@@ -1,0 +1,37 @@
+# Python
+*.pyc
+__pycache__/
+*.pyo
+*.pyd
+
+# Django
+*.log
+*.pot
+*.py[cod]
+*.sqlite3
+db.sqlite3
+
+# Virtual Environments
+venv/
+env/
+ENV/
+.venv/
+.env/
+.env.local
+
+# VSCode
+.vscode/
+
+# MacOS
+.DS_Store
+
+# Migrations (optional)
+**/migrations/*.py
+!**/migrations/__init__.py
+
+# Media/uploads (if any)
+media/
+uploads/
+
+# Node or frontend (if you use it later)
+node_modules/
