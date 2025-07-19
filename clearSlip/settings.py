@@ -76,8 +76,12 @@ WSGI_APPLICATION = 'clearSlip.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'clearslip_db',
+        'USER': 'clearslip_user',
+        'PASSWORD': 'Aayush@123',
+        'HOST': 'localhost',
+        'PORT': '5432'
     }
 }
 
