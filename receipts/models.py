@@ -1,14 +1,20 @@
 from django.db import models
+from django.contrib.auth.models import User 
 
 # Create your models here.
 class Receipts(models.Model):
+    user_id = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+
+
     seller_name = models.CharField(max_length=100)
     seller_address = models.TextField(max_length=100)
     seller_phone_number = models.IntegerField(max_length=14)
+
     buyer_name = models.CharField(max_length=100)
     buyer_address = models.TextField(max_length=100)
     buyer_phone_number = models.IntegerField(max_length=14)
     date = models.DateField(auto_now_add=True)
+
     item_description = models.TextField()
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     
