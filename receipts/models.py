@@ -8,11 +8,11 @@ class Receipts(models.Model):
 
     seller_name = models.CharField(max_length=100)
     seller_address = models.TextField(max_length=100)
-    seller_phone_number = models.IntegerField(max_length=14)
+    seller_phone_number = models.CharField(max_length=14)
 
     buyer_name = models.CharField(max_length=100)
     buyer_address = models.TextField(max_length=100)
-    buyer_phone_number = models.IntegerField(max_length=14)
+    buyer_phone_number = models.CharField(max_length=14)
     date = models.DateField(auto_now_add=True)
 
     item_description = models.TextField()
@@ -29,7 +29,7 @@ class Receipts(models.Model):
 class Driver(models.Model):
     driver_name = models.CharField(max_length=100)
     driver_date_of_birth = models.DateField()
-    driver_phone_number = models.IntegerField(max_length=14)
+    driver_phone_number = models.CharField(max_length=14)
     vehicle_number = models.CharField()
 
     def __self__(self):
