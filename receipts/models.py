@@ -9,12 +9,12 @@ class Receipts(models.Model):
 
     seller_name = models.CharField(max_length=100)
     seller_address = models.TextField(max_length=100)
-    seller_phone_number = models.CharField(max_length=14)
+    seller_phone_number = models.CharField(max_length=20)
     seller_email = models.CharField(max_length=50, default='example@gmail.com')
 
     buyer_name = models.CharField(max_length=100)
     buyer_address = models.TextField(max_length=100)
-    buyer_phone_number = models.CharField(max_length=14)
+    buyer_phone_number = models.CharField(max_length=20)
     date = models.DateField(auto_now_add=True)
 
     item_description = models.TextField()
