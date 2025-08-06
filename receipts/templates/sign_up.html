@@ -17,13 +17,33 @@
     <form method="POST">
         {% csrf_token %}
         <div class="mb-3">
-            <label for="username" class="form-label">Username</label>
-            <input type="text" name="username" class="form-control" id="username" required>
+            <label for="first_name" class="form-label">First Name</label>
+            <input type="text" name="first_name" class="form-control" id="first_name" required>
+        </div>
+
+        <div class="mb-3">
+            <label for="last_name" class="form-label">Last Name</label>
+            <input type="text" name="last_name" class="form-control" id="last_name" required>
+        </div>
+
+        <div class="mb-3">
+            <label for="phonenumber" class="form-label">Phone Number</label>
+            <input type="text" name="phonenumber" class="form-control" id="phonenumber" required>
+        </div>
+
+        <div class="mb-3">
+            <label for="email" class="form-label">Email</label>
+            <input type="email" name="email" class="form-control" id="email" required>
         </div>
 
         <div class="mb-3">
             <label for="password" class="form-label">Password</label>
             <input type="password" name="password" class="form-control" id="password" required>
+        </div>
+
+        <div class="mb-3">
+            <label for="confirm_password" class="form-label">Re-enter Your Password</label>
+            <input type="password" name="confirm_password" class="form-control" id="confirm_password" required>
         </div>
 
         <button type="submit" class="btn btn-success">Sign Up</button>
