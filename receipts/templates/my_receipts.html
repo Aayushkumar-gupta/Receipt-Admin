@@ -81,8 +81,8 @@
                     <td>{{ receipt.date }}</td>
                     <td>${{ receipt.total_amount }}</td>
                     <td>
-                        <a href="{% url 'receipt_detail' %}" class="btn btn-sm btn-primary">View</a>
-                        <a href="{% url 'receipt_pdf' %}" class="btn btn-sm btn-secondary">Download PDF</a>
+                        <a href="{% url 'my_receipts' %}" class="btn btn-sm btn-primary">View</a>
+                        <a href="{% url 'my_receipts' %}" class="btn btn-sm btn-secondary">Download PDF</a>
                     </td>
                 </tr>
                 {% endfor %}

@@ -1,13 +1,10 @@
 from django.shortcuts import render, redirect
 from .models import Receipts
-from io import BytesIO
-from django.http import HttpResponse
-from django.template.loader import get_template
-from xhtml2pdf import pisa
-from django.http import HttpResponse
-from .models import Receipts
 from django.shortcuts import get_object_or_404
-
+from django.template.loader import get_template
+from django.http import HttpResponse
+from xhtml2pdf import pisa
+from .models import Receipts
 
 
 def home(request):
@@ -20,7 +17,8 @@ def logout(request):
     return render(request, 'logout.html')
 
 def my_receipts(request):
-    return render(request, 'my_receipts.html')
+    receipts = Receipts.objects.all().order_by('-date')
+    return render(request, 'my_receipts.html', {'receipts': receipts})
 
 def about(request):
     return render(request, 'about.html')
@@ -61,39 +59,3 @@ def create_receipt(request):
 
     return render(request, 'receipt_form.html')
 
-
-def my_receipts(request):
-    receipts = Receipts.objects.filter().order_by('-date')
-    return render(request, 'my_receipts.html', {'receipts': receipts})
-
-
-
-def render_to_pdf(template_src, context_dict={}):
-    template = get_template(template_src)
-    html = template.render(context_dict)
-    result = BytesIO()
-    pdf = pisa.pisaDocument(BytesIO(html.encode("UTF-8")), result)
-    
-    if not pdf.err:
-        return HttpResponse(result.getvalue(), content_type='application/pdf')
-    return None
-
-
-
- View PDF in browser
-def receipt_pdf_view(request, receipt_id):
-    receipt = get_object_or_404(Receipts, id=receipt_id, user_id=request.user)
-    pdf = render_to_pdf('receipt_pdf.html', {'receipt': receipt})
-    return pdf
-
-# Download PDF
-def receipt_pdf_download(request, receipt_id):
-    receipt = get_object_or_404(Receipts, id=receipt_id, user_id=request.user)
-    pdf = render_to_pdf('receipt_pdf.html', {'receipt': receipt})
-    if pdf:
-        response = HttpResponse(pdf.content, content_type='application/pdf')
-        filename = f"Receipt_{receipt.invoice_number}.pdf"
-        content = f'attachment; filename="{filename}"'
-        response['Content-Disposition'] = content
-        return response
-    return HttpResponse("PDF generation failed")
