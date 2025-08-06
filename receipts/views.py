@@ -5,19 +5,15 @@ from django.template.loader import get_template
 from django.http import HttpResponse
 from xhtml2pdf import pisa
 from .models import Receipts
+from django.contrib.auth.decorators import login_required
 
 
 def home(request):
     return render(request, 'home.html')
 
-def login(request):
-    return render(request, 'login.html')
-
-def logout(request):
-    return render(request, 'logout.html')
-
+@login_required
 def my_receipts(request):
-    receipts = Receipts.objects.all().order_by('-date')
+    receipts = Receipts.objects.filter(user_id=request.user).order_by('-date')
     return render(request, 'my_receipts.html', {'receipts': receipts})
 
 def about(request):
@@ -32,7 +28,7 @@ def receipt_detail(request):
 def receipt_pdf(request):
     return render(request, 'my_receipts.html')
 
-
+@login_required
 def create_receipt(request):
     if request.method == 'POST':
         Receipts.objects.create(
