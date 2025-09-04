@@ -64,3 +64,6 @@ def user_login(request):  # ✅ Renamed to avoid conflict
 def user_logout(request):
     auth_logout(request) 
     return redirect('login')
+
+def forgot_password(request):
+    return render(request, 'forgot_password.html')

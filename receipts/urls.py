@@ -7,6 +7,6 @@ urlpatterns = [
     path('my_receipts/', views.my_receipts, name='my_receipts'),
     path('about/', views.about, name='about'),
     path('test/', views.test, name='test'),
-    
+    path('download/<int:pk>/', views.receipt_pdf, name='receipt_pdf'),
 
 ]

@@ -6,7 +6,9 @@ from django.http import HttpResponse
 from xhtml2pdf import pisa
 from .models import Receipts
 from django.contrib.auth.decorators import login_required
-
+from django.http import HttpResponse
+from django.template.loader import get_template
+from xhtml2pdf import pisa
 
 def home(request):
     return render(request, 'home.html')
@@ -25,8 +27,20 @@ def test(request):
 def receipt_detail(request):
     return render(request, 'my_receipts.html')
 
-def receipt_pdf(request):
-    return render(request, 'my_receipts.html')
+def receipt_pdf(request, pk):  # <-- add pk here
+    receipt = get_object_or_404(Receipts, pk=pk)
+    template = get_template("receipt_pdf.html")  # <-- correct template path
+    html = template.render({"receipt": receipt})
+
+    response = HttpResponse(content_type="application/pdf")
+    response['Content-Disposition'] = f'attachment; filename="receipt_{receipt.invoice_number}.pdf"'
+
+    pisa_status = pisa.CreatePDF(html, dest=response)
+
+    if pisa_status.err:
+        return HttpResponse("We had some errors while generating the PDF")
+    return response
+
 
 @login_required
 def create_receipt(request):
