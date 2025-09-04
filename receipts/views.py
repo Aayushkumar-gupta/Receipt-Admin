@@ -24,8 +24,27 @@ def about(request):
 def test(request):
     return render(request, 'test.html')
 
-def receipt_detail(request):
-    return render(request, 'my_receipts.html')
+from django.shortcuts import get_object_or_404
+from django.http import HttpResponse
+from django.template.loader import get_template
+from xhtml2pdf import pisa
+from .models import Receipts
+
+def view_receipt_pdf(request, pk):  # <-- view PDF in browser
+    receipt = get_object_or_404(Receipts, pk=pk)
+    template = get_template("receipt_pdf.html")
+    html = template.render({"receipt": receipt})
+
+    response = HttpResponse(content_type="application/pdf")
+    # 'inline' tells the browser to display PDF instead of downloading
+    response['Content-Disposition'] = f'inline; filename="receipt_{receipt.invoice_number}.pdf"'
+
+    pisa_status = pisa.CreatePDF(html, dest=response)
+
+    if pisa_status.err:
+        return HttpResponse("We had some errors while generating the PDF")
+    return response
+
 
 def receipt_pdf(request, pk):  # <-- add pk here
     receipt = get_object_or_404(Receipts, pk=pk)
