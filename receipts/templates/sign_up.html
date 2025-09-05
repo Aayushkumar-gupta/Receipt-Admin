@@ -71,7 +71,7 @@
         {% endfor %}
     {% endif %}
 
-    <form method="POST" novalidate>
+    <form method="POST" id="js-signup-form" novalidate>
         {% csrf_token %}
         
         <div class="form-floating mb-3">
@@ -109,4 +109,64 @@
 
     <a href="{% url 'login' %}" class="btn-link">Back to Login</a>
 </div>
+
+<script>
+    const form = document.getElementById('js-signup-form');
+
+    form.addEventListener('submit', function(event){
+        let isValid = true;
+        const firstname = document.getElementById('first_name');
+        const lastname = document.getElementById('last_name');
+        const phone = document.getElementById('phonenumber');
+        const email = document.getElementById('email');
+        const password = document.getElementById('password');
+        const confirmPassword = document.getElementById('confirm_password');
+
+        let inputs = [firstname, lastname, phone, email, password, confirmPassword];
+
+        for(let i = 0; i < inputs.length; i++){
+            inputs[i].style.borderColor = '';
+        }
+
+        for(let i = 0; i < inputs.length; i++){
+            input = inputs[i];
+            if(input.value.trim() === ''){
+                input.style.borderColor = 'red';
+                isValid = false;
+            }
+        }
+    
+        const emailPattern = /^[^ ]+@[^ ]+\.[a-z]{2,3}$/;
+        if(!emailPattern.test(email.value)){
+            email.style.borderColor = 'red';
+            isValid = false;
+            alert("Invalid Email Format!");
+        }
+
+        const phonePattern = /^[0-9]{10,}$/;
+        if(!phonePattern.test(phone.value)){
+            phone.style.borderColor = 'red';
+            isValid = false;
+            alert('Invalid Phone Number!');
+        }
+
+        const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/;
+        if (!passwordPattern.test(password.value)) {
+            password.style.borderColor = 'red';
+            isValid = false;
+            alert("The Password Format Must be Abc@123")
+        }
+
+        if (password.value !== confirmPassword.value) {
+            confirmPassword.style.borderColor = 'red';
+            isValid = false;
+            alert('The Passwords Do not Match!')
+        }
+
+        if (!isValid) {
+            event.preventDefault();
+        }
+    });
+
+</script>
 {% endblock %}
