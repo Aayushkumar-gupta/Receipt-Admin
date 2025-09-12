@@ -102,12 +102,14 @@
                     <th>Unit Price</th>
                     <th>Line Price</th>
                 </tr>
+                {% for item in receipt.items.all %}
                 <tr>
-                    <td>{{ receipt.item_description }}</td>
-                    <td>{{ receipt.item_quantity }}</td>
-                    <td>${{ receipt.unit_price }}</td>
-                    <td>${{ receipt.line_price }}</td>
+                    <td>{{ item.description }}</td>
+                    <td>{{ item.quantity }}</td>
+                    <td>${{ item.unit_price }}</td>
+                    <td>${{ item.line_price }}</td>
                 </tr>
+                {% endfor %}
             </table>
         </div>
 
@@ -133,7 +135,7 @@
         </div>
 
         <div class="tiny-text">
-            This receipt was generated with Clear Slip
+            This receipt was generated with Clear Slip.
         </div>
     </div>
 </body>

@@ -4,11 +4,14 @@ from django.shortcuts import get_object_or_404
 from django.template.loader import get_template
 from django.http import HttpResponse
 from xhtml2pdf import pisa
-from .models import Receipts
+from .models import Receipts, ReceiptItem
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.template.loader import get_template
 from xhtml2pdf import pisa
+import json
+from decimal import Decimal
+
 
 def home(request):
     return render(request, 'home.html')
@@ -64,27 +67,43 @@ def receipt_pdf(request, pk):  # <-- add pk here
 @login_required
 def create_receipt(request):
     if request.method == 'POST':
-        Receipts.objects.create(
+        receipt = Receipts.objects.create(
             user_id=request.user,
             seller_name=request.POST.get('seller_name'),
             seller_address=request.POST.get('seller_address'),
             seller_phone_number=request.POST.get('seller_phone_number'),
             seller_email=request.POST.get('seller_email'),
-
             buyer_name=request.POST.get('buyer_name'),
             buyer_address=request.POST.get('buyer_address'),
             buyer_phone_number=request.POST.get('buyer_phone_number'),
-
-            item_description=request.POST.get('item_description'),
-            item_quantity=request.POST.get('item_quantity'),
-            unit_price=request.POST.get('unit_price'),
-            line_price=request.POST.get('line_price'),
-
-            sub_total=request.POST.get('sub_total'),
-            tax_rate=request.POST.get('tax_rate'),
-            total_amount=request.POST.get('total_amount'),
+            tax_rate=Decimal(request.POST.get('tax_rate') or '0')
         )
-        return redirect('my_receipts')  # Redirect to receipt list page after creation
+
+        items_json = request.POST.get('items', '[]')  
+        items = json.loads(items_json)
+
+        sub_total = Decimal('0.00')
+        for item in items:
+            qty = int(item.get('quantity', 0))
+            unit = Decimal(str(item.get('unit_price') or '0'))
+            line_price = Decimal(item['quantity']) * Decimal(item['unit_price'])
+
+            ReceiptItem.objects.create(
+                receipt=receipt,
+                description=item.get('description', ''),
+                quantity=qty,
+                unit_price=unit,
+                line_price=line_price
+            )
+            sub_total += line_price
+
+        tax_rate = receipt.tax_rate or Decimal('0.00')
+        total_amount = (sub_total + (sub_total * (tax_rate / Decimal('100')))).quantize(Decimal('0.01'))
+
+        receipt.sub_total = sub_total
+        receipt.total_amount = total_amount
+        receipt.save()
+
+        return redirect('my_receipts')
 
     return render(request, 'receipt_form.html')
-
