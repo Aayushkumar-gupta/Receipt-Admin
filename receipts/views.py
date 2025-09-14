@@ -27,6 +27,9 @@ def about(request):
 def test(request):
     return render(request, 'test.html')
 
+def staging_area(request):
+    return render(request, 'staging_area.html')
+
 from django.shortcuts import get_object_or_404
 from django.http import HttpResponse
 from django.template.loader import get_template
@@ -76,6 +79,7 @@ def create_receipt(request):
             buyer_name=request.POST.get('buyer_name'),
             buyer_address=request.POST.get('buyer_address'),
             buyer_phone_number=request.POST.get('buyer_phone_number'),
+            buyer_email=request.POST.get('buyer_email'),
             tax_rate=Decimal(request.POST.get('tax_rate') or '0')
         )
 

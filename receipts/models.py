@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from decimal import Decimal
 
 class Receipts(models.Model):
+    is_staged = models.BooleanField(default=False)
     user_id = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
     invoice_number = models.CharField(max_length=20, blank=True, unique=True)
     seller_name = models.CharField(max_length=100)
@@ -12,6 +13,7 @@ class Receipts(models.Model):
     buyer_name = models.CharField(max_length=100)
     buyer_address = models.TextField(max_length=100)
     buyer_phone_number = models.CharField(max_length=20)
+    buyer_email = models.CharField(max_length=50, default='example@gmail.com')
     date = models.DateField(auto_now_add=True)
     sub_total = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     tax_rate = models.DecimalField(max_digits=5, decimal_places=2, default=8.25)
