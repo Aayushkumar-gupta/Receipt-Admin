@@ -18,7 +18,7 @@ def home(request):
 
 @login_required
 def my_receipts(request):
-    receipts = Receipts.objects.filter(user_id=request.user).order_by('-date')
+    receipts = Receipts.objects.filter(is_staged=True, user_id=request.user).order_by('-date')
     return render(request, 'my_receipts.html', {'receipts': receipts})
 
 def about(request):
@@ -28,13 +28,8 @@ def test(request):
     return render(request, 'test.html')
 
 def staging_area(request):
-    return render(request, 'staging_area.html')
-
-from django.shortcuts import get_object_or_404
-from django.http import HttpResponse
-from django.template.loader import get_template
-from xhtml2pdf import pisa
-from .models import Receipts
+    receipts = Receipts.objects.filter(is_staged=False, user_id=request.user).order_by('-date')
+    return render(request, 'staging_area.html', {'receipts': receipts})
 
 def view_receipt_pdf(request, pk):  # <-- view PDF in browser
     receipt = get_object_or_404(Receipts, pk=pk)
@@ -111,3 +106,10 @@ def create_receipt(request):
         return redirect('my_receipts')
 
     return render(request, 'receipt_form.html')
+
+
+def stage(request, pk):
+    receipt = Receipts.objects.get(id = pk)
+    receipt.is_staged = True
+    receipt.save()
+    return redirect('my_receipts')
