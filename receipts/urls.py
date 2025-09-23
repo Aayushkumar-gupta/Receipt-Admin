@@ -12,4 +12,5 @@ urlpatterns = [
     path('staging_area/', views.staging_area, name='staging_area'),
     path('stage/<int:pk>/', views.stage, name='stage'),
     path("staging-edit/<int:pk>/", views.staging_edit, name="staging_edit"),
+    path("staging-delete/<int:pk>/", views.staging_delete, name="staging_delete"),
 ]

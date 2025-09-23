@@ -168,3 +168,8 @@ def staging_edit(request, pk):
         "receipt": receipt,
         "items": items,
     })
+
+def staging_delete(request, pk):
+    receipt = Receipts.objects.get(id=pk)
+    receipt.delete()
+    return redirect("staging_area")

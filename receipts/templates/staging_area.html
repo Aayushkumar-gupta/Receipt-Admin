@@ -58,6 +58,11 @@
         background-color: #5a6268;
         border-color: #545b62;
     }
+
+    .btn-delete {
+        background-color: #800000;
+        color: #fff;
+    }
 </style>
 
 <div class="receipt-wrapper">
@@ -84,6 +89,7 @@
                         <a href="{% url 'view_receipt_pdf' receipt.id %}" class="btn btn-sm btn-primary">View</a>
                         <a href="{% url 'staging_edit' receipt.id %}" class="btn btn-sm btn-primary">Edit</a>
                         <a href="{% url 'stage' receipt.id %}" class="btn btn-sm btn-secondary" onclick="return confirm('Are you sure you want to Confirm the receipt? NOTE: You won\'t be able to edit it afterwards.')">Confirm</a>
+                        <a href="{% url 'staging_delete' receipt.id %}" class="btn btn-sm btn-delete" onclick="return confirm('Are you sure you want to delete this receipt?')">Delete</a>
                     </td>
                 </tr>
                 {% endfor %}
