@@ -8,9 +8,9 @@ from .models import Receipts, ReceiptItem
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.template.loader import get_template
-from xhtml2pdf import pisa
 import json
 from decimal import Decimal
+from .forms import ReceiptForm
 
 
 def home(request):
@@ -103,7 +103,7 @@ def create_receipt(request):
         receipt.total_amount = total_amount
         receipt.save()
 
-        return redirect('my_receipts')
+        return redirect('staging_area')
 
     return render(request, 'receipt_form.html')
 
@@ -113,3 +113,58 @@ def stage(request, pk):
     receipt.is_staged = True
     receipt.save()
     return redirect('my_receipts')
+
+
+def staging_edit(request, pk):
+    receipt = get_object_or_404(Receipts, id=pk)
+
+    # prevent editing confirmed receipts
+    if receipt.is_staged:
+        return redirect("staging_area")
+
+    if request.method == "POST":
+        form = ReceiptForm(request.POST, instance=receipt)
+        if form.is_valid():
+            # save receipt fields (seller + buyer + totals)
+            updated_receipt = form.save()
+
+            # handle items JSON (hidden field name = "items")
+            items_json = request.POST.get("items", "[]")
+            try:
+                items = json.loads(items_json)
+            except (ValueError, TypeError):
+                items = []
+
+            # replace existing items with new ones
+            updated_receipt.items.all().delete()
+            for it in items:
+                desc = it.get("description", "") or ""
+                qty = int(it.get("quantity") or 0)
+                # ensure Decimal for unit_price to match model
+                try:
+                    unit = Decimal(str(it.get("unit_price") or 0))
+                except:
+                    unit = Decimal("0")
+                if desc or qty or unit:
+                    ReceiptItem.objects.create(
+                        receipt=updated_receipt,
+                        description=desc,
+                        quantity=qty,
+                        unit_price=unit,
+                    )
+
+            return redirect("staging_area")
+        else:
+            # optionally pass form errors to template (template can show them)
+            pass
+    else:
+        form = ReceiptForm(instance=receipt)
+
+    # pass items to template for JS to load
+    items = list(receipt.items.values("description", "quantity", "unit_price"))
+
+    return render(request, "staging_edit.html", {
+        "form": form,
+        "receipt": receipt,
+        "items": items,
+    })
