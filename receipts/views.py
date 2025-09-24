@@ -49,6 +49,7 @@ def view_receipt_pdf(request, pk):  # <-- view PDF in browser
     return response
 
 
+@login_required
 def receipt_pdf(request, pk):  # <-- add pk here
     receipt = get_object_or_404(Receipts, pk=pk)
     template = get_template("receipt_pdf.html")  # <-- correct template path
@@ -110,13 +111,14 @@ def create_receipt(request):
     return render(request, 'receipt_form.html')
 
 
+@login_required
 def stage(request, pk):
     receipt = Receipts.objects.get(id = pk)
     receipt.is_staged = True
     receipt.save()
     return redirect('my_receipts')
 
-
+@login_required
 def staging_edit(request, pk):
     receipt = get_object_or_404(Receipts, id=pk)
 
@@ -171,6 +173,7 @@ def staging_edit(request, pk):
         "items": items,
     })
 
+@login_required
 def staging_delete(request, pk):
     receipt = Receipts.objects.get(id=pk)
     receipt.delete()
