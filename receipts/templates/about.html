@@ -4,42 +4,50 @@
 
 {% block content %}
 <style>
-    .about-section {
-        background-color: #f5f5f5;
-        padding: 50px 20px;
-        border-radius: 15px;
-        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.05);
-        margin-bottom: 40px;
+    body {
+        background-color: #F8FAFC; /* solid light neutral background */
+        font-family: 'Segoe UI', Tahoma, sans-serif;
+        color: #1E293B; /* charcoal text */
     }
 
+    /* Frosted glass container */
+    .glass-box {
+        background: rgba(255, 255, 255, 0.85);
+        border-radius: 20px;
+        padding: 40px;
+        margin-bottom: 40px;
+        box-shadow: 0 8px 25px rgba(0, 119, 182, 0.15);
+        backdrop-filter: blur(12px) saturate(140%);
+        -webkit-backdrop-filter: blur(12px) saturate(140%);
+        border: 1px solid rgba(226, 232, 240, 0.8);
+    }
+
+    /* About Section */
     .about-section h1 {
         font-size: 2.5rem;
-        color: #162447;
         font-weight: 700;
         margin-bottom: 20px;
+        color: #0077B6; /* trust-blue accent */
         text-align: center;
     }
 
     .about-section p {
         font-size: 1.1rem;
-        color: #333;
         line-height: 1.8;
         margin-bottom: 20px;
+        color: #1E293B;
     }
 
+    /* Contact Section */
     .contact-section {
-        background-color: #162447;
-        color: #fff;
-        padding: 40px 20px;
-        border-radius: 15px;
-        text-align: center;
-        margin-top: 40px;
+        text-align: center; /* center everything */
     }
 
     .contact-section h2 {
         font-size: 2rem;
         font-weight: 600;
         margin-bottom: 20px;
+        color: #0077B6;
     }
 
     .contact-section p {
@@ -48,16 +56,18 @@
     }
 
     .contact-section a {
-        color: #ffd700;
+        color: #00C49A; /* teal accent */
         text-decoration: none;
+        font-weight: 500;
     }
 
     .contact-section a:hover {
+        color: #009e84;
         text-decoration: underline;
     }
 </style>
 
-<div class="about-section">
+<div class="glass-box about-section">
     <h1>About Clear Slip</h1>
     <p>
         Clear Slip is a web application designed to help users create, track, manage, and analyze receipts efficiently.
@@ -74,7 +84,7 @@
     </p>
 </div>
 
-<div class="contact-section">
+<div class="glass-box contact-section">
     <h2>Contact Us</h2>
     <p>Email: <a href="mailto:support@clearslip.com">support@clearslip.com</a></p>
     <p>Phone: <a href="tel:+1234567890">+1 (234) 567-890</a></p>

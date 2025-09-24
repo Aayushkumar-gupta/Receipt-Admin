@@ -7,56 +7,67 @@
 
 <style>
     body {
-        background-color: #f0f2f5;
-        font-family: 'Segoe UI', sans-serif;
+        background-color: #F8FAFC; /* solid light neutral background */
+        font-family: 'Segoe UI', Tahoma, sans-serif;
+        color: #1E293B; /* charcoal for readability */
     }
 
+    /* Frosted glass container */
     .receipt-wrapper {
         max-width: 960px;
         margin: 50px auto;
-        background: #fff;
+        background: rgba(255, 255, 255, 0.85);
         padding: 40px;
-        border-radius: 15px;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        border-radius: 20px;
+        box-shadow: 0 8px 25px rgba(0, 119, 182, 0.15);
+        border: 1px solid #E2E8F0;
     }
 
     .receipt-title {
         font-size: 1.5rem;
         font-weight: 600;
-        color: #1f2d5a;
+        color: #0077B6; /* trust-blue accent */
         margin-bottom: 25px;
-        border-bottom: 2px solid #e0e0e0;
+        border-bottom: 2px solid #E2E8F0;
         padding-bottom: 8px;
     }
 
     .table th {
-        background-color: #f8f9fa;
-        color: #343a40;
+        background-color: #F1F5F9;
+        color: #334155;
+        font-weight: 600;
+    }
+
+    .table td {
+        color: #1E293B;
     }
 
     .btn-sm {
-        border-radius: 6px;
-        font-weight: 500;
+        border-radius: 8px;
+        font-weight: 600;
+        padding: 6px 14px;
     }
 
     .btn-primary {
-        background-color: #1f2d5a;
-        border-color: #1f2d5a;
+        background-color: #00C49A; /* teal accent */
+        border-color: #00C49A;
+        transition: background 0.3s ease;
     }
 
     .btn-primary:hover {
-        background-color: #162447;
-        border-color: #162447;
+        background-color: #009e84;
+        border-color: #009e84;
     }
 
     .btn-secondary {
-        background-color: #6c757d;
-        border-color: #6c757d;
+        background-color: #64748B; /* slate gray */
+        border-color: #64748B;
+        transition: background 0.3s ease;
     }
 
     .btn-secondary:hover {
-        background-color: #5a6268;
-        border-color: #545b62;
+        background-color: #475569;
+        border-color: #475569;
     }
 </style>
 

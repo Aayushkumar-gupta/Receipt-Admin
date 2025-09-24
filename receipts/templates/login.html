@@ -7,58 +7,73 @@
 
 <style>
     body {
-        background-color: #f0f2f5;
-        font-family: 'Segoe UI', sans-serif;
+        background-color: #F8FAFC; /* solid light neutral background */
+        font-family: 'Segoe UI', Tahoma, sans-serif;
+        color: #1E293B;
     }
 
+    /* Frosted glass form container */
     .form-wrapper {
         max-width: 480px;
-        margin: 50px auto;
-        background: #fff;
+        margin: 80px auto;
+        background: rgba(255, 255, 255, 0.85);
         padding: 40px;
-        border-radius: 15px;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        border-radius: 20px;
+        box-shadow: 0 8px 25px rgba(0, 119, 182, 0.15);
+        border: 1px solid #E2E8F0;
     }
 
     .form-title {
         font-size: 1.5rem;
         font-weight: 600;
-        color: #1f2d5a;
+        color: #0077B6; /* clear trust-blue */
         margin-bottom: 25px;
-        border-bottom: 2px solid #e0e0e0;
+        border-bottom: 2px solid #E2E8F0;
         padding-bottom: 8px;
         text-align: center;
     }
 
     .form-floating input {
         border-radius: 8px;
+        border: 1px solid #CBD5E1;
+        background: #ffffff;
     }
 
     .form-floating label {
-        color: #555;
+        color: #475569;
     }
 
     .btn-primary {
-        background-color: #1f2d5a;
-        border-color: #1f2d5a;
+        background-color: #00C49A; /* teal accent */
+        border-color: #00C49A;
         font-weight: 600;
         padding: 12px 24px;
         font-size: 16px;
-        border-radius: 8px;
+        border-radius: 10px;
         width: 100%;
+        transition: background 0.3s ease;
     }
 
     .btn-primary:hover {
-        background-color: #162447;
-        border-color: #162447;
+        background-color: #009e84;
+        border-color: #009e84;
     }
 
     .btn-link {
         display: block;
         text-align: center;
         margin-top: 15px;
-        color: #1f2d5a;
+        color: #0077B6;
         font-weight: 600;
+        text-decoration: none;
+    }
+
+    .btn-link:hover {
+        text-decoration: underline;
+    }
+
+    .alert {
+        margin-top: 10px;
     }
 </style>
 

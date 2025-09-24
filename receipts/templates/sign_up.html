@@ -7,58 +7,73 @@
 
 <style>
     body {
-        background-color: #f0f2f5;
-        font-family: 'Segoe UI', sans-serif;
+        background-color: #F8FAFC; /* light neutral background */
+        font-family: 'Segoe UI', Tahoma, sans-serif;
+        color: #1E293B;
     }
 
+    /* Frosted glass form container */
     .form-wrapper {
         max-width: 480px;
-        margin: 50px auto;
-        background: #fff;
+        margin: 80px auto;
+        background: rgba(255, 255, 255, 0.85);
         padding: 40px;
-        border-radius: 15px;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        border-radius: 20px;
+        box-shadow: 0 8px 25px rgba(0, 119, 182, 0.15);
+        border: 1px solid #E2E8F0;
     }
 
     .form-title {
         font-size: 1.5rem;
         font-weight: 600;
-        color: #1f2d5a;
+        color: #0077B6; /* trust-blue */
         margin-bottom: 25px;
-        border-bottom: 2px solid #e0e0e0;
+        border-bottom: 2px solid #E2E8F0;
         padding-bottom: 8px;
         text-align: center;
     }
 
     .form-floating input {
         border-radius: 8px;
+        border: 1px solid #CBD5E1;
+        background: #ffffff;
     }
 
     .form-floating label {
-        color: #555;
+        color: #475569;
     }
 
     .btn-success {
-        background-color: #1f2d5a;
-        border-color: #1f2d5a;
+        background-color: #00C49A; /* teal accent */
+        border-color: #00C49A;
         font-weight: 600;
         padding: 12px 24px;
         font-size: 16px;
-        border-radius: 8px;
+        border-radius: 10px;
         width: 100%;
+        transition: background 0.3s ease;
     }
 
     .btn-success:hover {
-        background-color: #162447;
-        border-color: #162447;
+        background-color: #009e84;
+        border-color: #009e84;
     }
 
     .btn-link {
         display: block;
         text-align: center;
         margin-top: 15px;
-        color: #1f2d5a;
+        color: #0077B6;
         font-weight: 600;
+        text-decoration: none;
+    }
+
+    .btn-link:hover {
+        text-decoration: underline;
+    }
+
+    .alert {
+        margin-top: 10px;
     }
 </style>
 
@@ -73,7 +88,7 @@
 
     <form method="POST" id="js-signup-form" novalidate>
         {% csrf_token %}
-        
+
         <div class="form-floating mb-3">
             <input type="text" name="first_name" class="form-control" id="first_name" placeholder="First Name" required>
             <label for="first_name">First Name</label>
@@ -124,18 +139,18 @@
 
         let inputs = [firstname, lastname, phone, email, password, confirmPassword];
 
-        for(let i = 0; i < inputs.length; i++){
-            inputs[i].style.borderColor = '';
-        }
+        // Reset borders
+        inputs.forEach(input => input.style.borderColor = '');
 
-        for(let i = 0; i < inputs.length; i++){
-            input = inputs[i];
+        // Check empty fields
+        inputs.forEach(input => {
             if(input.value.trim() === ''){
                 input.style.borderColor = 'red';
                 isValid = false;
             }
-        }
-    
+        });
+
+        // Email validation
         const emailPattern = /^[^ ]+@[^ ]+\.[a-z]{2,3}$/;
         if(!emailPattern.test(email.value)){
             email.style.borderColor = 'red';
@@ -143,6 +158,7 @@
             alert("Invalid Email Format!");
         }
 
+        // Phone validation
         const phonePattern = /^[0-9]{10,}$/;
         if(!phonePattern.test(phone.value)){
             phone.style.borderColor = 'red';
@@ -150,23 +166,24 @@
             alert('Invalid Phone Number!');
         }
 
+        // Password validation
         const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/;
         if (!passwordPattern.test(password.value)) {
             password.style.borderColor = 'red';
             isValid = false;
-            alert("The Password Format Must be Abc@123")
+            alert("The Password Format Must be Abc@123");
         }
 
+        // Confirm password match
         if (password.value !== confirmPassword.value) {
             confirmPassword.style.borderColor = 'red';
             isValid = false;
-            alert('The Passwords Do not Match!')
+            alert('The Passwords Do not Match!');
         }
 
         if (!isValid) {
             event.preventDefault();
         }
     });
-
 </script>
 {% endblock %}

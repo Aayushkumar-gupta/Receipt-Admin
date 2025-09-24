@@ -27,10 +27,12 @@ def about(request):
 def test(request):
     return render(request, 'test.html')
 
+@login_required
 def staging_area(request):
     receipts = Receipts.objects.filter(is_staged=False, user_id=request.user).order_by('-date')
     return render(request, 'staging_area.html', {'receipts': receipts})
 
+@login_required
 def view_receipt_pdf(request, pk):  # <-- view PDF in browser
     receipt = get_object_or_404(Receipts, pk=pk)
     template = get_template("receipt_pdf.html")

@@ -7,68 +7,77 @@
 
 <style>
     body {
-        background-color: #f0f2f5;
-        font-family: 'Segoe UI', sans-serif;
+        background-color: #F8FAFC; /* solid light neutral background */
+        font-family: 'Segoe UI', Tahoma, sans-serif;
+        color: #1E293B; /* charcoal for readability */
     }
 
+    /* Frosted glass form container */
     .form-wrapper {
         max-width: 960px;
         margin: 50px auto;
-        background: #fff;
+        background: rgba(255, 255, 255, 0.85);
         padding: 40px;
-        border-radius: 15px;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        border-radius: 20px;
+        box-shadow: 0 8px 25px rgba(0, 119, 182, 0.15);
+        border: 1px solid #E2E8F0;
     }
 
     .form-title {
         font-size: 1.5rem;
         font-weight: 600;
-        color: #1f2d5a;
+        color: #0077B6; /* clear trust-blue */
         margin-bottom: 25px;
-        border-bottom: 2px solid #e0e0e0;
+        border-bottom: 2px solid #E2E8F0;
         padding-bottom: 8px;
     }
 
     .form-floating input,
     .form-floating textarea {
         border-radius: 8px;
+        border: 1px solid #CBD5E1;
+        background: #ffffff;
+    }
+
+    .form-floating label {
+        color: #475569;
     }
 
     .btn-primary {
-        background-color: #1f2d5a;
-        border-color: #1f2d5a;
+        background-color: #00C49A; /* teal accent */
+        border-color: #00C49A;
         font-weight: 600;
         padding: 12px 24px;
         font-size: 16px;
-        border-radius: 8px;
+        border-radius: 10px;
+        transition: background 0.3s ease;
     }
 
     .btn-primary:hover {
-        background-color: #162447;
-        border-color: #162447;
+        background-color: #009e84;
+        border-color: #009e84;
+    }
+
+    .btn-secondary {
+        border-radius: 10px;
+        font-weight: 600;
+        padding: 12px 24px;
+    }
+
+    .section-divider {
+        margin-top: 40px;
     }
 
     .remove-btn {
-        color: red;
-        cursor: pointer;
-        font-size: 1.5rem;
-    }
-
-    /* Items table styling */
-    .items-table th {
-        background-color: #f8f9fa;
-        text-align: center;
-    }
-
-    .items-table td input {
-        text-align: center;
-    }
-
-    .remove-btn {
-        color: red;
+        color: #EF4444; /* red accent for remove */
         cursor: pointer;
         font-size: 1.2rem;
-}
+    }
+
+    /* Items container spacing */
+    .item-row + .item-row {
+        margin-top: 10px;
+    }
 </style>
 
 <div class="form-wrapper">
@@ -79,64 +88,53 @@
         <div class="form-title">👤 Seller Information</div>
         <div class="row g-3">
             <div class="col-md-6 form-floating">
-                <input type="text" class="form-control" name="seller_name" value="{{ receipt.seller_name }}" placeholder="Seller Name">
+                <input type="text" class="form-control" name="seller_name" value="{{ receipt.seller_name }}">
                 <label>Seller's Name</label>
             </div>
             <div class="col-md-6 form-floating">
-                <input type="text" class="form-control" name="seller_phone_number" value="{{ receipt.seller_phone_number }}" placeholder="Seller Phone">
+                <input type="text" class="form-control" name="seller_phone_number" value="{{ receipt.seller_phone_number }}">
                 <label>Seller's Phone</label>
             </div>
             <div class="col-md-6 form-floating">
-                <input type="email" class="form-control" name="seller_email" value="{{ receipt.seller_email }}" placeholder="Seller Email">
+                <input type="email" class="form-control" name="seller_email" value="{{ receipt.seller_email }}">
                 <label>Seller's Email</label>
             </div>
             <div class="col-md-6 form-floating">
-                <input type="text" class="form-control" name="seller_address" value="{{ receipt.seller_address }}" placeholder="Seller Address">
+                <input type="text" class="form-control" name="seller_address" value="{{ receipt.seller_address }}">
                 <label>Seller's Address</label>
             </div>
         </div>
 
         <!-- Buyer Information -->
-        <div class="form-title mt-5">🧾 Buyer Information</div>
+        <div class="form-title section-divider">🧾 Buyer Information</div>
         <div class="row g-3">
             <div class="col-md-6 form-floating">
-                <input type="text" class="form-control" name="buyer_name" value="{{ receipt.buyer_name }}" placeholder="Buyer Name">
+                <input type="text" class="form-control" name="buyer_name" value="{{ receipt.buyer_name }}">
                 <label>Buyer's Name</label>
             </div>
             <div class="col-md-6 form-floating">
-                <input type="text" class="form-control" name="buyer_phone_number" value="{{ receipt.buyer_phone_number }}" placeholder="Buyer Phone">
+                <input type="text" class="form-control" name="buyer_phone_number" value="{{ receipt.buyer_phone_number }}">
                 <label>Buyer's Phone</label>
             </div>
             <div class="col-md-6 form-floating">
-                <input type="email" class="form-control" name="buyer_email" value="{{ receipt.buyer_email }}" placeholder="Buyer Email">
+                <input type="email" class="form-control" name="buyer_email" value="{{ receipt.buyer_email }}">
                 <label>Buyer's Email</label>
             </div>
-            <div class="col-6 form-floating">
-                <input type="text" class="form-control" name="buyer_address" value="{{ receipt.buyer_address }}" placeholder="Buyer Address">
+            <div class="col-md-6 form-floating">
+                <input type="text" class="form-control" name="buyer_address" value="{{ receipt.buyer_address }}">
                 <label>Buyer's Address</label>
             </div>
         </div>
 
-       <!-- Item Information -->
-<div class="form-title mt-5">📦 Items</div>
-<table class="table table-bordered items-table align-middle text-center">
-    <thead>
-        <tr>
-            <th style="width: 40%;">Description</th>
-            <th style="width: 15%;">Quantity</th>
-            <th style="width: 20%;">Unit Price</th>
-            <th style="width: 20%;">Line Price</th>
-            <th style="width: 5%;">Remove</th>
-        </tr>
-    </thead>
-    <tbody id="items-container"></tbody>
-</table>
-
-<button type="button" class="btn btn-outline-secondary mt-2" onclick="addItem()">+ Add Item</button>
-
+        <!-- Item Information -->
+        <div class="form-title section-divider">📦 Items</div>
+        <div id="items-container">
+            <!-- Items will be loaded dynamically by JS -->
+        </div>
+        <button type="button" class="btn btn-outline-secondary mt-3" onclick="addItem()">+ Add Item</button>
 
         <!-- Pricing Information -->
-        <div class="form-title mt-5">💰 Pricing Summary</div>
+        <div class="form-title section-divider">💰 Pricing Summary</div>
         <div class="row g-3">
             <div class="col-md-4 form-floating">
                 <input type="number" readonly step="0.01" class="form-control" id="sub_total" name="sub_total" value="{{ receipt.sub_total }}">
@@ -152,10 +150,8 @@
             </div>
         </div>
 
-        <!-- Hidden field to hold JSON items -->
         <input type="hidden" name="items" id="items-input">
 
-        <!-- Submit Button -->
         <div class="text-center mt-5">
             <a href="{% url 'staging_area' %}" class="btn btn-secondary w-25 me-2">Cancel</a>
             <button type="submit" class="btn btn-primary w-50">Save Changes</button>
@@ -163,7 +159,7 @@
     </form>
 </div>
 
-<!-- Store items safely -->
+<!-- Load items JSON -->
 {{ items|json_script:"items-data" }}
 
 <script>
@@ -176,35 +172,45 @@ function calculateTotals() {
         row.querySelector('.line_price').value = linePrice.toFixed(2);
         subTotal += linePrice;
     });
-
     const taxRate = parseFloat(document.getElementById('tax_rate').value) || 0;
-    const taxAmount = subTotal * (taxRate / 100);
-    const total = subTotal + taxAmount;
-
+    const total = subTotal + subTotal * (taxRate / 100);
     document.getElementById('sub_total').value = subTotal.toFixed(2);
     document.getElementById('total_amount').value = total.toFixed(2);
 }
 
 function addItem(item = {description: "", quantity: 1, unit_price: 0}) {
     const container = document.getElementById('items-container');
-    const row = document.createElement('tr');
-    row.className = 'item-row';
+    const row = document.createElement('div');
+    row.className = 'row g-3 item-row mt-2';
     row.innerHTML = `
-        <td><input type="text" class="form-control" name="description" value="${item.description}"></td>
-        <td><input type="number" min="0" step="1" class="form-control quantity" value="${item.quantity}"></td>
-        <td><input type="number" min="0" step="0.01" class="form-control unit_price" value="${item.unit_price}"></td>
-        <td><input type="number" readonly class="form-control line_price" value="0"></td>
-        <td><span class="remove-btn" onclick="removeItem(this)">&times;</span></td>
+        <div class="col-md-5 form-floating">
+            <input type="text" class="form-control" name="description" placeholder="Description" value="${item.description}">
+            <label>Description</label>
+        </div>
+        <div class="col-md-2 form-floating">
+            <input type="number" min="0" step="1" class="form-control quantity" placeholder="Quantity" value="${item.quantity}">
+            <label>Qty</label>
+        </div>
+        <div class="col-md-2 form-floating">
+            <input type="number" min="0" step="0.01" class="form-control unit_price" placeholder="Unit Price" value="${item.unit_price}">
+            <label>Unit Price</label>
+        </div>
+        <div class="col-md-2 form-floating">
+            <input type="number" readonly class="form-control line_price" placeholder="Line Price" value="0">
+            <label>Line Price</label>
+        </div>
+        <div class="col-md-1 d-flex align-items-center">
+            <span class="remove-btn" onclick="removeItem(this)">&times;</span>
+        </div>
     `;
     container.appendChild(row);
-
     row.querySelector('.quantity').addEventListener('input', calculateTotals);
     row.querySelector('.unit_price').addEventListener('input', calculateTotals);
     calculateTotals();
 }
 
 function removeItem(button) {
-    button.closest('tr').remove();
+    button.closest('.item-row').remove();
     calculateTotals();
 }
 
@@ -221,12 +227,11 @@ function prepareItems() {
     calculateTotals();
 }
 
-// Load existing items
+// Load existing items on page load
 document.addEventListener("DOMContentLoaded", () => {
     const existingItems = JSON.parse(document.getElementById("items-data").textContent);
     existingItems.forEach(item => addItem(item));
     calculateTotals();
 });
 </script>
-
 {% endblock %}

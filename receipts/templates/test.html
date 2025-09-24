@@ -1,3 +1,137 @@
 {% extends 'base.html' %}
 
-{% block title %} Test {% endblock %}
+{% block title %} Home {% endblock %}
+
+{% block content %}
+<style>
+    body {
+        background-color: #F8FAFC; /* clean solid background */
+        font-family: 'Segoe UI', Tahoma, sans-serif;
+        color: #1E293B; /* charcoal text for readability */
+    }
+
+    /* Frosted glass container */
+    .glass-box {
+        background: #FFFFFF; /* solid clean white */
+        border-radius: 20px;
+        padding: 40px;
+        margin-bottom: 40px;
+        box-shadow: 0 6px 20px rgba(0, 119, 182, 0.15); /* subtle blue shadow */
+        border: 1px solid #E2E8F0;
+    }
+
+    /* Welcome */
+    .welcome-section h1 {
+        font-size: 3rem;
+        font-weight: 700;
+        margin-bottom: 15px;
+        color: #0077B6; /* Clear Blue */
+    }
+
+    .welcome-section p {
+        font-size: 1.2rem;
+        color: #334155;
+    }
+
+    /* Section headings */
+    .manual-section h2,
+    .dashboard-section h2 {
+        font-weight: 600;
+        margin-bottom: 20px;
+        color: #0077B6; /* trust anchor */
+    }
+
+    .manual-section p {
+        font-size: 1rem;
+        line-height: 1.7;
+        color: #475569;
+    }
+
+    /* Dashboard cards */
+    .dashboard-section .card {
+        background: #FFFFFF;
+        border: 1px solid #E2E8F0;
+        border-radius: 15px;
+        color: #1E293B;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .dashboard-section .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0, 119, 182, 0.25);
+    }
+
+    .dashboard-section .card-title {
+        font-weight: 600;
+        font-size: 1.2rem;
+        color: #0077B6;
+    }
+
+    .dashboard-section .card-text {
+        font-weight: 700;
+        font-size: 2rem;
+        color: #00C49A; /* teal highlight */
+    }
+
+    /* Buttons (for future) */
+    .btn-clear {
+        background-color: #00C49A;
+        color: #fff;
+        border-radius: 10px;
+        padding: 10px 20px;
+        font-weight: 600;
+        transition: background 0.3s ease;
+    }
+
+    .btn-clear:hover {
+        background-color: #009e84;
+    }
+</style>
+
+<!-- Welcome Section -->
+<div class="glass-box welcome-section text-center">
+    <h1>Welcome, {{ user.first_name|default:user.username }}!</h1>
+    <p>Create, track, manage, and analyze your receipts easily with <strong>Clear Slip</strong>.</p>
+</div>
+
+<!-- User Manual -->
+<div class="glass-box manual-section">
+    <h2>User Manual / Quick Guide</h2>
+    <p>
+        <strong>Creating a Receipt:</strong> Click on "Create Receipt" from the navbar, fill in the invoice details, and save.<br><br>
+        <strong>Staging Area:</strong> Review receipts in the staging area before confirming them. Once confirmed, they are finalized and cannot be edited.<br><br>
+        <strong>My Receipts:</strong> Access all your receipts in My Receipt area. You can view or download a PDF version of any receipt here.
+    </p>
+</div>
+
+<!-- Dashboard -->
+<div class="glass-box dashboard-section">
+    <h2>Your Sales Dashboard</h2>
+    <div class="row g-3">
+        <div class="col-md-4">
+            <div class="card text-center p-3">
+                <div class="card-body">
+                    <h5 class="card-title">Total Receipts</h5>
+                    <p class="card-text">{{ total_receipts }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-center p-3">
+                <div class="card-body">
+                    <h5 class="card-title">Total Revenue</h5>
+                    <p class="card-text">{{ total_revenue }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-center p-3">
+                <div class="card-body">
+                    <h5 class="card-title">Pending Receipts</h5>
+                    <p class="card-text">{{ pending_receipts }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

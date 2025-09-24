@@ -7,61 +7,85 @@
 
 <style>
     body {
-        background-color: #f0f2f5;
-        font-family: 'Segoe UI', sans-serif;
+        background-color: #F8FAFC; /* solid light neutral background */
+        font-family: 'Segoe UI', Tahoma, sans-serif;
+        color: #1E293B;
     }
 
+    /* Frosted glass wrapper */
     .receipt-wrapper {
         max-width: 960px;
         margin: 50px auto;
-        background: #fff;
+        background: rgba(255, 255, 255, 0.85);
         padding: 40px;
-        border-radius: 15px;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        border-radius: 20px;
+        box-shadow: 0 8px 25px rgba(0, 119, 182, 0.15); /* soft blue shadow */
+        border: 1px solid #E2E8F0;
     }
 
     .receipt-title {
         font-size: 1.5rem;
         font-weight: 600;
-        color: #1f2d5a;
+        color: #0077B6; /* clear blue */
         margin-bottom: 25px;
-        border-bottom: 2px solid #e0e0e0;
+        border-bottom: 2px solid #E2E8F0;
         padding-bottom: 8px;
     }
 
     .table th {
-        background-color: #f8f9fa;
-        color: #343a40;
+        background-color: #F1F5F9;
+        color: #1E293B;
+    }
+
+    .table td, .table th {
+        vertical-align: middle;
     }
 
     .btn-sm {
-        border-radius: 6px;
+        border-radius: 8px;
         font-weight: 500;
+        transition: all 0.2s ease;
     }
 
     .btn-primary {
-        background-color: #1f2d5a;
-        border-color: #1f2d5a;
+        background-color: #00C49A; /* teal accent */
+        border-color: #00C49A;
+        color: #fff;
     }
 
     .btn-primary:hover {
-        background-color: #162447;
-        border-color: #162447;
+        background-color: #009e84;
+        border-color: #009e84;
     }
 
     .btn-secondary {
-        background-color: #6c757d;
-        border-color: #6c757d;
+        background-color: #0077B6; /* clear blue */
+        border-color: #0077B6;
+        color: #fff;
     }
 
     .btn-secondary:hover {
-        background-color: #5a6268;
-        border-color: #545b62;
+        background-color: #005f8a;
+        border-color: #005f8a;
     }
 
     .btn-delete {
-        background-color: #800000;
+        background-color: #EF4444; /* red accent */
+        border-color: #EF4444;
         color: #fff;
+    }
+
+    .btn-delete:hover {
+        background-color: #c53030;
+        border-color: #c53030;
+    }
+
+    /* Center message */
+    .no-receipts {
+        text-align: center;
+        margin-top: 40px;
+        color: #475569;
+        font-style: italic;
     }
 </style>
 
@@ -97,7 +121,7 @@
         </table>
     </div>
     {% else %}
-        <p class="text-muted text-center mt-4">No receipts in staging area. Check 'My Receipts' section for final receipts!</p>
+        <p class="no-receipts">No receipts in staging area. Check 'My Receipts' section for final receipts!</p>
     {% endif %}
 </div>
 {% endblock %}

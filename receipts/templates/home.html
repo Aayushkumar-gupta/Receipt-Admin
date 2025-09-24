@@ -4,92 +4,118 @@
 
 {% block content %}
 <style>
-    /* Welcome Section */
-    .welcome-section {
-        background: linear-gradient(135deg, #162447 0%, #1f2d5a 100%);
-        color: #fff;
-        padding: 60px 20px;
-        border-radius: 15px;
-        text-align: center;
-        margin-bottom: 40px;
-        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    body {
+        background: linear-gradient(135deg, #F8FAFC, #E2E8F0, #F8FAFC);
+        background-size: 300% 300%;
+        animation: gradientBG 18s ease infinite;
+        font-family: 'Segoe UI', Tahoma, sans-serif;
+        color: #1E293B; /* charcoal for readability */
     }
 
+    @keyframes gradientBG {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+
+    /* Frosted glass container */
+    .glass-box {
+        background: rgba(255, 255, 255, 0.85);
+        border-radius: 20px;
+        padding: 40px;
+        margin-bottom: 40px;
+        box-shadow: 0 8px 25px rgba(0, 119, 182, 0.15); /* soft blue shadow */
+        backdrop-filter: blur(12px) saturate(140%);
+        -webkit-backdrop-filter: blur(12px) saturate(140%);
+        border: 1px solid rgba(226, 232, 240, 0.8);
+    }
+
+    /* Welcome */
     .welcome-section h1 {
         font-size: 3rem;
         font-weight: 700;
         margin-bottom: 15px;
+        color: #0077B6; /* Clear Blue */
     }
 
     .welcome-section p {
-        font-size: 1.25rem;
-        color: #e0e0e0;
+        font-size: 1.2rem;
+        color: #334155;
     }
 
-    /* User Manual / Guide */
-    .manual-section {
-        background-color: #f5f5f5;
-        border-radius: 15px;
-        padding: 30px;
-        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
-        margin-bottom: 40px;
-    }
-
-    .manual-section h2 {
-        color: #162447;
+    /* Section headings */
+    .manual-section h2,
+    .dashboard-section h2 {
         font-weight: 600;
         margin-bottom: 20px;
+        color: #0077B6; /* trust anchor */
     }
 
     .manual-section p {
         font-size: 1rem;
-        color: #333;
-        line-height: 1.6;
+        line-height: 1.7;
+        color: #475569;
     }
 
-    /* Dashboard */
-    .dashboard-section h2 {
-        color: #162447;
-        font-weight: 600;
-        margin-bottom: 20px;
-    }
-
+    /* Dashboard cards */
     .dashboard-section .card {
-        border-radius: 12px;
-        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+        background: #FFFFFF;
+        border: 1px solid #E2E8F0;
+        border-radius: 15px;
+        color: #1E293B;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .dashboard-section .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0, 119, 182, 0.25);
     }
 
     .dashboard-section .card-title {
         font-weight: 600;
-        color: #1f2d5a;
+        font-size: 1.2rem;
+        color: #0077B6;
     }
 
     .dashboard-section .card-text {
         font-weight: 700;
         font-size: 2rem;
-        color: #162447;
+        color: #00C49A; /* teal highlight */
+    }
+
+    /* Buttons (if you add later) */
+    .btn-clear {
+        background-color: #00C49A;
+        color: #fff;
+        border-radius: 10px;
+        padding: 10px 20px;
+        font-weight: 600;
+        transition: background 0.3s ease;
+    }
+
+    .btn-clear:hover {
+        background-color: #009e84;
     }
 </style>
 
 <!-- Welcome Section -->
-<div class="welcome-section">
+<div class="glass-box welcome-section text-center">
     <h1>Welcome, {{ user.first_name|default:user.username }}!</h1>
-    <p>Create, track, manage, and analyze your receipts easily with Clear Slip.</p>
+    <p>Create, track, manage, and analyze your receipts easily with <strong>Clear Slip</strong>.</p>
 </div>
 
-<!-- User Manual Section -->
-<div class="manual-section">
+<!-- User Manual -->
+<div class="glass-box manual-section">
     <h2>User Manual / Quick Guide</h2>
     <p>
-        <strong>Creating a Receipt:</strong> Click on "Create Receipt" from the navbar, fill in the invoice details, and save.
-        You can edit or delete receipts from the staging area.<br><br>
+        <strong>Creating a Receipt:</strong> Click on "Create Receipt" from the navbar, fill in the invoice details, and save.<br><br>
         <strong>Staging Area:</strong> Review receipts in the staging area before confirming them. Once confirmed, they are finalized and cannot be edited.<br><br>
-        <strong>My Receipts:</strong> Access all your receipts in My Receipt area. You can view or download a pdf version of receipt here.
+        <strong>My Receipts:</strong> Access all your receipts in My Receipt area. You can view or download a PDF version of any receipt here.
     </p>
 </div>
 
-<!-- Dashboard Section -->
-<div class="dashboard-section">
+<!-- Dashboard -->
+<div class="glass-box dashboard-section">
     <h2>Your Sales Dashboard</h2>
     <div class="row g-3">
         <div class="col-md-4">
