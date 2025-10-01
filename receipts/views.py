@@ -24,6 +24,9 @@ def my_receipts(request):
 def about(request):
     return render(request, 'about.html')
 
+def profile(request):
+    return render(request, 'profile.html')
+
 def test(request):
     return render(request, 'test.html')
 

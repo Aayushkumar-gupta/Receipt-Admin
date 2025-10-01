@@ -102,6 +102,7 @@
                     <li class="nav-item"><a class="nav-link" href="{% url 'staging_area' %}">Staging Area</a></li>
                     <li class="nav-item"><a class="nav-link" href="{% url 'my_receipts' %}">My Receipts</a></li>
                     <li class="nav-item"><a class="nav-link" href="{% url 'about' %}">About</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'profile' %}">Profile</a></li>
 
                     {% if not user.is_authenticated %}
                         <li class="nav-item"><a class="nav-link" href="{% url 'login' %}">Login</a></li>
