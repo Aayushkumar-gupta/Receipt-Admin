@@ -80,7 +80,7 @@ def create_receipt(request):
         return redirect("user_profile")
 
     seller_address = request.POST.get('seller_address', '').strip()
-    
+
     if seller_address and not profile.address:
         profile.address = seller_address
         profile.save()
@@ -206,27 +206,37 @@ def staging_delete(request, pk):
 def update_profile(request):
     if request.method == "POST":
         user = request.user
-        profile = user.userprofile  
+        profile = user.userprofile
 
-        # Track changes for email and phone
+        # Get posted data
         new_email = request.POST.get("email")
         new_phone = request.POST.get("phone_number")
+        current_password = request.POST.get("current_password")  # user must enter password
 
         # Update User fields
         user.first_name = request.POST.get("first_name")
         user.last_name = request.POST.get("last_name")
+        profile.address = request.POST.get("address")
 
+        # Check if email or phone is changing
+        sensitive_change = (new_email != user.email) or (new_phone != profile.phone_number)
+
+        if sensitive_change:
+            # Verify current password
+            if not user.check_password(current_password):
+                messages.error(request, "Incorrect password. Cannot update email or phone number ❌")
+                return redirect("user_profile")
+
+        # Update email if changed
         if new_email != user.email:
             user.email = new_email
             user.username = new_email
             profile.email_verified = False  # mark email as unverified
 
-        # Update Profile fields
+        # Update phone if changed
         if new_phone != profile.phone_number:
             profile.phone_number = new_phone
             profile.phone_verified = False  # mark phone as unverified
-
-        profile.address = request.POST.get("address")
 
         # Save changes
         user.save()
@@ -234,5 +244,5 @@ def update_profile(request):
 
         messages.success(request, "Profile updated successfully ✅")
         return redirect("user_profile")
-    
+
     return redirect("user_profile")

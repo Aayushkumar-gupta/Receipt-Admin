@@ -68,39 +68,73 @@
     <!-- Profile Info -->
     <div class="form-title">👤 User Information</div>
 
-    <form method="post" action="{% url 'update_profile' %}">
+    <form method="post" action="{% url 'update_profile' %}" id="profileForm">
         {% csrf_token %}
+
+        <!-- Hidden dummy inputs to prevent browser autofill/focus -->
+        <input type="text" style="display:none" autocomplete="off">
+        <input type="password" style="display:none" autocomplete="new-password">
+
         <div class="form-floating mb-3">
-            <input type="text" class="form-control" name="first_name" value="{{ request.user.first_name }}" required>
+            <input type="text" class="form-control" name="first_name" value="{{ request.user.first_name }}" readonly required autocomplete="off">
             <label>First Name</label>
         </div>
 
         <div class="form-floating mb-3">
-            <input type="text" class="form-control" name="last_name" value="{{ request.user.last_name }}" required>
+            <input type="text" class="form-control" name="last_name" value="{{ request.user.last_name }}" readonly required autocomplete="off">
             <label>Last Name</label>
         </div>
 
         <div class="form-floating mb-3">
-            <input type="email" class="form-control" name="email" value="{{ request.user.email }}" required>
+            <input type="email" class="form-control" name="email" value="{{ request.user.email }}" readonly required
+                   autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
             <label>Email</label>
         </div>
 
         <div class="form-floating mb-3">
-            <input type="text" class="form-control" name="phone_number" value="{{ request.user.userprofile.phone_number }}">
+            <input type="text" class="form-control" name="phone_number" value="{{ request.user.userprofile.phone_number }}" readonly autocomplete="off">
             <label>Phone Number</label>
         </div>
 
         <div class="form-floating mb-3">
-            <input type="text" class="form-control" name="address" value="{{ request.user.userprofile.address|default:'' }}">
+            <input type="text" class="form-control" name="address" value="{{ request.user.userprofile.address|default:'' }}" readonly autocomplete="off">
             <label>Address</label>
         </div>
 
-        <button type="submit" class="btn btn-primary" onclick="return confirm('Are you sure you?');">Save Changes</button>
+        <div class="form-floating mb-3">
+            <input type="password" class="form-control" name="current_password" placeholder="Enter current password" readonly autocomplete="new-password">
+            <label>Current Password (required if changing email/phone)</label>
+        </div>
+
+        <!-- Buttons -->
+        <button type="button" class="btn btn-success" id="editBtn">Edit Profile</button>
+        <button type="submit" class="btn btn-primary" id="saveBtn" style="display:none;" onclick="return confirm('Are you sure you want to save changes?');">Save Changes</button>
     </form>
 </div> 
 
+<script>
+    const editBtn = document.getElementById('editBtn');
+    const saveBtn = document.getElementById('saveBtn');
+    const form = document.getElementById('profileForm');
+
+    // Make form editable when Edit button is clicked
+    editBtn.addEventListener('click', () => {
+        form.querySelectorAll('input').forEach(input => input.removeAttribute('readonly'));
+        saveBtn.style.display = 'inline-block';
+        editBtn.style.display = 'none';
+        form.querySelector('input[name="first_name"]').focus();
+    });
+
+    // Remove focus from all inputs on page load to prevent autofocus
+    window.addEventListener('load', () => {
+        const inputs = form.querySelectorAll('input');
+        inputs.forEach(input => input.blur());
+        document.activeElement.blur();
+    });
+</script>
+
+<!-- Phone and Email verification sections remain unchanged -->
 <div class="form-wrapper">
-    <!-- Phone Verification -->
     <div class="form-title section-divider">📱 Phone Verification</div>
     {% if request.user.userprofile.phone_verified %}
         <p class="text-success">✅ Phone number verified</p>
@@ -121,7 +155,6 @@
         </form>
     {% endif %}
 
-    <!-- Email Verification -->
     <div class="form-title section-divider">📧 Email Verification</div>
     {% if request.user.userprofile.email_verified %}
         <p class="text-success">✅ Email verified</p>
