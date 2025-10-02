@@ -56,7 +56,7 @@ def view_receipt_pdf(request, pk):  # <-- view PDF in browser
 def receipt_pdf(request, pk):  # <-- add pk here
     receipt = get_object_or_404(Receipts, pk=pk)
     template = get_template("receipt_pdf.html")  # <-- correct template path
-    html = template.render({"receipt": receipt})
+    html = template.render({"receipt": receipt, "is_staged": receipt.is_staged})
 
     response = HttpResponse(content_type="application/pdf")
     response['Content-Disposition'] = f'attachment; filename="receipt_{receipt.invoice_number}.pdf"'
@@ -116,10 +116,11 @@ def create_receipt(request):
 
 @login_required
 def stage(request, pk):
-    receipt = Receipts.objects.get(id = pk)
-    receipt.is_staged = True
-    receipt.save()
-    return redirect('my_receipts')
+    if request.method == 'POST':
+        receipt = Receipts.objects.get(id = pk)
+        receipt.is_staged = True
+        receipt.save()
+        return redirect('my_receipts')
 
 @login_required
 def staging_edit(request, pk):
@@ -178,6 +179,7 @@ def staging_edit(request, pk):
 
 @login_required
 def staging_delete(request, pk):
-    receipt = Receipts.objects.get(id=pk)
-    receipt.delete()
-    return redirect("staging_area")
+    if request.method == 'POST':
+        receipt = Receipts.objects.get(id=pk)
+        receipt.delete()
+        return redirect("staging_area")
