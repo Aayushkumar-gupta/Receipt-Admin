@@ -79,6 +79,11 @@ def create_receipt(request):
         messages.info(request, "You must verify your email and phone number before creating a receipt.")
         return redirect("user_profile")
 
+    seller_address = request.POST.get('seller_address', '').strip()
+    
+    if seller_address and not profile.address:
+        profile.address = seller_address
+        profile.save()
     
     if request.method == 'POST':
         receipt = Receipts.objects.create(

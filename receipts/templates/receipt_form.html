@@ -93,7 +93,7 @@
             </div>
             <div class="col-md-6 form-floating">
                 <input type="text" class="form-control" name="seller_address" placeholder="Seller Address"
-                    value="{{ request.user.userprofile.address }}" required>
+                    value="{% if request.user.userprofile.address %}{{ request.user.userprofile.address }}{% endif %}" required>
                 <label>Seller's Address</label>
             </div>
         </div>
