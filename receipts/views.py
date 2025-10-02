@@ -76,7 +76,7 @@ def create_receipt(request):
     profile = request.user.userprofile
 
     if not profile.email_verified or not profile.phone_verified:
-        messages.error(request, "❌ You must verify your email and phone number before creating a receipt.")
+        messages.info(request, "You must verify your email and phone number before creating a receipt.")
         return redirect("user_profile")
 
     
@@ -130,6 +130,7 @@ def stage(request, pk):
         receipt = Receipts.objects.get(id = pk)
         receipt.is_staged = True
         receipt.save()
+        messages.success(request, "Staging Successful!")
         return redirect('my_receipts')
 
 @login_required
@@ -192,6 +193,7 @@ def staging_delete(request, pk):
     if request.method == 'POST':
         receipt = Receipts.objects.get(id=pk)
         receipt.delete()
+        messages.error(request, "Receipt Deleted.")
         return redirect("staging_area")
     
 
@@ -211,6 +213,7 @@ def update_profile(request):
 
         if new_email != user.email:
             user.email = new_email
+            user.username = new_email
             profile.email_verified = False  # mark email as unverified
 
         # Update Profile fields

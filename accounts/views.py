@@ -111,6 +111,7 @@ def verify_email(request, uidb64, token):
         profile.email_verified = True
         profile.save()
         if request.user.is_authenticated and request.user.id == user.id:
+            messages.success(request, "Email Verified!")
             return redirect('profile')
         else:
             messages.success(request, "Email verified! You'r all set.")
@@ -137,12 +138,14 @@ def verify_account(request):
                 user.save()
 
             if request.user.is_authenticated and request.user.id == user.id:
+                messages.success(request, "Phone Number Verified!")
                 return redirect('profile')
             else:
                 messages.success(request, "Phone verified! Verify your Email now.")
                 return redirect('login')
         else:
             messages.error(request, "Incorrect OTP. Try again.")
+            return redirect('profile')
 
     return render(request, 'verify_account.html')
 
@@ -157,6 +160,7 @@ def resend_verification_email(request):
         else:
             # Send a new verification email
             send_verification_email(user, request)
+            messages.success(request, "Verification Emai sent! Check you email.")
         return redirect('profile')
     
 @login_required
@@ -171,6 +175,7 @@ def resend_phone_otp(request):
         request.session['phone_user_id'] = user.id
 
         # Send OTP to user's phone
+        messages.success(request, "OTP sent! Check your Phone.")
         send_otp_sms(profile.phone_number, otp)
         
         return redirect('profile')
