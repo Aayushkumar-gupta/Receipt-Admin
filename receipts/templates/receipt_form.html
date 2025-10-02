@@ -77,23 +77,27 @@
         <div class="form-title">👤 Seller Information</div>
         <div class="row g-3">
             <div class="col-md-6 form-floating">
-                <input type="text" class="form-control" name="seller_name" placeholder="Seller Name" required>
+                <input type="text" class="form-control" name="seller_name" placeholder="Seller Name" 
+                    value="{{ request.user.first_name }} {{ request.user.last_name }}" required>
                 <label>Seller's Name</label>
             </div>
             <div class="col-md-6 form-floating">
-                <input type="text" class="form-control" name="seller_phone_number" id="js-seller_phone_number" placeholder="Seller Phone" required>
+                <input type="text" class="form-control" name="seller_phone_number" id="js-seller_phone_number" placeholder="Seller Phone"
+                    value="{{ request.user.userprofile.phone_number }}" required>
                 <label>Seller's Phone</label>
             </div>
             <div class="col-md-6 form-floating">
-                <input type="email" class="form-control" name="seller_email" id="js-seller_email" placeholder="Seller Email" required>
+                <input type="email" class="form-control" name="seller_email" id="js-seller_email" placeholder="Seller Email"
+                    value="{{ request.user.email }}" required>
                 <label>Seller's Email</label>
             </div>
             <div class="col-md-6 form-floating">
-                <input type="text" class="form-control" name="seller_address" placeholder="Seller Address" required>
+                <input type="text" class="form-control" name="seller_address" placeholder="Seller Address"
+                    value="{{ request.user.userprofile.address }}" required>
                 <label>Seller's Address</label>
             </div>
         </div>
-
+        
         <!-- Buyer Information -->
         <div class="form-title section-divider">🧾 Buyer Information</div>
         <div class="row g-3">

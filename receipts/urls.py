@@ -14,4 +14,6 @@ urlpatterns = [
     path("staging-edit/<int:pk>/", views.staging_edit, name="staging_edit"),
     path("staging-delete/<int:pk>/", views.staging_delete, name="staging_delete"),
     path('profile/', views.profile, name='profile'),
+    path("profile/", views.profile, name="user_profile"),
+
 ]

@@ -11,6 +11,8 @@ from django.template.loader import get_template
 import json
 from decimal import Decimal
 from .forms import ReceiptForm
+from django.contrib import messages
+from accounts.models import UserProfile
 
 
 def home(request):
@@ -71,6 +73,13 @@ def receipt_pdf(request, pk):  # <-- add pk here
 
 @login_required
 def create_receipt(request):
+    profile = request.user.userprofile
+
+    if not profile.email_verified or not profile.phone_verified:
+        messages.error(request, "❌ You must verify your email and phone number before creating a receipt.")
+        return redirect("user_profile")
+
+    
     if request.method == 'POST':
         receipt = Receipts.objects.create(
             user_id=request.user,
@@ -184,3 +193,38 @@ def staging_delete(request, pk):
         receipt = Receipts.objects.get(id=pk)
         receipt.delete()
         return redirect("staging_area")
+    
+
+@login_required
+def update_profile(request):
+    if request.method == "POST":
+        user = request.user
+        profile = user.userprofile  
+
+        # Track changes for email and phone
+        new_email = request.POST.get("email")
+        new_phone = request.POST.get("phone_number")
+
+        # Update User fields
+        user.first_name = request.POST.get("first_name")
+        user.last_name = request.POST.get("last_name")
+
+        if new_email != user.email:
+            user.email = new_email
+            profile.email_verified = False  # mark email as unverified
+
+        # Update Profile fields
+        if new_phone != profile.phone_number:
+            profile.phone_number = new_phone
+            profile.phone_verified = False  # mark phone as unverified
+
+        profile.address = request.POST.get("address")
+
+        # Save changes
+        user.save()
+        profile.save()
+
+        messages.success(request, "Profile updated successfully ✅")
+        return redirect("user_profile")
+    
+    return redirect("user_profile")

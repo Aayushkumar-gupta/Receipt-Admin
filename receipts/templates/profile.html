@@ -67,10 +67,39 @@
 <div class="form-wrapper">
     <!-- Profile Info -->
     <div class="form-title">👤 User Information</div>
-    <p><strong>Name:</strong> {{ request.user.first_name }} {{ request.user.last_name }}</p>
-    <p><strong>Email:</strong> {{ request.user.email }}</p>
-    <p><strong>Phone:</strong> {{ request.user.userprofile.phone_number }}</p>
 
+    <form method="post" action="{% url 'update_profile' %}">
+        {% csrf_token %}
+        <div class="form-floating mb-3">
+            <input type="text" class="form-control" name="first_name" value="{{ request.user.first_name }}" required>
+            <label>First Name</label>
+        </div>
+
+        <div class="form-floating mb-3">
+            <input type="text" class="form-control" name="last_name" value="{{ request.user.last_name }}" required>
+            <label>Last Name</label>
+        </div>
+
+        <div class="form-floating mb-3">
+            <input type="email" class="form-control" name="email" value="{{ request.user.email }}" required>
+            <label>Email</label>
+        </div>
+
+        <div class="form-floating mb-3">
+            <input type="text" class="form-control" name="phone_number" value="{{ request.user.userprofile.phone_number }}">
+            <label>Phone Number</label>
+        </div>
+
+        <div class="form-floating mb-3">
+            <input type="text" class="form-control" name="address" value="{{ request.user.userprofile.address|default:'' }}">
+            <label>Address</label>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Save Changes</button>
+    </form>
+</div> 
+
+<div class="form-wrapper">
     <!-- Phone Verification -->
     <div class="form-title section-divider">📱 Phone Verification</div>
     {% if request.user.userprofile.phone_verified %}

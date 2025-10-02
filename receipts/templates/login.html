@@ -79,13 +79,6 @@
 
 <div class="form-wrapper">
     <h2 class="form-title">Login</h2>
-
-    {% if messages %}
-        {% for message in messages %}
-            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
-        {% endfor %}
-    {% endif %}
-
     <form method="POST" novalidate>
         {% csrf_token %}
         <div class="form-floating mb-3">
