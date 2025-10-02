@@ -24,6 +24,7 @@ def my_receipts(request):
 def about(request):
     return render(request, 'about.html')
 
+@login_required
 def profile(request):
     return render(request, 'profile.html')
 

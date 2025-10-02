@@ -70,26 +70,26 @@
 </style>
 
 <div class="form-wrapper">
-    <form method="POST" action="{% url 'create_receipt' %}" onsubmit="prepareItems()">
+    <form method="POST" action="{% url 'create_receipt' %}" id = "js-createreceipt-form" onsubmit="prepareItems()">
         {% csrf_token %}
 
         <!-- Seller Information -->
         <div class="form-title">👤 Seller Information</div>
         <div class="row g-3">
             <div class="col-md-6 form-floating">
-                <input type="text" class="form-control" name="seller_name" placeholder="Seller Name">
+                <input type="text" class="form-control" name="seller_name" placeholder="Seller Name" required>
                 <label>Seller's Name</label>
             </div>
             <div class="col-md-6 form-floating">
-                <input type="text" class="form-control" name="seller_phone_number" placeholder="Seller Phone">
+                <input type="text" class="form-control" name="seller_phone_number" id="js-seller_phone_number" placeholder="Seller Phone" required>
                 <label>Seller's Phone</label>
             </div>
             <div class="col-md-6 form-floating">
-                <input type="email" class="form-control" name="seller_email" placeholder="Seller Email">
+                <input type="email" class="form-control" name="seller_email" id="js-seller_email" placeholder="Seller Email" required>
                 <label>Seller's Email</label>
             </div>
             <div class="col-md-6 form-floating">
-                <input type="text" class="form-control" name="seller_address" placeholder="Seller Address">
+                <input type="text" class="form-control" name="seller_address" placeholder="Seller Address" required>
                 <label>Seller's Address</label>
             </div>
         </div>
@@ -98,19 +98,19 @@
         <div class="form-title section-divider">🧾 Buyer Information</div>
         <div class="row g-3">
             <div class="col-md-6 form-floating">
-                <input type="text" class="form-control" name="buyer_name" placeholder="Buyer Name">
+                <input type="text" class="form-control" name="buyer_name" placeholder="Buyer Name" required>
                 <label>Buyer's Name</label>
             </div>
             <div class="col-md-6 form-floating">
-                <input type="text" class="form-control" name="buyer_phone_number" placeholder="Buyer Phone">
+                <input type="text" class="form-control" name="buyer_phone_number" id="js-buyer_phone_number" placeholder="Buyer Phone" required>
                 <label>Buyer's Phone</label>
             </div>
             <div class="col-md-6 form-floating">
-                <input type="email" class="form-control" name="buyer_email" placeholder="Buyer Email">
+                <input type="email" class="form-control" name="buyer_email" id="js-buyer_email" placeholder="Buyer Email" required>
                 <label>Buyer's Email</label>
             </div>
             <div class="col-6 form-floating">
-                <input type="text" class="form-control" name="buyer_address" placeholder="Buyer Address">
+                <input type="text" class="form-control" name="buyer_address" placeholder="Buyer Address" required>
                 <label>Buyer's Address</label>
             </div>
         </div>
@@ -120,19 +120,19 @@
         <div id="items-container">
             <div class="row g-3 item-row">
                 <div class="col-md-5 form-floating">
-                    <input type="text" class="form-control" name="description" placeholder="Description">
+                    <input type="text" class="form-control" name="description" placeholder="Description" required>
                     <label>Description</label>
                 </div>
                 <div class="col-md-2 form-floating">
-                    <input type="number" min="0" step="1" class="form-control quantity" placeholder="Quantity" value="1">
+                    <input type="number" min="0" step="1" class="form-control quantity" id="js-quantity" placeholder="Quantity" value="1" required>
                     <label>Qty</label>
                 </div>
                 <div class="col-md-2 form-floating">
-                    <input type="number" min="0" step="0.01" class="form-control unit_price" placeholder="Unit Price" value="0">
+                    <input type="number" min="0" step="0.01" class="form-control unit_price" id="js-unit-price" placeholder="Unit Price" value="0" required>
                     <label>Unit Price</label>
                 </div>
                 <div class="col-md-2 form-floating">
-                    <input type="number" readonly class="form-control line_price" placeholder="Line Price" value="0">
+                    <input type="number" readonly class="form-control line_price" placeholder="Line Price" value="0" required>
                     <label>Line Price</label>
                 </div>
                 <div class="col-md-1 d-flex align-items-center">
@@ -147,15 +147,15 @@
         <div class="form-title section-divider">💰 Pricing Summary</div>
         <div class="row g-3">
             <div class="col-md-4 form-floating">
-                <input type="number" readonly step="0.01" class="form-control" id="sub_total" name="sub_total" placeholder="Subtotal">
+                <input type="number" readonly step="0.01" class="form-control" id="sub_total" name="sub_total" placeholder="Subtotal" required>
                 <label>Subtotal</label>
             </div>
             <div class="col-md-4 form-floating">
-                <input type="number" step="0.01" class="form-control" id="tax_rate" name="tax_rate" placeholder="Tax Rate" value="8.25">
+                <input type="number" step="0.01" class="form-control" id="tax_rate" name="tax_rate" placeholder="Tax Rate" value="8.25" required>
                 <label>Tax Rate (%)</label>
             </div>
             <div class="col-md-4 form-floating">
-                <input type="number" readonly step="0.01" class="form-control" id="total_amount" name="total_amount" placeholder="Total Amount">
+                <input type="number" readonly step="0.01" class="form-control" id="total_amount" name="total_amount" placeholder="Total Amount" required>
                 <label>Total Amount</label>
             </div>
         </div>
@@ -238,6 +238,73 @@ function prepareItems() {
 
 document.addEventListener('input', calculateTotals);
 window.addEventListener('load', calculateTotals);
+
+const form = document.getElementById('js-createreceipt-form');
+
+form.addEventListener('submit', function(event){
+    let isValid = true;
+
+    // Required fields
+    const requiredFields = [
+        'js-seller_name', 'js-seller_phone_number', 'js-seller_email', 'js-seller_address',
+        'js-buyer_name', 'js-buyer_phone_number', 'js-buyer_email', 'js-buyer_address',
+        'js-item', 'js-quantity', 'js-unit-price'
+    ];
+
+    requiredFields.forEach(id => {
+        const field = document.getElementById(id);
+        field.style.borderColor = '';
+        if(field.value.trim() === ''){
+            field.style.borderColor = 'red';
+            isValid = false;
+        }
+    });
+
+    // Email validation
+    const emailPattern = /^[^ ]+@[^ ]+\.[a-z]{2,}$/;
+    ['js-seller_email', 'js-buyer_email'].forEach(id => {
+        const emailField = document.getElementById(id);
+        if(emailField.value.trim() !== '' && !emailPattern.test(emailField.value)){
+            emailField.style.borderColor = 'red';
+            isValid = false;
+            alert("Invalid Email: " + emailField.value);
+        }
+    });
+
+    // Phone validation
+    const phonePattern = /^[0-9]{10,}$/;
+    ['js-seller_phone_number', 'js-buyer_phone_number'].forEach(id => {
+        const phoneField = document.getElementById(id);
+        if(phoneField.value.trim() !== '' && !phonePattern.test(phoneField.value)){
+            phoneField.style.borderColor = 'red';
+            isValid = false;
+            alert("Invalid Phone Number: " + phoneField.value);
+        }
+    });
+
+    // Quantity & Price
+    const qty = document.getElementById('js-quantity');
+    const price = document.getElementById('js-unit-price');
+    if(qty.value <= 0){
+        qty.style.borderColor = 'red';
+        isValid = false;
+        alert("Quantity must be greater than 0");
+    }
+    if(price.value < 0){
+        price.style.borderColor = 'red';
+        isValid = false;
+        alert("Unit Price cannot be negative");
+    }
+
+    // Force recalc totals before submission
+    calculateTotals();
+    document.getElementById('sub_total').setAttribute("readonly", true);
+    document.getElementById('total_amount').setAttribute("readonly", true);
+
+    if (!isValid) {
+        event.preventDefault();
+    }
+});
 </script>
 
 {% endblock %}
