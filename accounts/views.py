@@ -80,7 +80,7 @@ def user_login(request):
             logger.info(f"LOGIN SUCCESS for {username}")
             if user.is_active:
                 auth_login(request, user)
-                return redirect('home')
+                return redirect('dashboard')
             else:
                 messages.error(request, "Account not verified. Please verify your email and phone.")
         else:
@@ -94,7 +94,7 @@ def user_login(request):
 
 def user_logout(request):
     auth_logout(request) 
-    return redirect('login')
+    return redirect('home')
 
 def forgot_password(request):
     return render(request, 'forgot_password.html')

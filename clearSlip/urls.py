@@ -17,13 +17,14 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from django.contrib.auth import views as auth_views
-from accounts import views
+from accounts import views as account_views
 from receipts import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('receipts.urls')),
     path('accounts/', include('accounts.urls')),
+    path('dashboard/', views.dashboard, name='dashboard'),
     path("password_reset/", 
          auth_views.PasswordResetView.as_view(template_name="password_reset.html"), 
          name="password_reset"),

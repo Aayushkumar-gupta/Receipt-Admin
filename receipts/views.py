@@ -19,6 +19,10 @@ def home(request):
     return render(request, 'home.html')
 
 @login_required
+def dashboard(request):
+    return render(request, 'dashboard.html')
+
+@login_required
 def my_receipts(request):
     receipts = Receipts.objects.filter(is_staged=True, user_id=request.user).order_by('-date')
     return render(request, 'my_receipts.html', {'receipts': receipts})
