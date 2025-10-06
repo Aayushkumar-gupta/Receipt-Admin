@@ -1,8 +1,149 @@
 {% extends 'base.html' %}
-
-{% block title %} Dashborad {% endblock %}
+{% block title %} Dashboard {% endblock %}
 
 {% block content %}
+<style>
+body {
+    background: linear-gradient(135deg, #F8FAFC, #E2E8F0, #F8FAFC);
+    background-size: 300% 300%;
+    animation: gradientBG 18s ease infinite;
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    color: #1E293B;
+}
+@keyframes gradientBG {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
 
+.glass-box {
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 25px;
+    padding: 60px 50px;
+    margin-bottom: 50px;
+    box-shadow: 0 10px 35px rgba(0, 119, 182, 0.2);
+    backdrop-filter: blur(15px) saturate(150%);
+    -webkit-backdrop-filter: blur(15px) saturate(150%);
+    border: 1px solid rgba(226, 232, 240, 0.85);
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+}
 
+/* Titles */
+h1, h2 {
+    color: #0077B6;
+    font-weight: 700;
+    margin-bottom: 25px;
+    text-align: center;
+}
+
+/* Cards */
+.card {
+    background: #FFFFFF;
+    border-radius: 20px;
+    box-shadow: 0 5px 20px rgba(0, 119, 182, 0.2);
+    transition: transform 0.3s ease;
+    text-align: center;
+    padding: 30px 10px;
+}
+.card:hover {
+    transform: translateY(-5px);
+}
+.card h5 {
+    color: #0077B6;
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+.card p {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #00C49A;
+}
+
+/* Table */
+.table {
+    background: white;
+    border-radius: 15px;
+    overflow: hidden;
+}
+.table th {
+    background-color: #0077B6;
+    color: white;
+    font-weight: 600;
+}
+.table td {
+    color: #334155;
+    vertical-align: middle;
+}
+</style>
+
+<!-- Welcome Section -->
+<div class="glass-box text-center">
+    <h1>Welcome back, {{ user.first_name|default:user.username }}!</h1>
+    <p>Here’s an overview of your business performance.</p>
+</div>
+
+<!-- Stats Section -->
+<div class="glass-box">
+    <h2>Quick Stats</h2>
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="card">
+                <h5>Total Receipts</h5>
+                <p>{{ total_receipts }}</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <h5>Total Revenue</h5>
+                <p>${{ total_revenue }}</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <h5>Pending Receipts</h5>
+                <p>{{ pending_receipts }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Receipts Section -->
+<div class="glass-box">
+    <h2>Recent Receipts</h2>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Receipt ID</th>
+                <th>Total Amount</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for receipt in recent_receipts %}
+            <tr>
+                <td>{{ receipt.date }}</td>
+                <td>{{ receipt.invoice_number }}</td>
+                <td>${{ receipt.total_amount }}</td>
+                <td>
+                    {% if receipt.is_staged %}
+                        <span style="color: #00C49A; font-weight: 300;">Staged</span>
+                    {% else %}
+                        <span style="color: #EF4444;; font-weight: 300;">Unstaged</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4" class="text-center text-muted">No recent receipts found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <div class="text-center mt-3">
+        <a href="{% url 'my_receipts' %}" class="btn btn-outline-primary">View All Receipts</a>
+    </div>
+</div>
 {% endblock %}

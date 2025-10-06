@@ -20,7 +20,26 @@ def home(request):
 
 @login_required
 def dashboard(request):
-    return render(request, 'dashboard.html')
+
+    user = request.user
+    # Query all receipts created by this user
+    receipts = Receipts.objects.filter(user_id=user)
+
+    total_receipts = receipts.count()
+    total_revenue = sum(r.sub_total for r in receipts)
+    pending_receipts = receipts.filter(is_staged=False).count()
+
+    # Get the 5 most recent receipts
+    recent_receipts = receipts.order_by('-date')[:5]
+
+    context = {
+        'total_receipts': total_receipts,
+        'total_revenue': total_revenue,
+        'pending_receipts': pending_receipts,
+        'recent_receipts': recent_receipts,
+    }
+
+    return render(request, 'dashboard.html', context)
 
 @login_required
 def my_receipts(request):

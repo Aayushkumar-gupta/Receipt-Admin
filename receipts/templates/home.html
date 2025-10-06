@@ -1,147 +1,186 @@
 {% extends 'base.html' %}
 
-{% block title %} Home {% endblock %}
+{% block title %}Home - Clear Slip{% endblock %}
 
 {% block content %}
 <style>
-    body {
-        background: linear-gradient(135deg, #F8FAFC, #E2E8F0, #F8FAFC);
-        background-size: 300% 300%;
-        animation: gradientBG 18s ease infinite;
-        font-family: 'Segoe UI', Tahoma, sans-serif;
-        color: #1E293B; /* charcoal for readability */
-    }
+/* General Styling */
+body {
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    background: #F8FAFC;
+    color: #1E293B;
+}
 
-    @keyframes gradientBG {
-        0% { background-position: 0% 50%; }
-        50% { background-position: 100% 50%; }
-        100% { background-position: 0% 50%; }
-    }
+/* Hero Section */
+.hero {
+    text-align: center;
+    padding: 100px 20px;
+    background: #FFFFFF; /* Removed gradient */
+    border-radius: 25px; /* Added rounded corners */
+    max-width: 1000px;
+    margin: 80px auto 60px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+}
 
-    /* Frosted glass container */
-    .glass-box {
-        background: rgba(255, 255, 255, 0.85);
-        border-radius: 20px;
-        padding: 40px;
-        margin-bottom: 40px;
-        box-shadow: 0 8px 25px rgba(0, 119, 182, 0.15); /* soft blue shadow */
-        backdrop-filter: blur(12px) saturate(140%);
-        -webkit-backdrop-filter: blur(12px) saturate(140%);
-        border: 1px solid rgba(226, 232, 240, 0.8);
-    }
+.hero h1 {
+    font-size: 3rem;
+    font-weight: 700;
+    color: #0077B6;
+    margin-bottom: 20px;
+}
 
-    /* Welcome */
-    .welcome-section h1 {
-        font-size: 3rem;
-        font-weight: 700;
-        margin-bottom: 15px;
-        color: #0077B6; /* Clear Blue */
-    }
+.hero p {
+    font-size: 1.3rem;
+    color: #475569;
+    max-width: 600px;
+    margin: 0 auto 30px;
+}
 
-    .welcome-section p {
-        font-size: 1.2rem;
-        color: #334155;
-    }
+.btn-clear {
+    background-color: #00C49A;
+    color: #fff;
+    border-radius: 10px;
+    padding: 12px 25px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background 0.3s ease;
+}
 
-    /* Section headings */
-    .manual-section h2,
-    .dashboard-section h2 {
-        font-weight: 600;
-        margin-bottom: 20px;
-        color: #0077B6; /* trust anchor */
-    }
+.btn-clear:hover {
+    background-color: #009e84;
+}
 
-    .manual-section p {
-        font-size: 1rem;
-        line-height: 1.7;
-        color: #475569;
-    }
+/* Features Section */
+.features {
+    padding: 60px 20px;
+}
 
-    /* Dashboard cards */
-    .dashboard-section .card {
-        background: #FFFFFF;
-        border: 1px solid #E2E8F0;
-        border-radius: 15px;
-        color: #1E293B;
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
+.features h2 {
+    text-align: center;
+    font-weight: 600;
+    color: #0077B6;
+    margin-bottom: 50px;
+}
 
-    .dashboard-section .card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 25px rgba(0, 119, 182, 0.25);
-    }
+.feature-card {
+    background: #fff;
+    border-radius: 15px;
+    padding: 25px;
+    text-align: center;
+    box-shadow: 0 6px 18px rgba(0, 119, 182, 0.15);
+    transition: transform 0.3s ease;
+    height: 100%; /* Equal height */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
 
-    .dashboard-section .card-title {
-        font-weight: 600;
-        font-size: 1.2rem;
-        color: #0077B6;
-    }
+.feature-card:hover {
+    transform: translateY(-5px);
+}
 
-    .dashboard-section .card-text {
-        font-weight: 700;
-        font-size: 2rem;
-        color: #00C49A; /* teal highlight */
-    }
+.feature-card h5 {
+    color: #0077B6;
+    font-weight: 600;
+    margin-bottom: 10px;
+}
 
-    /* Buttons (if you add later) */
-    .btn-clear {
-        background-color: #00C49A;
-        color: #fff;
-        border-radius: 10px;
-        padding: 10px 20px;
-        font-weight: 600;
-        transition: background 0.3s ease;
-    }
+.feature-card p {
+    color: #475569;
+}
 
-    .btn-clear:hover {
-        background-color: #009e84;
-    }
+/* Ensure all cards are same height */
+.features .row {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.features .col-md-3 {
+    display: flex;
+}
+
+/* Demo Section */
+.demo-section {
+    text-align: center;
+    padding: 60px 20px;
+}
+
+.demo-section img {
+    max-width: 90%;
+    border-radius: 15px;
+    box-shadow: 0 8px 25px rgba(0, 119, 182, 0.15);
+}
+
+/* Why Us Section */
+.why-us {
+    background: #E2F7F1;
+    padding: 60px 20px;
+    text-align: center;
+    border-radius: 15px;
+    max-width: 1000px;
+    margin: 60px auto;
+}
+
+.why-us h2 {
+    color: #0077B6;
+    margin-bottom: 20px;
+}
+
+.why-us p {
+    color: #334155;
+    font-size: 1.1rem;
+    max-width: 700px;
+    margin: 0 auto;
+}
 </style>
 
-<!-- Welcome Section -->
-<div class="glass-box welcome-section text-center">
-    <h1>Welcome, {{ user.first_name|default:user.username }}!</h1>
-    <p>Create, track, manage, and analyze your receipts easily with <strong>Clear Slip</strong>.</p>
+<!-- Hero Section -->
+<div class="hero">
+    <h1>Manage Your Receipts Effortlessly</h1>
+    <p>Clear Slip helps you create, store, and organize receipts in one place, securely and efficiently.</p>
+    <a href="{% url 'sign_up' %}" class="btn-clear">Get Started</a>
 </div>
 
-<!-- User Manual -->
-<div class="glass-box manual-section">
-    <h2>User Manual / Quick Guide</h2>
-    <p>
-        <strong>Creating a Receipt:</strong> Click on "Create Receipt" from the navbar, fill in the invoice details, and save.<br><br>
-        <strong>Staging Area:</strong> Review receipts in the staging area before confirming them. Once confirmed, they are finalized and cannot be edited.<br><br>
-        <strong>My Receipts:</strong> Access all your receipts in My Receipt area. You can view or download a PDF version of any receipt here.
-    </p>
-</div>
-
-<!-- Dashboard -->
-<div class="glass-box dashboard-section">
-    <h2>Your Sales Dashboard</h2>
-    <div class="row g-3">
-        <div class="col-md-4">
-            <div class="card text-center p-3">
-                <div class="card-body">
-                    <h5 class="card-title">Total Receipts</h5>
-                    <p class="card-text">{{ total_receipts }}</p>
-                </div>
+<!-- Features Section -->
+<div class="features container">
+    <h2>Why Choose Clear Slip?</h2>
+    <div class="row g-4">
+        <div class="col-md-3">
+            <div class="feature-card">
+                <h5>📑 Create Receipts Instantly</h5>
+                <p>Generate professional receipts in seconds without any hassle.</p>
             </div>
         </div>
-        <div class="col-md-4">
-            <div class="card text-center p-3">
-                <div class="card-body">
-                    <h5 class="card-title">Total Revenue</h5>
-                    <p class="card-text">{{ total_revenue }}</p>
-                </div>
+        <div class="col-md-3">
+            <div class="feature-card">
+                <h5>📂 Keep Everything Organized</h5>
+                <p>All your receipts in one place, easy to find and manage.</p>
             </div>
         </div>
-        <div class="col-md-4">
-            <div class="card text-center p-3">
-                <div class="card-body">
-                    <h5 class="card-title">Pending Receipts</h5>
-                    <p class="card-text">{{ pending_receipts }}</p>
-                </div>
+        <div class="col-md-3">
+            <div class="feature-card">
+                <h5>🌐 Access Anywhere</h5>
+                <p>Work from any device and never lose track of your records.</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="feature-card">
+                <h5>🔒 Secure & Private</h5>
+                <p>Your data is safe with encryption and secure storage.</p>
             </div>
         </div>
     </div>
+</div>
+
+<!-- Demo / Screenshot Section -->
+<div class="demo-section container">
+    <h2>See Clear Slip in Action</h2>
+    <img src="" alt="Dashboard Screenshot">
+</div>
+
+<!-- Why Us Section -->
+<div class="why-us container">
+    <h2>Why Us?</h2>
+    <p>We focus on simplicity, speed, and security. Clear Slip helps you save time, reduce errors, and stay organized without any learning curve.</p>
 </div>
 {% endblock %}
