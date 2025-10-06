@@ -76,12 +76,73 @@ h1, h2 {
     color: #334155;
     vertical-align: middle;
 }
+
+/* Goal Section */
+.goal-wrapper {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    margin-top: 10px;
+}
+#goal-display {
+    font-style: italic;
+    color: #0077B6;
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 0;
+    transition: all 0.3s ease;
+}
+.edit-icon {
+    margin-left: 10px;
+    color: #0077B6;
+    cursor: pointer;
+    font-size: 1.2rem;
+    opacity: 0;
+    transition: opacity 0.3s ease, transform 0.2s ease;
+}
+.goal-wrapper:hover .edit-icon {
+    opacity: 1;
+}
+.edit-icon:hover {
+    transform: scale(1.2);
+}
 </style>
+
+<!-- Include Font Awesome for icons -->
+<link
+  rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+/>
 
 <!-- Welcome Section -->
 <div class="glass-box text-center">
     <h1>Welcome back, {{ user.first_name|default:user.username }}!</h1>
-    <p>Here’s an overview of your business performance.</p>
+
+    <div class="goal-wrapper">
+        {% if profile.goal %}
+            <p id="goal-display">“{{ profile.goal }}”</p>
+        {% else %}
+            <p id="goal-display" style="color: #64748B;">Click here to set a goal or motto.</p>
+        {% endif %}
+        <i id="edit-goal-btn" class="fas fa-pencil-alt edit-icon" title="Edit Goal"></i>
+    </div>
+
+    <form id="goal-form" method="POST" class="mt-3" style="display: none;">
+        {% csrf_token %}
+        <input 
+            type="text" 
+            name="goal" 
+            class="form-control" 
+            style="max-width: 400px; margin: 0 auto; border-radius: 10px;"
+            placeholder="Enter your goal or motto"
+            value="{{ profile.goal|default:'' }}"
+        >
+        <button type="submit" class="btn btn-outline-primary mt-3">Save Goal</button>
+    </form>
+
+    <!-- Moved this line below the goal -->
+    <p class="mt-4">Here’s an overview of your business performance.</p>
 </div>
 
 <!-- Stats Section -->
@@ -131,7 +192,7 @@ h1, h2 {
                     {% if receipt.is_staged %}
                         <span style="color: #00C49A; font-weight: 300;">Staged</span>
                     {% else %}
-                        <span style="color: #EF4444;; font-weight: 300;">Unstaged</span>
+                        <span style="color: #EF4444; font-weight: 300;">Unstaged</span>
                     {% endif %}
                 </td>
             </tr>
@@ -146,4 +207,18 @@ h1, h2 {
         <a href="{% url 'my_receipts' %}" class="btn btn-outline-primary">View All Receipts</a>
     </div>
 </div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const editBtn = document.getElementById("edit-goal-btn");
+    const form = document.getElementById("goal-form");
+    const goalDisplay = document.getElementById("goal-display");
+
+    editBtn.addEventListener("click", function() {
+        const isHidden = form.style.display === "none";
+        form.style.display = isHidden ? "block" : "none";
+        goalDisplay.style.display = isHidden ? "none" : "block";
+    });
+});
+</script>
 {% endblock %}

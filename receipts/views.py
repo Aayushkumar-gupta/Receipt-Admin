@@ -20,16 +20,23 @@ def home(request):
 
 @login_required
 def dashboard(request):
-
     user = request.user
+    profile = UserProfile.objects.get(user=user)
+
+    # Handle goal update
+    if request.method == "POST":
+        goal = request.POST.get("goal")
+        profile.goal = goal
+        profile.save()
+        messages.success(request, "Your goal has been updated!")
+        return redirect('dashboard')
+
     # Query all receipts created by this user
     receipts = Receipts.objects.filter(user_id=user)
 
     total_receipts = receipts.count()
     total_revenue = sum(r.sub_total for r in receipts)
     pending_receipts = receipts.filter(is_staged=False).count()
-
-    # Get the 5 most recent receipts
     recent_receipts = receipts.order_by('-date')[:5]
 
     context = {
@@ -37,6 +44,7 @@ def dashboard(request):
         'total_revenue': total_revenue,
         'pending_receipts': pending_receipts,
         'recent_receipts': recent_receipts,
+        'profile': profile,
     }
 
     return render(request, 'dashboard.html', context)
