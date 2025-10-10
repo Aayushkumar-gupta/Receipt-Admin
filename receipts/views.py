@@ -274,6 +274,6 @@ def update_profile(request):
         profile.save()
 
         messages.success(request, "Profile updated successfully ✅")
-        return redirect("user_profile")
+        return redirect("profile")
 
-    return redirect("user_profile")
+    return redirect("profile")
