@@ -145,3 +145,15 @@ EMAIL_HOST_PASSWORD = 'your_app_password'
 
 LOGIN_REDIRECT_URL = '/dashboard/'
 LOGOUT_REDIRECT_URL = '/'
+
+SESSION_COOKIE_AGE = 60 * 60 * 24 * 7  # 1 week (in seconds)
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False
+
+SESSION_COOKIE_SECURE = True      # Only send cookies over HTTPS
+CSRF_COOKIE_SECURE = True         # CSRF protection also uses secure cookies
+
+SESSION_COOKIE_HTTPONLY = True
+CSRF_COOKIE_HTTPONLY = True
+
+SESSION_COOKIE_SAMESITE = 'Lax'
+CSRF_COOKIE_SAMESITE = 'Lax'
