@@ -108,21 +108,25 @@ def create_receipt(request):
 
     if not profile.email_verified or not profile.phone_verified:
         messages.info(request, "You must verify your email and phone number before creating a receipt.")
-        return redirect("user_profile")
-
-    seller_address = request.POST.get('seller_address', '').strip()
-
-    if seller_address and not profile.address:
-        profile.address = seller_address
-        profile.save()
+        return redirect("profile")
     
+    if not profile.address or profile.address.strip() == "":
+        messages.warning(request, "You must add your address in your profile before creating a receipt.")
+        return redirect("profile")
+
+
+    seller_name = f"{request.user.first_name} {request.user.last_name}"
+    seller_email = request.user.email
+    seller_phone = profile.phone_number
+    seller_address = profile.address or "Default Address"
+
     if request.method == 'POST':
         receipt = Receipts.objects.create(
             user_id=request.user,
-            seller_name=request.POST.get('seller_name'),
-            seller_address=request.POST.get('seller_address'),
-            seller_phone_number=request.POST.get('seller_phone_number'),
-            seller_email=request.POST.get('seller_email'),
+            seller_name=seller_name,
+            seller_address=seller_address,
+            seller_phone_number=seller_phone,
+            seller_email=seller_email,
             buyer_name=request.POST.get('buyer_name'),
             buyer_address=request.POST.get('buyer_address'),
             buyer_phone_number=request.POST.get('buyer_phone_number'),
@@ -137,7 +141,7 @@ def create_receipt(request):
         for item in items:
             qty = int(item.get('quantity', 0))
             unit = Decimal(str(item.get('unit_price') or '0'))
-            line_price = Decimal(item['quantity']) * Decimal(item['unit_price'])
+            line_price = qty * unit
 
             ReceiptItem.objects.create(
                 receipt=receipt,
@@ -160,6 +164,7 @@ def create_receipt(request):
     return render(request, 'receipt_form.html')
 
 
+
 @login_required
 def stage(request, pk):
     if request.method == 'POST':
@@ -173,29 +178,28 @@ def stage(request, pk):
 def staging_edit(request, pk):
     receipt = get_object_or_404(Receipts, id=pk)
 
-    # prevent editing confirmed receipts
+    # prevent editing staged/confirmed receipts
     if receipt.is_staged:
         return redirect("staging_area")
 
     if request.method == "POST":
+        # Only buyer info + totals are editable
         form = ReceiptForm(request.POST, instance=receipt)
         if form.is_valid():
-            # save receipt fields (seller + buyer + totals)
-            updated_receipt = form.save()
+            updated_receipt = form.save(commit=False)
 
-            # handle items JSON (hidden field name = "items")
+            # Handle items from hidden JSON field
             items_json = request.POST.get("items", "[]")
             try:
                 items = json.loads(items_json)
             except (ValueError, TypeError):
                 items = []
 
-            # replace existing items with new ones
+            # Delete old items and create new ones
             updated_receipt.items.all().delete()
             for it in items:
                 desc = it.get("description", "") or ""
                 qty = int(it.get("quantity") or 0)
-                # ensure Decimal for unit_price to match model
                 try:
                     unit = Decimal(str(it.get("unit_price") or 0))
                 except:
@@ -208,11 +212,10 @@ def staging_edit(request, pk):
                         unit_price=unit,
                     )
 
+            updated_receipt.save()  # save buyer info and totals
             return redirect("staging_area")
-        else:
-            # optionally pass form errors to template (template can show them)
-            pass
     else:
+        # GET request: prefill form with buyer info + totals
         form = ReceiptForm(instance=receipt)
 
     # pass items to template for JS to load
@@ -231,7 +234,6 @@ def staging_delete(request, pk):
         receipt.delete()
         messages.error(request, "Receipt Deleted.")
         return redirect("staging_area")
-    
 
 @login_required
 def update_profile(request):
@@ -242,32 +244,36 @@ def update_profile(request):
         # Get posted data
         new_email = request.POST.get("email")
         new_phone = request.POST.get("phone_number")
-        current_password = request.POST.get("current_password")  # user must enter password
+        new_address = request.POST.get("address")
+        current_password = request.POST.get("current_password")
 
-        # Update User fields
-        user.first_name = request.POST.get("first_name")
-        user.last_name = request.POST.get("last_name")
-        profile.address = request.POST.get("address")
+        # Always allow address update (no password needed)
+        if new_address and new_address != profile.address:
+            profile.address = new_address
 
-        # Check if email or phone is changing
+        # Check if email or phone number is changing
         sensitive_change = (new_email != user.email) or (new_phone != profile.phone_number)
 
         if sensitive_change:
-            # Verify current password
-            if not user.check_password(current_password):
+            # Password required for sensitive changes
+            if not current_password or not user.check_password(current_password):
                 messages.error(request, "Incorrect password. Cannot update email or phone number ❌")
-                return redirect("user_profile")
+                return redirect("profile")
 
-        # Update email if changed
-        if new_email != user.email:
-            user.email = new_email
-            user.username = new_email
-            profile.email_verified = False  # mark email as unverified
+            # Update email if changed
+            if new_email != user.email:
+                user.email = new_email
+                user.username = new_email
+                profile.email_verified = False  # reset verification
 
-        # Update phone if changed
-        if new_phone != profile.phone_number:
-            profile.phone_number = new_phone
-            profile.phone_verified = False  # mark phone as unverified
+            # Update phone if changed
+            if new_phone != profile.phone_number:
+                profile.phone_number = new_phone
+                profile.phone_verified = False  # reset verification
+
+        # Update first/last name (no password needed)
+        user.first_name = request.POST.get("first_name")
+        user.last_name = request.POST.get("last_name")
 
         # Save changes
         user.save()

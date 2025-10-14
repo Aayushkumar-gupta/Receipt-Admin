@@ -6,10 +6,6 @@ class ReceiptForm(forms.ModelForm):
         model = Receipts
         # include seller fields and buyer_email so they are saved
         fields = [
-            'seller_name',
-            'seller_address',
-            'seller_phone_number',
-            'seller_email',
             'buyer_name',
             'buyer_address',
             'buyer_phone_number',

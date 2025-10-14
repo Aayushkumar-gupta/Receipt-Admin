@@ -70,36 +70,11 @@
 </style>
 
 <div class="form-wrapper">
-    <form method="POST" action="{% url 'create_receipt' %}" id = "js-createreceipt-form" onsubmit="prepareItems()">
+    <form method="POST" action="{% url 'create_receipt' %}" id="js-createreceipt-form" onsubmit="prepareItems()">
         {% csrf_token %}
 
-        <!-- Seller Information -->
-        <div class="form-title">👤 Seller Information</div>
-        <div class="row g-3">
-            <div class="col-md-6 form-floating">
-                <input type="text" class="form-control" name="seller_name" placeholder="Seller Name" 
-                    value="{{ request.user.first_name }} {{ request.user.last_name }}" required>
-                <label>Seller's Name</label>
-            </div>
-            <div class="col-md-6 form-floating">
-                <input type="text" class="form-control" name="seller_phone_number" id="js-seller_phone_number" placeholder="Seller Phone"
-                    value="{{ request.user.userprofile.phone_number }}" required>
-                <label>Seller's Phone</label>
-            </div>
-            <div class="col-md-6 form-floating">
-                <input type="email" class="form-control" name="seller_email" id="js-seller_email" placeholder="Seller Email"
-                    value="{{ request.user.email }}" required>
-                <label>Seller's Email</label>
-            </div>
-            <div class="col-md-6 form-floating">
-                <input type="text" class="form-control" name="seller_address" placeholder="Seller Address"
-                    value="{% if request.user.userprofile.address %}{{ request.user.userprofile.address }}{% endif %}" required>
-                <label>Seller's Address</label>
-            </div>
-        </div>
-        
         <!-- Buyer Information -->
-        <div class="form-title section-divider">🧾 Buyer Information</div>
+        <div class="form-title">🧾 Buyer Information</div>
         <div class="row g-3">
             <div class="col-md-6 form-floating">
                 <input type="text" class="form-control" name="buyer_name" placeholder="Buyer Name" required>
@@ -248,25 +223,9 @@ const form = document.getElementById('js-createreceipt-form');
 form.addEventListener('submit', function(event){
     let isValid = true;
 
-    // Required fields
-    const requiredFields = [
-        'js-seller_name', 'js-seller_phone_number', 'js-seller_email', 'js-seller_address',
-        'js-buyer_name', 'js-buyer_phone_number', 'js-buyer_email', 'js-buyer_address',
-        'js-item', 'js-quantity', 'js-unit-price'
-    ];
-
-    requiredFields.forEach(id => {
-        const field = document.getElementById(id);
-        field.style.borderColor = '';
-        if(field.value.trim() === ''){
-            field.style.borderColor = 'red';
-            isValid = false;
-        }
-    });
-
     // Email validation
     const emailPattern = /^[^ ]+@[^ ]+\.[a-z]{2,}$/;
-    ['js-seller_email', 'js-buyer_email'].forEach(id => {
+    ['js-buyer_email'].forEach(id => {
         const emailField = document.getElementById(id);
         if(emailField.value.trim() !== '' && !emailPattern.test(emailField.value)){
             emailField.style.borderColor = 'red';
@@ -277,7 +236,7 @@ form.addEventListener('submit', function(event){
 
     // Phone validation
     const phonePattern = /^[0-9]{10,}$/;
-    ['js-seller_phone_number', 'js-buyer_phone_number'].forEach(id => {
+    ['js-buyer_phone_number'].forEach(id => {
         const phoneField = document.getElementById(id);
         if(phoneField.value.trim() !== '' && !phonePattern.test(phoneField.value)){
             phoneField.style.borderColor = 'red';
@@ -300,7 +259,6 @@ form.addEventListener('submit', function(event){
         alert("Unit Price cannot be negative");
     }
 
-    // Force recalc totals before submission
     calculateTotals();
     document.getElementById('sub_total').setAttribute("readonly", true);
     document.getElementById('total_amount').setAttribute("readonly", true);

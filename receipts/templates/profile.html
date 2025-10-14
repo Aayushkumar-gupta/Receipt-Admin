@@ -104,7 +104,7 @@ body {
     border-radius: 20px;
     padding: 25px;
     margin-top: 30px;
-    text-align: center;
+    text-align: left;
     box-shadow: 0 5px 20px rgba(0, 119, 182, 0.1);
 }
 
@@ -117,14 +117,59 @@ body {
 .verify-status {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-start;
+    gap: 12px;
+    font-size: 1rem;
+    margin-bottom: 10px;
+}
+.verify-status span {
+    font-weight: 500;
 }
 .verify-status i {
-    font-size: 20px;
+    font-size: 18px;
 }
 .verified { color: #00C49A; }
 .not-verified { color: #EF4444; }
 
+.verify-btn {
+    background: transparent;
+    color: #0077B6;
+    border: 1px solid #0077B6;
+    border-radius: 8px;
+    padding: 4px 10px;
+    font-weight: 600;
+    transition: 0.3s;
+    font-size: 0.9rem;
+}
+.verify-btn:hover {
+    background-color: #0077B6;
+    color: white;
+}
+
+/* OTP Input */
+.otp-form {
+    margin-top: 10px;
+    display: none;
+}
+.otp-input {
+    width: 120px;
+    text-align: center;
+    border-radius: 8px;
+    border: 1px solid #CBD5E1;
+    padding: 5px;
+    margin-right: 10px;
+}
+.otp-submit {
+    background-color: #00C49A;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 5px 12px;
+    font-weight: 600;
+}
+.otp-submit:hover {
+    background-color: #009e84;
+}
 </style>
 
 <div class="profile-card">
@@ -153,18 +198,10 @@ body {
                 <input type="text" name="phone_number" class="form-control" value="{{ user.userprofile.phone_number }}" readonly>
                 <label>Phone Number</label>
             </div>
-        </div>
-
-        <div class="info-card">
-            <h4>Address</h4>
             <div class="form-floating mb-3">
-                <input type="text" name="address" class="form-control" value="{{ user.userprofile.address|default:'' }}" readonly>
+                <input type="text" name="address" class="form-control" value="{{ user.userprofile.address }}" readonly>
                 <label>Address</label>
-            </div>  
-        </div>
-        
-        <div class="info-card">
-            <h4>Security</h4>
+            </div>
             <div class="form-floating mb-3">
                 <input type="password" name="current_password" class="form-control" placeholder="Enter password" readonly>
                 <label>Current Password (if changing Email/Phone Number)</label>
@@ -176,23 +213,40 @@ body {
     <!-- Verification Section -->
     <div class="verify-card">
         <h4>Verification Status</h4>
+
+        <!-- Email Verification -->
         <div class="verify-status">
-            <span>Email: 
-                {% if user.userprofile.email_verified %}
-                    <span class="verified"><i class="fa-solid fa-circle-check"></i> Verified</span>
-                {% else %}
-                    <span class="not-verified"><i class="fa-solid fa-circle-xmark"></i> Not Verified</span>
-                {% endif %}
-            </span>
+            <span>Email:</span>
+            {% if user.userprofile.email_verified %}
+                <span class="verified"><i class="fa-solid fa-circle-check"></i> Verified</span>
+            {% else %}
+                <form method="POST" action="{% url 'resend_verification_email' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="verify-btn"><i class="fa-solid fa-envelope"></i> Verify Email</button>
+                </form>
+            {% endif %}
         </div>
-        <div class="verify-status mt-2">
-            <span>Phone:
-                {% if user.userprofile.phone_verified %}
-                    <span class="verified"><i class="fa-solid fa-circle-check"></i> Verified</span>
-                {% else %}
-                    <span class="not-verified"><i class="fa-solid fa-circle-xmark"></i> Not Verified</span>
-                {% endif %}
-            </span>
+
+        <!-- Phone Verification -->
+        <div class="verify-status">
+            <span>Phone:</span>
+            {% if user.userprofile.phone_verified %}
+                <span class="verified"><i class="fa-solid fa-circle-check"></i> Verified</span>
+            {% else %}
+                <div>
+                    <form method="POST" action="{% url 'resend_phone_otp' %}" id="otpRequestForm">
+                        {% csrf_token %}
+                        <button type="button" class="verify-btn" id="requestOtpBtn"><i class="fa-solid fa-mobile-screen"></i> Verify Phone</button>
+                    </form>
+
+                    <!-- OTP Input Field -->
+                    <form method="POST" action="{% url 'verify_phone_otp' %}" class="otp-form" id="otpForm">
+                        {% csrf_token %}
+                        <input type="text" name="otp" maxlength="6" placeholder="Enter OTP" class="otp-input" required>
+                        <button type="submit" class="otp-submit">Submit</button>
+                    </form>
+                </div>
+            {% endif %}
         </div>
     </div>
 </div>
@@ -201,11 +255,31 @@ body {
 const editBtn = document.getElementById('editBtn');
 const saveBtn = document.getElementById('saveBtn');
 const inputs = document.querySelectorAll('#profileForm input');
+const requestOtpBtn = document.getElementById('requestOtpBtn');
+const otpForm = document.getElementById('otpForm');
 
+// Enable editing when "Edit Profile" clicked
 editBtn.addEventListener('click', () => {
-    inputs.forEach(i => i.removeAttribute('readonly'));
+    inputs.forEach(i => {
+        // Remove readonly only if it exists
+        if (i.hasAttribute('readonly')) {
+            i.removeAttribute('readonly');
+        }
+    });
     saveBtn.style.display = 'inline-block';
     editBtn.style.display = 'none';
 });
+
+if (requestOtpBtn) {
+    requestOtpBtn.addEventListener('click', () => {
+        fetch("{% url 'resend_phone_otp' %}", {
+            method: "POST",
+            headers: { "X-CSRFToken": "{{ csrf_token }}" }
+        }).then(() => {
+            otpForm.style.display = 'block';
+            requestOtpBtn.style.display = 'none';
+        });
+    });
+}
 </script>
 {% endblock %}

@@ -7,12 +7,11 @@
 
 <style>
     body {
-        background-color: #F8FAFC; /* solid light neutral background */
+        background-color: #F8FAFC;
         font-family: 'Segoe UI', Tahoma, sans-serif;
-        color: #1E293B; /* charcoal for readability */
+        color: #1E293B;
     }
 
-    /* Frosted glass form container */
     .form-wrapper {
         max-width: 960px;
         margin: 50px auto;
@@ -26,7 +25,7 @@
     .form-title {
         font-size: 1.5rem;
         font-weight: 600;
-        color: #0077B6; /* clear trust-blue */
+        color: #0077B6;
         margin-bottom: 25px;
         border-bottom: 2px solid #E2E8F0;
         padding-bottom: 8px;
@@ -44,7 +43,7 @@
     }
 
     .btn-primary {
-        background-color: #00C49A; /* teal accent */
+        background-color: #00C49A;
         border-color: #00C49A;
         font-weight: 600;
         padding: 12px 24px;
@@ -69,12 +68,11 @@
     }
 
     .remove-btn {
-        color: #EF4444; /* red accent for remove */
+        color: #EF4444;
         cursor: pointer;
         font-size: 1.2rem;
     }
 
-    /* Items container spacing */
     .item-row + .item-row {
         margin-top: 10px;
     }
@@ -84,29 +82,8 @@
     <form method="POST" action="{% url 'staging_edit' receipt.id %}" id="js-editreceipt-form" onsubmit="prepareItems()">
         {% csrf_token %}
 
-        <!-- Seller Information -->
-        <div class="form-title">👤 Seller Information</div>
-        <div class="row g-3">
-            <div class="col-md-6 form-floating">
-                <input type="text" class="form-control" id="js-seller_name" name="seller_name" value="{{ receipt.seller_name }}" required>
-                <label>Seller's Name</label>
-            </div>
-            <div class="col-md-6 form-floating">
-                <input type="text" class="form-control" id="js-seller_phone_number" name="seller_phone_number" value="{{ receipt.seller_phone_number }}" required>
-                <label>Seller's Phone</label>
-            </div>
-            <div class="col-md-6 form-floating">
-                <input type="email" class="form-control" id="js-seller_email" name="seller_email" value="{{ receipt.seller_email }}" required>
-                <label>Seller's Email</label>
-            </div>
-            <div class="col-md-6 form-floating">
-                <input type="text" class="form-control" id="js-seller_address" name="seller_address" value="{{ receipt.seller_address }}" required>
-                <label>Seller's Address</label>
-            </div>
-        </div>
-
         <!-- Buyer Information -->
-        <div class="form-title section-divider">🧾 Buyer Information</div>
+        <div class="form-title">🧾 Buyer Information</div>
         <div class="row g-3">
             <div class="col-md-6 form-floating">
                 <input type="text" class="form-control" id="js-buyer_name" name="buyer_name" value="{{ receipt.buyer_name }}" required>
@@ -185,11 +162,11 @@ function addItem(item = {description: "", quantity: 1, unit_price: 0}) {
             <label>Description</label>
         </div>
         <div class="col-md-2 form-floating">
-            <input type="number" min="1" step="1" class="form-control quantity" id="js-quantity" placeholder="Quantity" value="${item.quantity}" required>
+            <input type="number" min="1" step="1" class="form-control quantity" placeholder="Quantity" value="${item.quantity}" required>
             <label>Qty</label>
         </div>
         <div class="col-md-2 form-floating">
-            <input type="number" min="0" step="0.01" class="form-control unit_price" id="js-unit-price" placeholder="Unit Price" value="${item.unit_price}" required>
+            <input type="number" min="0" step="0.01" class="form-control unit_price" placeholder="Unit Price" value="${item.unit_price}" required>
             <label>Unit Price</label>
         </div>
         <div class="col-md-2 form-floating">
@@ -224,7 +201,6 @@ function prepareItems() {
     calculateTotals();
 }
 
-// Load existing items
 document.addEventListener("DOMContentLoaded", () => {
     const existingItems = JSON.parse(document.getElementById("items-data").textContent);
     existingItems.forEach(item => addItem(item));
@@ -239,25 +215,21 @@ form.addEventListener('submit', function(event){
     const emailPattern = /^[^ ]+@[^ ]+\.[a-z]{2,}$/;
     const phonePattern = /^[0-9]{10,}$/;
 
-    // Validate seller & buyer emails
-    ['js-seller_email', 'js-buyer_email'].forEach(id => {
-        const field = document.getElementById(id);
-        if(field.value.trim() !== '' && !emailPattern.test(field.value)){
-            field.style.borderColor = 'red';
-            alert("Invalid Email: " + field.value);
-            isValid = false;
-        } else field.style.borderColor = '';
-    });
+    // Validate buyer emails
+    const buyerEmailField = document.getElementById('js-buyer_email');
+    if(buyerEmailField.value.trim() !== '' && !emailPattern.test(buyerEmailField.value)){
+        buyerEmailField.style.borderColor = 'red';
+        alert("Invalid Email: " + buyerEmailField.value);
+        isValid = false;
+    } else buyerEmailField.style.borderColor = '';
 
-    // Validate phone numbers
-    ['js-seller_phone_number', 'js-buyer_phone_number'].forEach(id => {
-        const field = document.getElementById(id);
-        if(field.value.trim() !== '' && !phonePattern.test(field.value)){
-            field.style.borderColor = 'red';
-            alert("Invalid Phone Number: " + field.value);
-            isValid = false;
-        } else field.style.borderColor = '';
-    });
+    // Validate buyer phone
+    const buyerPhoneField = document.getElementById('js-buyer_phone_number');
+    if(buyerPhoneField.value.trim() !== '' && !phonePattern.test(buyerPhoneField.value)){
+        buyerPhoneField.style.borderColor = 'red';
+        alert("Invalid Phone Number: " + buyerPhoneField.value);
+        isValid = false;
+    } else buyerPhoneField.style.borderColor = '';
 
     // Validate quantities & prices
     document.querySelectorAll('.quantity').forEach(qty => {
