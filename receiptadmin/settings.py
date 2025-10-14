@@ -52,7 +52,7 @@ MIDDLEWARE = [
     'django.middleware.csrf.CsrfViewMiddleware',
 ]
 
-ROOT_URLCONF = 'clearSlip.urls'
+ROOT_URLCONF = 'ReceiptAdmin.urls'
 
 TEMPLATES = [
     {
@@ -70,7 +70,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'clearSlip.wsgi.application'
+WSGI_APPLICATION = 'ReceiptAdmin.wsgi.application'
 
 
 # Database
