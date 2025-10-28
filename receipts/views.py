@@ -283,3 +283,11 @@ def update_profile(request):
         return redirect("profile")
 
     return redirect("profile")
+
+
+def refund(request, pk):
+    receipt = Receipts.objects.get(id=pk)
+    receipt.refund = True
+    receipt.save()
+    messages.info(request, "Refund Granted!")
+    return redirect("my_receipts")

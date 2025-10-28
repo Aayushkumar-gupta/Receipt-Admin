@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from decimal import Decimal
 
 class Receipts(models.Model):
+    refund = models.BooleanField(default=False)
     is_staged = models.BooleanField(default=False)
     user_id = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
     invoice_number = models.CharField(max_length=20, blank=True, unique=True)

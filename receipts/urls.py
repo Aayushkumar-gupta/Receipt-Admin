@@ -15,4 +15,5 @@ urlpatterns = [
     path("staging-delete/<int:pk>/", views.staging_delete, name="staging_delete"),
     path('profile/', views.profile, name='profile'),
     path('dashboard/', views.dashboard, name='dashboard'),
+    path("refund/<int:pk>/", views.refund, name = 'refund'),
 ]

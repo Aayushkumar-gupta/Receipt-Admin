@@ -60,7 +60,7 @@
     }
 
     .btn-secondary {
-        background-color: #64748B; /* slate gray */
+        background-color: #64748B; 
         border-color: #64748B;
         transition: background 0.3s ease;
     }
@@ -68,6 +68,16 @@
     .btn-secondary:hover {
         background-color: #475569;
         border-color: #475569;
+    }
+    .btn-refund {
+        background-color: #EF4444; 
+        border-color: #EF4444;
+        color: #fff;
+    }
+
+    .btn-refund:hover {
+        background-color: #c53030;
+        border-color: #c53030;
     }
 </style>
 
@@ -82,6 +92,7 @@
                     <th>Invoice #</th>
                     <th>Date</th>
                     <th>Total</th>
+                    <th>Status</th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -91,8 +102,14 @@
                     <td>{{ receipt.invoice_number }}</td>
                     <td>{{ receipt.date }}</td>
                     <td>${{ receipt.total_amount }}</td>
+                    {% if receipt.refund == True %}
+                        <td><span style="color: #EF4444;">Refunded</span></td>
+                    {% else %}
+                        <td><span style="color: #00C49A;">Final</span></td>
+                    {% endif %}
                     <td>
                         <a href="{% url 'view_receipt_pdf' receipt.id %}" class="btn btn-sm btn-primary">View</a>
+                        <a href="{% url 'refund' receipt.id %}" class="btn btn-sm btn-refund">Refund</a>
                         <a href="{% url 'receipt_pdf' receipt.id %}" class="btn btn-sm btn-secondary">Download PDF</a>
                     </td>
                 </tr>
