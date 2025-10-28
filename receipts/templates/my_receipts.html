@@ -109,7 +109,7 @@
                     {% endif %}
                     <td>
                         <a href="{% url 'view_receipt_pdf' receipt.id %}" class="btn btn-sm btn-primary">View</a>
-                        <a href="{% url 'refund' receipt.id %}" class="btn btn-sm btn-refund">Refund</a>
+                        <a href="{% url 'refund' receipt.id %}" class="btn btn-sm btn-refund" onclick="return confirm('Are you sure you want to Refund the receipt? NOTE: You won\'t be able to edit it afterwards.');">Refund</a>
                         <a href="{% url 'receipt_pdf' receipt.id %}" class="btn btn-sm btn-secondary">Download PDF</a>
                     </td>
                 </tr>

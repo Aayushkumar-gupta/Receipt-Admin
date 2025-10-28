@@ -35,7 +35,8 @@ def dashboard(request):
     receipts = Receipts.objects.filter(user_id=user)
 
     total_receipts = receipts.count()
-    total_revenue = sum(r.sub_total for r in receipts)
+    total_revenue = sum(r.sub_total for r in receipts 
+    if not r.refund and r.is_staged)
     pending_receipts = receipts.filter(is_staged=False).count()
     recent_receipts = receipts.order_by('-date')[:5]
 

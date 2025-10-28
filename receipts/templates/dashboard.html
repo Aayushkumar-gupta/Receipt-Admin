@@ -189,10 +189,12 @@ h1, h2 {
                 <td>{{ receipt.invoice_number }}</td>
                 <td>${{ receipt.total_amount }}</td>
                 <td>
-                    {% if receipt.is_staged %}
-                        <span style="color: #00C49A; font-weight: 300;">Staged</span>
-                    {% else %}
-                        <span style="color: #EF4444; font-weight: 300;">Unstaged</span>
+                    {% if receipt.is_staged and not receipt.refund %}
+                        <span style="color: #00C49A; font-weight: 300;">Final</span>
+                    {% elif receipt.is_staged and receipt.refund%}
+                        <span style="color: #EF4444; font-weight: 300;">Refunded</span>
+                    {% elif not receipt.is_staged and not receipt.refund%}
+                        <span style="color: #E0A800; font-weight: 300;">Unstaged</span>
                     {% endif %}
                 </td>
             </tr>
