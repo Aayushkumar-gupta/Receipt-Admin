@@ -7,27 +7,26 @@
 
 <style>
     body {
-        background-color: #F8FAFC; /* solid light neutral background */
+        background-color: #F8FAFC;
         font-family: 'Segoe UI', Tahoma, sans-serif;
         color: #1E293B;
     }
 
-    /* Frosted glass wrapper */
     .receipt-wrapper {
         max-width: 960px;
         margin: 50px auto;
         background: rgba(255, 255, 255, 0.85);
         padding: 40px;
         border-radius: 20px;
-        box-shadow: 0 8px 25px rgba(0, 119, 182, 0.15); /* soft blue shadow */
+        box-shadow: 0 8px 25px rgba(0, 119, 182, 0.15);
         border: 1px solid #E2E8F0;
     }
 
     .receipt-title {
         font-size: 1.5rem;
         font-weight: 600;
-        color: #0077B6; /* clear blue */
-        margin-bottom: 25px;
+        color: #0077B6;
+        margin-bottom: 0;
         border-bottom: 2px solid #E2E8F0;
         padding-bottom: 8px;
     }
@@ -48,7 +47,7 @@
     }
 
     .btn-primary {
-        background-color: #00C49A; /* teal accent */
+        background-color: #00C49A;
         border-color: #00C49A;
         color: #fff;
     }
@@ -59,7 +58,7 @@
     }
 
     .btn-secondary {
-        background-color: #0077B6; /* clear blue */
+        background-color: #0077B6;
         border-color: #0077B6;
         color: #fff;
     }
@@ -80,7 +79,6 @@
         border-color: #c53030;
     }
 
-    /* Center message */
     .no-receipts {
         text-align: center;
         margin-top: 40px;
@@ -90,7 +88,15 @@
 </style>
 
 <div class="receipt-wrapper">
-    <div class="receipt-title">📑 Unstaged Receipts</div>
+
+    <!-- Title and Search Bar -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div class="receipt-title">📑 Unstaged Receipts</div>
+        <form method="GET" action="" class="d-flex">
+            <input type="text" name="search" class="form-control form-control-sm" placeholder="Search receipts..." value="{{ request.GET.search }}">
+            <button type="submit" class="btn btn-sm btn-primary ms-2">Search</button>
+        </form>
+    </div>
 
     {% if receipts %}
     <div class="table-responsive">
@@ -113,20 +119,19 @@
                         <a href="{% url 'view_receipt_pdf' receipt.id %}" class="btn btn-sm btn-primary">View</a>
                         <a href="{% url 'staging_edit' receipt.id %}" class="btn btn-sm btn-primary">Edit</a>
                         <form method="post" action="{% url 'stage' receipt.id %}" style="display:inline;">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-sm btn-secondary"
-                            onclick="return confirm('Are you sure you want to Confirm the receipt? NOTE: You won\'t be able to edit it afterwards.');">
-                            Confirm
-                        </button>
-                    </form>
-                    
-                    <form method="post" action="{% url 'staging_delete' receipt.id %}" style="display:inline;">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-sm btn-delete"
-                            onclick="return confirm('Are you sure you want to delete this receipt?');">
-                            Delete
-                        </button>
-                    </form>
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-secondary"
+                                onclick="return confirm('Are you sure you want to Confirm the receipt? NOTE: You won\'t be able to edit it afterwards.');">
+                                Confirm
+                            </button>
+                        </form>
+                        <form method="post" action="{% url 'staging_delete' receipt.id %}" style="display:inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-delete"
+                                onclick="return confirm('Are you sure you want to delete this receipt?');">
+                                Delete
+                            </button>
+                        </form>
                     </td>
                 </tr>
                 {% endfor %}

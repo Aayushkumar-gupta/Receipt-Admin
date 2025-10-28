@@ -52,7 +52,11 @@ def dashboard(request):
 
 @login_required
 def my_receipts(request):
-    receipts = Receipts.objects.filter(is_staged=True, user_id=request.user).order_by('-date')
+    search_query = request.GET.get('search', '')
+    receipts = Receipts.objects.filter(is_staged=True, user_id=request.user)
+    if search_query:
+        receipts = receipts.filter(invoice_number__icontains=search_query)
+    receipts = receipts.order_by('-date')
     return render(request, 'my_receipts.html', {'receipts': receipts})
 
 def about(request):
@@ -67,7 +71,11 @@ def test(request):
 
 @login_required
 def staging_area(request):
-    receipts = Receipts.objects.filter(is_staged=False, user_id=request.user).order_by('-date')
+    search_query = request.GET.get('search', '')
+    receipts = Receipts.objects.filter(is_staged=False, user_id=request.user)
+    if search_query:
+        receipts = receipts.filter(invoice_number__icontains=search_query)
+    receipts = receipts.order_by('-date')
     return render(request, 'staging_area.html', {'receipts': receipts})
 
 @login_required

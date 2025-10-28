@@ -27,7 +27,7 @@
         font-size: 1.5rem;
         font-weight: 600;
         color: #0077B6; /* trust-blue accent */
-        margin-bottom: 25px;
+        margin-bottom: 0; /* handled by flex container */
         border-bottom: 2px solid #E2E8F0;
         padding-bottom: 8px;
     }
@@ -69,6 +69,7 @@
         background-color: #475569;
         border-color: #475569;
     }
+
     .btn-refund {
         background-color: #EF4444; 
         border-color: #EF4444;
@@ -82,7 +83,15 @@
 </style>
 
 <div class="receipt-wrapper">
-    <div class="receipt-title">📑 My Receipts</div>
+
+    <!-- Title and Search Bar -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div class="receipt-title">📑 My Receipts</div>
+        <form method="GET" action="" class="d-flex">
+            <input type="text" name="search" class="form-control form-control-sm" placeholder="Search receipts..." value="{{ request.GET.search }}">
+            <button type="submit" class="btn btn-sm btn-primary ms-2">Search</button>
+        </form>
+    </div>
 
     {% if receipts %}
     <div class="table-responsive">
@@ -102,7 +111,7 @@
                     <td>{{ receipt.invoice_number }}</td>
                     <td>{{ receipt.date }}</td>
                     <td>${{ receipt.total_amount }}</td>
-                    {% if receipt.refund == True %}
+                    {% if receipt.refund %}
                         <td><span style="color: #EF4444;">Refunded</span></td>
                     {% else %}
                         <td><span style="color: #00C49A;">Final</span></td>
