@@ -1,8 +1,12 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Home - Receipt Admin{% endblock %}
 
 {% block content %}
+<!-- Include Swiper CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.css" />
+
 <style>
 /* General Styling */
 body {
@@ -15,8 +19,8 @@ body {
 .hero {
     text-align: center;
     padding: 100px 20px;
-    background: #FFFFFF; /* Removed gradient */
-    border-radius: 25px; /* Added rounded corners */
+    background: #FFFFFF;
+    border-radius: 25px;
     max-width: 1000px;
     margin: 80px auto 60px;
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
@@ -69,7 +73,7 @@ body {
     text-align: center;
     box-shadow: 0 6px 18px rgba(0, 119, 182, 0.15);
     transition: transform 0.3s ease;
-    height: 100%; /* Equal height */
+    height: 100%;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -89,7 +93,6 @@ body {
     color: #475569;
 }
 
-/* Ensure all cards are same height */
 .features .row {
     display: flex;
     flex-wrap: wrap;
@@ -105,10 +108,66 @@ body {
     padding: 60px 20px;
 }
 
-.demo-section img {
-    max-width: 90%;
+/* Swiper Carousel Enhancements */
+.demo-slider {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.demo-slider .swiper {
+    width: 100%;
+    padding-top: 50px;
+    padding-bottom: 50px;
+}
+
+.demo-slider .swiper-slide {
+    width: 400px;
+    height: auto;
+    opacity: 0.5;
+    transition: transform 0.5s ease, opacity 0.5s ease;
+    text-align: center;
+}
+
+.demo-slider .swiper-slide-active {
+    transform: scale(1.25);
+    opacity: 1;
+}
+
+.demo-slider .swiper-slide img {
+    width: 100%;
     border-radius: 15px;
-    box-shadow: 0 8px 25px rgba(0, 119, 182, 0.15);
+    box-shadow: 0 6px 18px rgba(0, 119, 182, 0.25);
+}
+
+/* Caption below image */
+.slide-caption {
+    margin-top: 10px;
+    font-weight: 600;
+    color: #0077B6;
+    font-size: 1rem;
+}
+
+/* Navigation Buttons */
+.swiper-button-next,
+.swiper-button-prev {
+    color: #0077B6;
+    transition: transform 0.2s ease;
+}
+
+.swiper-button-next:hover,
+.swiper-button-prev:hover {
+    transform: scale(1.1);
+}
+
+/* Pagination Dots */
+.swiper-pagination-bullet {
+    background: #00C49A;
+    opacity: 0.7;
+}
+
+.swiper-pagination-bullet-active {
+    background: #0077B6;
+    opacity: 1;
 }
 
 /* Why Us Section */
@@ -173,9 +232,39 @@ body {
 </div>
 
 <!-- Demo / Screenshot Section -->
-<div class="demo-section container">
-    <h2>See Receipt Admin in Action</h2>
-    <img src="" alt="Dashboard Screenshot">
+<div class="demo-section container text-center">
+  <h2>See Receipt Admin in Action</h2>
+
+  <!-- Swiper Carousel -->
+  <div class="demo-slider container mt-4 position-relative">
+    <div class="swiper mySwiper">
+      <div class="swiper-wrapper">
+        <div class="swiper-slide">
+          <img src="{% static 'receipts/Dashboard.png' %}" alt="Dashboard">
+          <div class="slide-caption">Dashboard Overview</div>
+        </div>
+        <div class="swiper-slide">
+          <img src="{% static 'receipts/Create.png' %}" alt="Create">
+          <div class="slide-caption">Create Receipt Page</div>
+        </div>
+        <div class="swiper-slide">
+          <img src="{% static 'receipts/Stage.png' %}" alt="Stage">
+          <div class="slide-caption">Staging Area</div>
+        </div>
+        <div class="swiper-slide">
+          <img src="{% static 'receipts/Receipts.png' %}" alt="Receipts">
+          <div class="slide-caption">All Receipts Page</div>
+        </div>
+      </div>
+
+      <!-- Navigation buttons -->
+      <div class="swiper-button-next"></div>
+      <div class="swiper-button-prev"></div>
+
+      <!-- Pagination dots -->
+      <div class="swiper-pagination"></div>
+    </div>
+  </div>
 </div>
 
 <!-- Why Us Section -->
@@ -183,4 +272,36 @@ body {
     <h2>Why Us?</h2>
     <p>We focus on simplicity, speed, and security. Receipt Admin helps you save time, reduce errors, and stay organized without any learning curve.</p>
 </div>
+
+<!-- Include Swiper JS -->
+<script src="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.js"></script>
+<script>
+  var swiper = new Swiper(".mySwiper", {
+    effect: 'coverflow',
+    grabCursor: true,
+    centeredSlides: true,
+    slidesPerView: 'auto',
+    loop: false, 
+    spaceBetween: 40,
+    coverflowEffect: {
+      rotate: 0,
+      stretch: 0,
+      depth: 150,
+      modifier: 2,
+      slideShadows: false
+    },
+    autoplay: {
+      delay: 2500,
+      disableOnInteraction: false,
+    },
+    pagination: {
+      el: ".swiper-pagination",
+      clickable: true,
+    },
+    navigation: {
+      nextEl: ".swiper-button-next",
+      prevEl: ".swiper-button-prev",
+    },
+  });
+</script>
 {% endblock %}
