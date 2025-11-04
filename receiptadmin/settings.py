@@ -23,9 +23,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-uo!(wl1#b!x4&r_!$^oq4130^-6%svg_-(as$(3xg=dmmnk)q$'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['receiptadmin.com']
 
 
 # Application definition
@@ -143,19 +143,23 @@ EMAIL_HOST_USER = 'your_email@gmail.com'
 EMAIL_HOST_PASSWORD = 'your_app_password'
 '''
 
-"""
-LOGIN_REDIRECT_URL = '/dashboard/'
-LOGOUT_REDIRECT_URL = '/'
-
-SESSION_COOKIE_AGE = 60 * 60 * 24 * 7  # 1 week (in seconds)
-SESSION_EXPIRE_AT_BROWSER_CLOSE = False
-
-SESSION_COOKIE_SECURE = True      # Only send cookies over HTTPS
-CSRF_COOKIE_SECURE = True         # CSRF protection also uses secure cookies
-
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
 SESSION_COOKIE_HTTPONLY = True
-CSRF_COOKIE_HTTPONLY = True
-
 SESSION_COOKIE_SAMESITE = 'Lax'
 CSRF_COOKIE_SAMESITE = 'Lax'
-"""
+
+
+SECURE_HSTS_SECONDS = 31536000  # 1 year in seconds
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+SECURE_HSTS_PRELOAD = True
+
+SECURE_SSL_REDIRECT = True
+
+
+import os
+
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
+
+if not SECRET_KEY:
+    raise ValueError("The SECRET_KEY environment variable is not set!")
