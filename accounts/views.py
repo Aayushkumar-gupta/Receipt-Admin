@@ -192,7 +192,7 @@ def test_email(request):
             'Test Email',
             'This is a test message from Render.',
             settings.EMAIL_HOST_USER,
-            ['your-email@gmail.com'],  # replace with a real Gmail to receive
+            ['support@receiptadmin.com'],  
             fail_silently=False
         )
         return HttpResponse("Email sent successfully!")
