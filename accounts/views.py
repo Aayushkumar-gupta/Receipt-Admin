@@ -184,6 +184,7 @@ def resend_phone_otp(request):
 from django.core.mail import send_mail
 from django.http import HttpResponse
 from django.conf import settings
+import traceback
 
 def test_email(request):
     try:
@@ -191,9 +192,10 @@ def test_email(request):
             'Test Email',
             'This is a test message from Render.',
             settings.EMAIL_HOST_USER,
-            ['recipient@example.com'],
+            ['your-email@gmail.com'],  # replace with a real Gmail to receive
             fail_silently=False
         )
         return HttpResponse("Email sent successfully!")
     except Exception as e:
-        return HttpResponse(f"Error: {e}")
+        # Show the full traceback in the browser
+        return HttpResponse(f"Error sending email: {e}<br><pre>{traceback.format_exc()}</pre>")
