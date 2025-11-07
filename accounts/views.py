@@ -14,6 +14,8 @@ from .utils import send_verification_email, send_otp_sms
 import random
 import logging
 logger = logging.getLogger(__name__)
+import threading
+
 
 def sign_up(request):
     if request.method == 'POST':
@@ -24,28 +26,27 @@ def sign_up(request):
         password = request.POST.get('password')
         confirm_password = request.POST.get('confirm_password')
 
-        # Basic validations
+        # Validations
         if User.objects.filter(email=email).exists():
             messages.error(request, "User already exists.")
             return render(request, 'sign_up.html')
-        elif password != confirm_password:
+        if password != confirm_password:
             messages.error(request, "Passwords do not match.")
             return render(request, 'sign_up.html')
-        elif not first_name or not last_name:
+        if not first_name or not last_name:
             messages.error(request, "First name and last name are required.")
             return render(request, 'sign_up.html')
 
-        # Create inactive user (cannot login until email verified)
+        # Create user
         user = User.objects.create_user(
             username=email,
             first_name=first_name,
             last_name=last_name,
             email=email,
             password=password,
-            is_active=True,
+            is_active=True,  # Can login only after phone+email verification
         )
 
-        # Create profile with email_verified and phone_verified set to False
         profile = UserProfile.objects.create(
             user=user,
             phone_number=phone_number,
@@ -53,18 +54,17 @@ def sign_up(request):
             phone_verified=False
         )
 
-        # Step 1: Generate and send phone OTP
-        otp = random.randint(100000, 999999)  # 6-digit OTP
+        # Step 1: Phone OTP
+        otp = random.randint(100000, 999999)
         request.session['phone_otp'] = otp
         request.session['phone_user_id'] = user.id
-        send_otp_sms(phone_number, otp)  # send OTP via SMS
+        send_otp_sms(phone_number, otp)
 
-        # Step 2: Send email verification
-        send_verification_email(user, request)
+        # Step 2: Email verification (async)
+        threading.Thread(target=send_email_async, args=(user, request)).start()
 
-        # Notify user to verify email and phone
-        messages.success(request, "Account created! Please complete Email and Phone Verification.")
-        return redirect('verify_account')  # page where user enters OTP
+        messages.success(request, "Account created! Complete Email and Phone verification.")
+        return redirect('verify_account')
 
     return render(request, 'sign_up.html')
 
@@ -110,11 +110,10 @@ def verify_email(request, uidb64, token):
     if user and default_token_generator.check_token(user, token):
         profile.email_verified = True
         profile.save()
+        messages.success(request, "Email verified successfully!")
         if request.user.is_authenticated and request.user.id == user.id:
-            messages.success(request, "Email Verified!")
             return redirect('profile')
         else:
-            messages.success(request, "Email verified! You'r all set.")
             return redirect('login')
     else:
         messages.error(request, "Invalid or expired verification link.")
@@ -149,6 +148,12 @@ def verify_account(request):
 
     return render(request, 'verify_account.html')
 
+def send_email_async(user, request):
+    try:
+        send_verification_email(user, request)
+    except Exception as e:
+        print("Failed to send verification email:", e)
+
 @login_required
 def resend_verification_email(request):
     if request.method == "POST":
@@ -158,9 +163,8 @@ def resend_verification_email(request):
         if profile.email_verified:
             messages.info(request, "Your email is already verified.")
         else:
-            # Send a new verification email
-            send_verification_email(user, request)
-            messages.success(request, "Verification Emai sent! Check you email.")
+            threading.Thread(target=send_email_async, args=(user, request)).start()
+            messages.success(request, "Verification Email sent! Check your inbox.")
         return redirect('profile')
     
 @login_required
