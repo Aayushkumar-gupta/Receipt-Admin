@@ -12,7 +12,8 @@ def send_verification_email(user, request):
 
     subject = "Verify your Clear Slip account"
     message = f"Hello {user.first_name},\n\nPlease click the link below to verify your email:\n{verify_url}\n\nThank you!"
-    send_mail(subject, message, settings.EMAIL_HOST_USER, [user.email])
+    send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [user.email])
+
 
 def send_otp_sms(phone_number, otp):
     print(f"[DEV] OTP for {phone_number} is {otp}")
