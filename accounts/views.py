@@ -159,13 +159,14 @@ def resend_verification_email(request):
     if request.method == 'POST':
         user = request.user
         try:
-            # Pass request along with user
-            send_verification_email(request, user)
+            send_verification_email(user, request)  # pass user first, then request
             messages.success(request, "Verification email sent successfully!")
         except Exception as e:
             messages.error(request, f"Failed to send email: {e}")
-        return redirect('profile')  # or wherever you want to redirect
+        return redirect('profile')
     return redirect('profile')
+
+
     
 @login_required
 def resend_phone_otp(request):
