@@ -156,16 +156,17 @@ def send_email_async(user, request):
 
 @login_required
 def resend_verification_email(request):
-    if request.method == "POST":
+    if request.method == 'POST':
         user = request.user
-        profile = UserProfile.objects.get(user=user)
-
-        if profile.email_verified:
-            messages.info(request, "Your email is already verified.")
-        else:
-            threading.Thread(target=send_email_async, args=(user, request)).start()
-            messages.success(request, "Verification Email sent! Check your inbox.")
-        return redirect('profile')
+        try:
+            send_verification_email(user)
+            messages.success(request, "Verification email sent successfully!")
+        except Exception as e:
+            messages.error(request, f"Failed to send email: {e}")
+        # Redirect somewhere after sending
+        return redirect('profile')  # or any URL name
+    # If GET request
+    return redirect('profile')
     
 @login_required
 def resend_phone_otp(request):
