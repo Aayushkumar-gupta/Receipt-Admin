@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'receipts',
     'accounts',
+    'sendgrid_backend',
 ]
 
 MIDDLEWARE = [
@@ -168,17 +169,24 @@ FULL_MEDIA_URL = os.environ.get('FULL_MEDIA_URL', f"{SITE_URL}/media/")
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
-# Use console backend (for testing)
-#EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+#Hybrid system (local = SMTP, Render = SendGrid API)
+if ENVIRONMENT == 'local':
+    # Local development using SMTP (works fine locally)
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+    EMAIL_HOST = 'smtp.sendgrid.net'
+    EMAIL_PORT = 587
+    EMAIL_USE_TLS = True
+    EMAIL_HOST_USER = 'apikey'
+    EMAIL_HOST_PASSWORD = os.environ.get('SENDGRID_API_KEY')
+    DEFAULT_FROM_EMAIL = 'support@receiptadmin.com'
 
-# For real email (example with Gmail)
-EMAIL_BACKEND = os.environ.get('EMAIL_BACKEND', 'django.core.mail.backends.smtp.EmailBackend')
-EMAIL_HOST = os.environ.get('EMAIL_HOST', 'smtp.sendgrid.net')
-EMAIL_PORT = int(os.environ.get('EMAIL_PORT', 587))
-EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', 'True') == 'True'
-EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')  
-EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
-DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL')
+else:
+    # use SendGrid Web API (since SMTP ports are blocked)
+    EMAIL_BACKEND = "sendgrid_backend.SendgridBackend"
+    SENDGRID_API_KEY = os.environ.get("SENDGRID_API_KEY")
+    SENDGRID_SANDBOX_MODE_IN_DEBUG = False
+    SENDGRID_ECHO_TO_STDOUT = False
+    DEFAULT_FROM_EMAIL = "support@receiptadmin.com"
 
 CSRF_TRUSTED_ORIGINS = [
     'https://receiptadmin.com',

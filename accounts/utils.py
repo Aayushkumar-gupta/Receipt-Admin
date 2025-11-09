@@ -10,7 +10,7 @@ def send_verification_email(user, request):
     token = default_token_generator.make_token(user)
     verify_url = request.build_absolute_uri(reverse('verify_email', args=[uid, token]))
 
-    subject = "Verify your Clear Slip account"
+    subject = "Verify your Receipt Admin account"
     message = f"Hello {user.first_name},\n\nPlease click the link below to verify your email:\n{verify_url}\n\nThank you!"
     send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [user.email])
 
