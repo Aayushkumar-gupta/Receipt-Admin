@@ -159,13 +159,12 @@ def resend_verification_email(request):
     if request.method == 'POST':
         user = request.user
         try:
-            send_verification_email(user)
+            # Pass request along with user
+            send_verification_email(request, user)
             messages.success(request, "Verification email sent successfully!")
         except Exception as e:
             messages.error(request, f"Failed to send email: {e}")
-        # Redirect somewhere after sending
-        return redirect('profile')  # or any URL name
-    # If GET request
+        return redirect('profile')  # or wherever you want to redirect
     return redirect('profile')
     
 @login_required
