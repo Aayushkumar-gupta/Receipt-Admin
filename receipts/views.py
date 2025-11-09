@@ -115,8 +115,8 @@ def receipt_pdf(request, pk):  # <-- add pk here
 def create_receipt(request):
     profile = request.user.userprofile
 
-    if not profile.email_verified or not profile.phone_verified:
-        messages.info(request, "You must verify your email and phone number before creating a receipt.")
+    if not profile.email_verified:
+        messages.info(request, "You must verify your email before creating a receipt.")
         return redirect("profile")
     
     if not profile.address or profile.address.strip() == "":
@@ -261,7 +261,7 @@ def update_profile(request):
             profile.address = new_address
 
         # Check if email or phone number is changing
-        sensitive_change = (new_email != user.email) or (new_phone != profile.phone_number)
+        sensitive_change = (new_email != user.email)
 
         if sensitive_change:
             # Password required for sensitive changes
@@ -275,10 +275,10 @@ def update_profile(request):
                 user.username = new_email
                 profile.email_verified = False  # reset verification
 
-            # Update phone if changed
-            if new_phone != profile.phone_number:
-                profile.phone_number = new_phone
-                profile.phone_verified = False  # reset verification
+        # Update phone if changed
+        if new_phone != profile.phone_number:
+            profile.phone_number = new_phone
+            profile.phone_verified = False  # reset verification
 
         # Update first/last name (no password needed)
         user.first_name = request.POST.get("first_name")

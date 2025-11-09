@@ -55,16 +55,16 @@ def sign_up(request):
         )
 
         # Step 1: Phone OTP
-        otp = random.randint(100000, 999999)
-        request.session['phone_otp'] = otp
-        request.session['phone_user_id'] = user.id
-        send_otp_sms(phone_number, otp)
+        #otp = random.randint(100000, 999999)
+        #request.session['phone_otp'] = otp
+        #request.session['phone_user_id'] = user.id
+        #send_otp_sms(phone_number, otp)
 
         # Step 2: Email verification (async)
         threading.Thread(target=send_email_async, args=(user, request)).start()
 
-        messages.success(request, "Account created! Complete Email and Phone verification.")
-        return redirect('verify_account')
+        messages.success(request, "Account created! Check you email inbox for verification.")
+        return redirect('login')
 
     return render(request, 'sign_up.html')
 
