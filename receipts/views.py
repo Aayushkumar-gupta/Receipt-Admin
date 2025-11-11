@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect
 from .models import Receipts
 from django.shortcuts import get_object_or_404
 from django.template.loader import get_template
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from xhtml2pdf import pisa
 from .models import Receipts, ReceiptItem
 from django.contrib.auth.decorators import login_required
@@ -65,9 +65,6 @@ def about(request):
 @login_required
 def profile(request):
     return render(request, 'profile.html')
-
-def test(request):
-    return render(request, 'test.html')
 
 @login_required
 def staging_area(request):
@@ -300,3 +297,6 @@ def refund(request, pk):
     receipt.save()
     messages.info(request, "Refund Granted!")
     return redirect("my_receipts")
+
+def test(request):
+    return JsonResponse({"status": "ok"})
