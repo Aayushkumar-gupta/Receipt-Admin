@@ -120,23 +120,28 @@ def create_receipt(request):
         messages.warning(request, "You must add your address in your profile before creating a receipt.")
         return redirect("profile")
 
-
     seller_name = f"{request.user.first_name} {request.user.last_name}"
     seller_email = request.user.email
     seller_phone = profile.phone_number
     seller_address = profile.address or "Default Address"
 
     if request.method == 'POST':
+        # Get buyer details with default fallbacks
+        buyer_name = request.POST.get('buyer_name', '').strip()
+        buyer_address = request.POST.get('buyer_address', '').strip() or "N/A"
+        buyer_phone_number = request.POST.get('buyer_phone_number', '').strip()
+        buyer_email = request.POST.get('buyer_email', '').strip() or "N/A"
+
         receipt = Receipts.objects.create(
             user_id=request.user,
             seller_name=seller_name,
             seller_address=seller_address,
             seller_phone_number=seller_phone,
             seller_email=seller_email,
-            buyer_name=request.POST.get('buyer_name'),
-            buyer_address=request.POST.get('buyer_address'),
-            buyer_phone_number=request.POST.get('buyer_phone_number'),
-            buyer_email=request.POST.get('buyer_email'),
+            buyer_name=buyer_name,
+            buyer_address=buyer_address,
+            buyer_phone_number=buyer_phone_number,
+            buyer_email=buyer_email,
             tax_rate=Decimal(request.POST.get('tax_rate') or '0')
         )
 
