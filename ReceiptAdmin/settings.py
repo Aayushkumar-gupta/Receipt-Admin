@@ -119,16 +119,7 @@ else:
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+        'NAME': 'receipts.validators.StrongPasswordValidator',
     },
 ]
 
@@ -172,14 +163,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 #Hybrid system (local = SMTP, Render = SendGrid API)
 if ENVIRONMENT == 'local':
     # Local development using SMTP (works fine locally)
-    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-    EMAIL_HOST = 'smtp.sendgrid.net'
-    EMAIL_PORT = 587
-    EMAIL_USE_TLS = True
-    EMAIL_HOST_USER = 'apikey'
-    EMAIL_HOST_PASSWORD = os.environ.get('SENDGRID_API_KEY')
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
     DEFAULT_FROM_EMAIL = 'support@receiptadmin.com'
-
 else:
     # use SendGrid Web API (since SMTP ports are blocked)
     EMAIL_BACKEND = "sendgrid_backend.SendgridBackend"

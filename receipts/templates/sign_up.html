@@ -167,11 +167,11 @@
         }
 
         // Password validation
-        const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/;
+        const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/;
         if (!passwordPattern.test(password.value)) {
             password.style.borderColor = 'red';
             isValid = false;
-            alert("The Password Format Must be Abc@123");
+            alert('Your password must be at least 8 characters long, contain at least one uppercase letter, one lowercase letter, one number, one special character, not be entirely numeric.');
         }
 
         // Confirm password match
