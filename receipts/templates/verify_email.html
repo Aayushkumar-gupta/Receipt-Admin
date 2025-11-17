@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            color: #1E293B;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            background: #ffffff;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 40px 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0, 119, 182, 0.1);
+            text-align: center;
+        }
+
+        h1 {
+            color: #0077B6;
+            font-weight: 700;
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+
+        p {
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+
+        .btn {
+            display: inline-block;
+            background-color: #0077B6;
+            color: #fff !important;
+            padding: 14px 28px;
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: bold;
+            font-size: 16px;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        .btn:hover {
+            background-color: #005f8c;
+            transform: translateY(-2px);
+        }
+
+        .footer {
+            font-size: 14px;
+            color: #64748B;
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Hi {{ user.first_name }},</h1>
+        <p>Thanks for signing up for <strong>Receipt Admin</strong>! Please verify your email to get started.</p>
+        <p><a href="{{ verify_url }}" class="btn">Verify My Email</a></p>
+        <div class="footer">
+            If you did not sign up, please ignore this email.<br>
+            &copy; {% now "Y" %} Receipt Admin Team
+        </div>
+    </div>
+</body>
+</html>
