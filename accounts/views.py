@@ -15,6 +15,9 @@ import random
 import logging
 logger = logging.getLogger(__name__)
 import threading
+from django.contrib.auth.views import PasswordResetView
+from django.urls import reverse_lazy
+from .utils import send_password_reset_email
 
 
 def sign_up(request):
@@ -185,3 +188,12 @@ def resend_phone_otp(request):
         
         return redirect('profile')
     
+class CustomPasswordResetView(PasswordResetView):
+    template_name = 'password_reset_form.html'
+    success_url = reverse_lazy('password_reset_done')
+
+    def form_valid(self, form):
+        # Send password reset email via SendGrid
+        for user in form.get_users():
+            send_password_reset_email(user, self.request)
+        return super().form_valid(form)
