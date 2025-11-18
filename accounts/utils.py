@@ -3,8 +3,9 @@ from django.contrib.auth.tokens import default_token_generator
 from django.utils.http import urlsafe_base64_encode
 from django.utils.encoding import force_bytes
 from django.conf import settings
-from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Mail
 
 
 def send_verification_email(user, request):
@@ -33,14 +34,20 @@ def send_verification_email(user, request):
     """
 
     # Create the email message
-    email = EmailMultiAlternatives(
-        subject=subject,
-        body=text_content,
+    message = Mail(
         from_email=settings.DEFAULT_FROM_EMAIL,
-        to=[user.email],
+        to_emails=user.email,
+        subject=subject,
+        html_content=html_content,
     )
-    email.attach_alternative(html_content, "text/html")
-    email.send()
+
+    # Send the email
+    try:
+        sg = SendGridAPIClient(settings.SENDGRID_API_KEY)
+        response = sg.send(message)
+        print(f"Email sent to {user.email}, status code: {response.status_code}")
+    except Exception as e:
+        print(f"Error sending verification email: {e}")
 
 
 def send_otp_sms(phone_number, otp):
