@@ -199,20 +199,5 @@
     <!-- Bootstrap JS CDN -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     {% block scripts %}{% endblock %}
-
-    <script>
-window.addEventListener("beforeunload", function (e) {
-    const url = "/accounts/auto-logout/";
-
-    if (navigator.sendBeacon) {
-        navigator.sendBeacon(url);
-    } else {
-        // synchronous fallback for Safari
-        const xhr = new XMLHttpRequest();
-        xhr.open("POST", url, false);  // synchronous
-        xhr.send(null);
-    }
-});
-</script>
 </body>
 </html>

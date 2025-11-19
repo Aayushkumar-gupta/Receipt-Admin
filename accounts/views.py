@@ -106,13 +106,6 @@ def user_logout(request):
     request.session.flush()   
     return redirect('home')
 
-@csrf_exempt
-def auto_logout(request):
-    if request.user.is_authenticated:
-        logout(request)
-        request.session.flush()  
-    return HttpResponse(status=204)
-
 def forgot_password(request):
     return render(request, 'forgot_password.html')
 

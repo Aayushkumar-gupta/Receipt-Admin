@@ -12,5 +12,4 @@ urlpatterns = [
     path("verify-phone-otp/", views.verify_account, name="verify_phone_otp"),
     path('verify-email/<uidb64>/<token>/', views.verify_email, name='verify_email'),
     path('verify-account/', views.verify_account, name='verify_account'),
-    path("auto-logout/", views.auto_logout, name="auto_logout"),
 ]
