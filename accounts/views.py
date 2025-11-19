@@ -21,6 +21,8 @@ from .utils import send_password_reset_email
 from django.utils.http import urlsafe_base64_encode
 from django.utils.encoding import force_bytes
 from django.urls import reverse
+from django.contrib.auth import logout
+from django.http import HttpResponse
 
 
 
@@ -101,7 +103,15 @@ def user_login(request):
 
 def user_logout(request):
     auth_logout(request) 
+    request.session.flush()   
     return redirect('home')
+
+@csrf_exempt
+def auto_logout(request):
+    if request.user.is_authenticated:
+        logout(request)
+        request.session.flush()  
+    return HttpResponse(status=204)
 
 def forgot_password(request):
     return render(request, 'forgot_password.html')

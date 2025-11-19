@@ -50,14 +50,8 @@ def send_verification_email(user, request):
         print(f"Error sending verification email: {e}")
 
 
-# accounts/utils.py
-from django.conf import settings
-from django.template.loader import render_to_string
-from sendgrid import SendGridAPIClient
-from sendgrid.helpers.mail import Mail
-
 def send_password_reset_email(user, reset_url):
-    subject = "Reset Your Password"
+    subject = "Reset your Receipt Admin password."
 
     # Render custom HTML email template
     html_content = render_to_string('password_reset_email.html', {
