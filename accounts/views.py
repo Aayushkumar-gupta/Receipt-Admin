@@ -18,6 +18,10 @@ import threading
 from django.contrib.auth.views import PasswordResetView
 from django.urls import reverse_lazy
 from .utils import send_password_reset_email
+from django.utils.http import urlsafe_base64_encode
+from django.utils.encoding import force_bytes
+from django.urls import reverse
+
 
 
 def sign_up(request):
@@ -189,11 +193,22 @@ def resend_phone_otp(request):
         return redirect('profile')
     
 class CustomPasswordResetView(PasswordResetView):
-    template_name = 'password_reset_form.html'
+    template_name = 'password_reset.html'  # The form page
     success_url = reverse_lazy('password_reset_done')
 
     def form_valid(self, form):
-        # Send password reset email via SendGrid
-        for user in form.get_users():
-            send_password_reset_email(user, self.request)
-        return super().form_valid(form)
+        email = form.cleaned_data["email"]
+        users = list(form.get_users(email))
+        for user in users:
+            # Generate UID and token
+            uid = urlsafe_base64_encode(force_bytes(user.pk))
+            token = default_token_generator.make_token(user)
+            # Build full reset URL
+            reset_url = self.request.build_absolute_uri(
+                reverse('password_reset_confirm', kwargs={'uidb64': uid, 'token': token})
+            )
+            # Send custom email with reset URL
+            send_password_reset_email(user, reset_url)
+        return redirect(self.success_url)
+
+    
