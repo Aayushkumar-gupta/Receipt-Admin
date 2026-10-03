@@ -25,13 +25,14 @@ ENV/
 # MacOS
 .DS_Store
 
-# Migrations (optional)
-**/migrations/*.py
-!**/migrations/__init__.py
-
 # Media/uploads (if any)
 media/
 uploads/
 
 # Node or frontend (if you use it later)
 node_modules/
+
+# Database dumps / migrations
+*.sql
+*.dump
+*.backup

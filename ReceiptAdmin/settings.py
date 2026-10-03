@@ -176,8 +176,11 @@ else:
     SENDGRID_SANDBOX_MODE_IN_DEBUG = False
     SENDGRID_ECHO_TO_STDOUT = False
     SENDGRID_TRACK_EMAIL_OPENS = False  
-    SENDGRID_TRACK_EMAIL_CLICKS = False  
+    SENDGRID_TRACK_EMAIL_CLICKS = False
     DEFAULT_FROM_EMAIL = "support@receiptadmin.com"
+
+# Resend API (used by accounts/utils.py to send verification and password reset emails)
+RESEND_API_KEY = os.environ.get("RESEND_API_KEY")
 
 CSRF_TRUSTED_ORIGINS = [
     'https://receiptadmin.com',

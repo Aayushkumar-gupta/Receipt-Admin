@@ -4,8 +4,7 @@ from django.utils.http import urlsafe_base64_encode
 from django.utils.encoding import force_bytes
 from django.conf import settings
 from django.template.loader import render_to_string
-from sendgrid import SendGridAPIClient
-from sendgrid.helpers.mail import Mail
+import resend
 
 
 def send_verification_email(user, request):
@@ -33,19 +32,17 @@ def send_verification_email(user, request):
     Thank you!
     """
 
-    # Create the email message
-    message = Mail(
-        from_email=settings.DEFAULT_FROM_EMAIL,
-        to_emails=user.email,
-        subject=subject,
-        html_content=html_content,
-    )
-
     # Send the email
     try:
-        sg = SendGridAPIClient(settings.SENDGRID_API_KEY)
-        response = sg.send(message)
-        print(f"Email sent to {user.email}, status code: {response.status_code}")
+        resend.api_key = settings.RESEND_API_KEY
+        response = resend.Emails.send({
+            "from": settings.DEFAULT_FROM_EMAIL,
+            "to": [user.email],
+            "subject": subject,
+            "html": html_content,
+            "text": text_content,
+        })
+        print(f"Email sent to {user.email}, id: {response['id']}")
     except Exception as e:
         print(f"Error sending verification email: {e}")
 
@@ -69,16 +66,15 @@ def send_password_reset_email(user, reset_url):
     If you did not request this, ignore this email.
     """
 
-    message = Mail(
-        from_email=settings.DEFAULT_FROM_EMAIL,
-        to_emails=user.email,
-        subject=subject,
-        html_content=html_content
-    )
-
     try:
-        sg = SendGridAPIClient(settings.SENDGRID_API_KEY)
-        sg.send(message)
+        resend.api_key = settings.RESEND_API_KEY
+        resend.Emails.send({
+            "from": settings.DEFAULT_FROM_EMAIL,
+            "to": [user.email],
+            "subject": subject,
+            "html": html_content,
+            "text": text_content,
+        })
         print(f"Password reset email sent to {user.email}")
     except Exception as e:
         print(f"Error sending password reset email: {e}")
