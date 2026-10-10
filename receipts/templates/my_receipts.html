@@ -7,9 +7,9 @@
 
 <style>
     body {
-        background-color: #F8FAFC; /* solid light neutral background */
+        background-color: #F8FAFC;
         font-family: 'Segoe UI', Tahoma, sans-serif;
-        color: #1E293B; /* charcoal for readability */
+        color: #1E293B;
     }
 
     /* Frosted glass container */
@@ -26,7 +26,7 @@
     .receipt-title {
         font-size: 1.5rem;
         font-weight: 600;
-        color: #0077B6; /* trust-blue accent */
+        color: #0077B6;
         margin-bottom: 0; /* handled by flex container */
         border-bottom: 2px solid #E2E8F0;
         padding-bottom: 8px;
@@ -49,7 +49,7 @@
     }
 
     .btn-primary {
-        background-color: #00C49A; /* teal accent */
+        background-color: #00C49A;
         border-color: #00C49A;
         transition: background 0.3s ease;
     }
@@ -118,7 +118,12 @@
                     {% endif %}
                     <td>
                         <a href="{% url 'view_receipt_pdf' receipt.id %}" class="btn btn-sm btn-primary">View</a>
-                        <a href="{% url 'refund' receipt.id %}" class="btn btn-sm btn-refund" onclick="return confirm('Are you sure you want to Refund the receipt? NOTE: You won\'t be able to edit it afterwards.');">Refund</a>
+                        {% if not receipt.refund %}
+                        <form method="post" action="{% url 'refund' receipt.id %}" style="display:inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-refund" onclick="return confirm('Are you sure you want to Refund the receipt? NOTE: You won\'t be able to edit it afterwards.');">Refund</button>
+                        </form>
+                        {% endif %}
                         <a href="{% url 'receipt_pdf' receipt.id %}" class="btn btn-sm btn-secondary">Download PDF</a>
                     </td>
                 </tr>

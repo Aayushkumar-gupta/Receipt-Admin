@@ -158,15 +158,15 @@ function addItem(item = {description: "", quantity: 1, unit_price: 0}) {
     row.className = 'row g-3 item-row mt-2';
     row.innerHTML = `
         <div class="col-md-5 form-floating">
-            <input type="text" class="form-control js-item" name="description" placeholder="Description" value="${item.description}" required>
+            <input type="text" class="form-control js-item" name="description" placeholder="Description" required>
             <label>Description</label>
         </div>
         <div class="col-md-2 form-floating">
-            <input type="number" min="1" step="1" class="form-control quantity" placeholder="Quantity" value="${item.quantity}" required>
+            <input type="number" min="1" step="1" class="form-control quantity" placeholder="Quantity" required>
             <label>Qty</label>
         </div>
         <div class="col-md-2 form-floating">
-            <input type="number" min="0" step="0.01" class="form-control unit_price" placeholder="Unit Price" value="${item.unit_price}" required>
+            <input type="number" min="0" step="0.01" class="form-control unit_price" placeholder="Unit Price" required>
             <label>Unit Price</label>
         </div>
         <div class="col-md-2 form-floating">
@@ -177,6 +177,10 @@ function addItem(item = {description: "", quantity: 1, unit_price: 0}) {
             <span class="remove-btn" onclick="removeItem(this)">&times;</span>
         </div>
     `;
+    // Set values via the DOM (not innerHTML) so user text can't inject HTML
+    row.querySelector('input[name="description"]').value = item.description;
+    row.querySelector('.quantity').value = item.quantity;
+    row.querySelector('.unit_price').value = item.unit_price;
     container.appendChild(row);
     row.querySelector('.quantity').addEventListener('input', calculateTotals);
     row.querySelector('.unit_price').addEventListener('input', calculateTotals);
@@ -215,7 +219,6 @@ form.addEventListener('submit', function(event){
     const emailPattern = /^[^ ]+@[^ ]+\.[a-z]{2,}$/;
     const phonePattern = /^[0-9]{10,}$/;
 
-    // Validate buyer emails
     const buyerEmailField = document.getElementById('js-buyer_email');
     if(buyerEmailField.value.trim() !== '' && !emailPattern.test(buyerEmailField.value)){
         buyerEmailField.style.borderColor = 'red';
@@ -223,7 +226,6 @@ form.addEventListener('submit', function(event){
         isValid = false;
     } else buyerEmailField.style.borderColor = '';
 
-    // Validate buyer phone
     const buyerPhoneField = document.getElementById('js-buyer_phone_number');
     if(buyerPhoneField.value.trim() !== '' && !phonePattern.test(buyerPhoneField.value)){
         buyerPhoneField.style.borderColor = 'red';
@@ -231,7 +233,6 @@ form.addEventListener('submit', function(event){
         isValid = false;
     } else buyerPhoneField.style.borderColor = '';
 
-    // Validate quantities & prices
     document.querySelectorAll('.quantity').forEach(qty => {
         if(qty.value <= 0){
             qty.style.borderColor = 'red';
