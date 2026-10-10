@@ -1,62 +1,87 @@
-from django.contrib.auth.models import User
-from django.shortcuts import render, redirect
+import logging
+import random
+import re
+import threading
+
 from django.contrib import messages
 from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
 from django.contrib.auth.decorators import login_required
-from .models import UserProfile
+from django.contrib.auth.models import User
+from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth.tokens import default_token_generator
-from django.utils.http import urlsafe_base64_decode
-from django.utils.encoding import force_str
-from .utils import send_verification_email, send_otp_sms
-import random
-import logging
-logger = logging.getLogger(__name__)
-import threading
 from django.contrib.auth.views import PasswordResetView
-from django.urls import reverse_lazy
-from .utils import send_password_reset_email
-from django.utils.http import urlsafe_base64_encode
-from django.utils.encoding import force_bytes
-from django.urls import reverse
 from django.core import signing
+from django.core.exceptions import ValidationError
+from django.core.validators import validate_email
+from django.db import IntegrityError, transaction
+from django.db.models import Q
+from django.shortcuts import render, redirect
+from django.urls import reverse, reverse_lazy
+from django.utils.encoding import force_bytes, force_str
+from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
+
+from .models import UserProfile
+from .utils import send_otp_sms, send_password_reset_email, send_verification_email
+
+logger = logging.getLogger(__name__)
 
 
 def sign_up(request):
     if request.method == 'POST':
-        first_name = request.POST.get('first_name')
-        last_name = request.POST.get('last_name')
-        email = request.POST.get('email')
-        phone_number = request.POST.get('phonenumber')
-        password = request.POST.get('password')
-        confirm_password = request.POST.get('confirm_password')
+        first_name = request.POST.get('first_name', '').strip()
+        last_name = request.POST.get('last_name', '').strip()
+        email = request.POST.get('email', '').strip()
+        phone_number = request.POST.get('phonenumber', '').strip()
+        password = request.POST.get('password', '')
+        confirm_password = request.POST.get('confirm_password', '')
 
-        # Validations
-        if User.objects.filter(email=email).exists():
+        errors = []
+        if not first_name or not last_name:
+            errors.append("First name and last name are required.")
+        elif len(first_name) > 150 or len(last_name) > 150:
+            errors.append("First and last name must be 150 characters or fewer.")
+
+        try:
+            validate_email(email)
+            if len(email) > 150:
+                errors.append("Email must be 150 characters or fewer.")
+        except ValidationError:
+            errors.append("Enter a valid email address.")
+
+        if not re.fullmatch(r'\d{10,15}', phone_number):
+            errors.append("Phone number must be 10 to 15 digits.")
+
+        if password != confirm_password:
+            errors.append("Passwords do not match.")
+        else:
+            try:
+                validate_password(password, user=User(username=email, email=email,
+                                                      first_name=first_name, last_name=last_name))
+            except ValidationError as e:
+                errors.extend(e.messages)
+
+        if not errors and User.objects.filter(Q(email__iexact=email) | Q(username__iexact=email)).exists():
+            errors.append("User already exists.")
+
+        if errors:
+            for error in errors:
+                messages.error(request, error)
+            return render(request, 'sign_up.html')
+
+        try:
+            with transaction.atomic():
+                user = User.objects.create_user(
+                    username=email,
+                    first_name=first_name,
+                    last_name=last_name,
+                    email=email,
+                    password=password,
+                    is_active=True,
+                )
+                UserProfile.objects.create(user=user, phone_number=phone_number)
+        except IntegrityError:
             messages.error(request, "User already exists.")
             return render(request, 'sign_up.html')
-        if password != confirm_password:
-            messages.error(request, "Passwords do not match.")
-            return render(request, 'sign_up.html')
-        if not first_name or not last_name:
-            messages.error(request, "First name and last name are required.")
-            return render(request, 'sign_up.html')
-
-        # Create user
-        user = User.objects.create_user(
-            username=email,
-            first_name=first_name,
-            last_name=last_name,
-            email=email,
-            password=password,
-            is_active=True,  # Can login only after phone+email verification
-        )
-
-        UserProfile.objects.create(
-            user=user,
-            phone_number=phone_number,
-            email_verified=False,
-            phone_verified=False
-        )
 
         # Step 1: Phone OTP
         # otp = random.randint(100000, 999999)
@@ -67,7 +92,7 @@ def sign_up(request):
         # Step 2: Email verification (async)
         threading.Thread(target=send_email_async, args=(user, request)).start()
 
-        messages.success(request, "Account created! Check you email inbox for verification.")
+        messages.success(request, "Account created! Check your email inbox for verification.")
         return redirect('login')
 
     return render(request, 'sign_up.html')
@@ -169,7 +194,7 @@ def resend_verification_email(request):
     if request.method == 'POST':
         user = request.user
         try:
-            send_verification_email(user, request)  # pass user first, then request
+            send_verification_email(user, request)
             messages.success(request, "Verification email sent successfully!")
         except Exception as e:
             messages.error(request, f"Failed to send email: {e}")
@@ -196,7 +221,7 @@ def resend_phone_otp(request):
 
 
 class CustomPasswordResetView(PasswordResetView):
-    template_name = 'password_reset.html'  # The form page
+    template_name = 'password_reset.html'
     success_url = reverse_lazy('password_reset_done')
 
     def form_valid(self, form):
