@@ -77,7 +77,6 @@ def sign_up(request):
 
     return render(request, 'sign_up.html')
 
-@csrf_exempt
 def user_login(request):  
     if request.method == 'POST':
         username = request.POST.get('username')
@@ -93,7 +92,6 @@ def user_login(request):
             else:
                 messages.error(request, "Account not verified. Please verify your email and phone.")
         else:
-            logger.warning(f"LOGIN FAIL for {username} with password {password}")
             messages.error(request, "Invalid username or password")
 
         return redirect('login')

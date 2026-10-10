@@ -13,6 +13,7 @@ from decimal import Decimal
 from .forms import ReceiptForm
 from django.contrib import messages
 from accounts.models import UserProfile
+from django.views.decorators.http import require_POST
 
 
 def home(request):
@@ -23,7 +24,6 @@ def dashboard(request):
     user = request.user
     profile = UserProfile.objects.get(user=user)
 
-    # Handle goal update
     if request.method == "POST":
         goal = request.POST.get("goal")
         profile.goal = goal
@@ -31,7 +31,6 @@ def dashboard(request):
         messages.success(request, "Your goal has been updated!")
         return redirect('dashboard')
 
-    # Query all receipts created by this user
     receipts = Receipts.objects.filter(user_id=user)
 
     total_receipts = receipts.count()
@@ -76,13 +75,12 @@ def staging_area(request):
     return render(request, 'staging_area.html', {'receipts': receipts})
 
 @login_required
-def view_receipt_pdf(request, pk):  # <-- view PDF in browser
-    receipt = get_object_or_404(Receipts, pk=pk)
+def view_receipt_pdf(request, pk):
+    receipt = get_object_or_404(Receipts, pk=pk, user_id=request.user)
     template = get_template("receipt_pdf.html")
     html = template.render({"receipt": receipt})
 
     response = HttpResponse(content_type="application/pdf")
-    # 'inline' tells the browser to display PDF instead of downloading
     response['Content-Disposition'] = f'inline; filename="receipt_{receipt.invoice_number}.pdf"'
 
     pisa_status = pisa.CreatePDF(html, dest=response)
@@ -93,9 +91,9 @@ def view_receipt_pdf(request, pk):  # <-- view PDF in browser
 
 
 @login_required
-def receipt_pdf(request, pk):  # <-- add pk here
-    receipt = get_object_or_404(Receipts, pk=pk)
-    template = get_template("receipt_pdf.html")  # <-- correct template path
+def receipt_pdf(request, pk):
+    receipt = get_object_or_404(Receipts, pk=pk, user_id=request.user)
+    template = get_template("receipt_pdf.html")
     html = template.render({"receipt": receipt, "is_staged": receipt.is_staged})
 
     response = HttpResponse(content_type="application/pdf")
@@ -126,7 +124,6 @@ def create_receipt(request):
     seller_address = profile.address or "Default Address"
 
     if request.method == 'POST':
-        # Get buyer details with default fallbacks
         buyer_name = request.POST.get('buyer_name', '').strip()
         buyer_address = request.POST.get('buyer_address', '').strip() or "N/A"
         buyer_phone_number = request.POST.get('buyer_phone_number', '').strip()
@@ -177,24 +174,23 @@ def create_receipt(request):
 
 
 @login_required
+@require_POST
 def stage(request, pk):
-    if request.method == 'POST':
-        receipt = Receipts.objects.get(id = pk)
-        receipt.is_staged = True
-        receipt.save()
-        messages.success(request, "Staging Successful!")
-        return redirect('my_receipts')
+    receipt = get_object_or_404(Receipts, pk=pk, user_id=request.user, is_staged=False)
+    receipt.is_staged = True
+    receipt.save()
+    messages.success(request, "Staging Successful!")
+    return redirect('my_receipts')
 
 @login_required
 def staging_edit(request, pk):
-    receipt = get_object_or_404(Receipts, id=pk)
+    receipt = get_object_or_404(Receipts, pk=pk, user_id=request.user)
 
     # prevent editing staged/confirmed receipts
     if receipt.is_staged:
         return redirect("staging_area")
 
     if request.method == "POST":
-        # Only buyer info + totals are editable
         form = ReceiptForm(request.POST, instance=receipt)
         if form.is_valid():
             updated_receipt = form.save(commit=False)
@@ -206,7 +202,6 @@ def staging_edit(request, pk):
             except (ValueError, TypeError):
                 items = []
 
-            # Delete old items and create new ones
             updated_receipt.items.all().delete()
             for it in items:
                 desc = it.get("description", "") or ""
@@ -223,10 +218,9 @@ def staging_edit(request, pk):
                         unit_price=unit,
                     )
 
-            updated_receipt.save()  # save buyer info and totals
+            updated_receipt.save()
             return redirect("staging_area")
     else:
-        # GET request: prefill form with buyer info + totals
         form = ReceiptForm(instance=receipt)
 
     # pass items to template for JS to load
@@ -239,12 +233,12 @@ def staging_edit(request, pk):
     })
 
 @login_required
+@require_POST
 def staging_delete(request, pk):
-    if request.method == 'POST':
-        receipt = Receipts.objects.get(id=pk)
-        receipt.delete()
-        messages.error(request, "Receipt Deleted.")
-        return redirect("staging_area")
+    receipt = get_object_or_404(Receipts, pk=pk, user_id=request.user, is_staged=False)
+    receipt.delete()
+    messages.error(request, "Receipt Deleted.")
+    return redirect("staging_area")
 
 @login_required
 def update_profile(request):
@@ -252,7 +246,6 @@ def update_profile(request):
         user = request.user
         profile = user.userprofile
 
-        # Get posted data
         new_email = request.POST.get("email")
         new_phone = request.POST.get("phone_number")
         new_address = request.POST.get("address")
@@ -262,22 +255,19 @@ def update_profile(request):
         if new_address and new_address != profile.address:
             profile.address = new_address
 
-        # Check if email or phone number is changing
         sensitive_change = (new_email != user.email)
 
         if sensitive_change:
             # Password required for sensitive changes
             if not current_password or not user.check_password(current_password):
-                messages.error(request, "Incorrect password. Cannot update email or phone number ❌")
+                messages.error(request, "Incorrect password. Cannot update email or phone number!")
                 return redirect("profile")
 
-            # Update email if changed
             if new_email != user.email:
                 user.email = new_email
                 user.username = new_email
                 profile.email_verified = False  # reset verification
 
-        # Update phone if changed
         if new_phone != profile.phone_number:
             profile.phone_number = new_phone
             profile.phone_verified = False  # reset verification
@@ -286,18 +276,18 @@ def update_profile(request):
         user.first_name = request.POST.get("first_name")
         user.last_name = request.POST.get("last_name")
 
-        # Save changes
         user.save()
         profile.save()
 
-        messages.success(request, "Profile updated successfully ✅")
+        messages.success(request, "Profile updated successfully!")
         return redirect("profile")
 
     return redirect("profile")
 
-
+@login_required
+@require_POST
 def refund(request, pk):
-    receipt = Receipts.objects.get(id=pk)
+    receipt = get_object_or_404(Receipts, pk=pk, user_id=request.user, is_staged=True, refund=False)
     receipt.refund = True
     receipt.save()
     messages.info(request, "Refund Granted!")
