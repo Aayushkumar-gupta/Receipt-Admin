@@ -1,5 +1,5 @@
 from django.urls import reverse
-from django.contrib.auth.tokens import default_token_generator
+from django.core import signing
 from django.utils.http import urlsafe_base64_encode
 from django.utils.encoding import force_bytes
 from django.conf import settings
@@ -10,7 +10,7 @@ import resend
 def send_verification_email(user, request):
     # Generate UID and token
     uid = urlsafe_base64_encode(force_bytes(user.pk))
-    token = default_token_generator.make_token(user)
+    token = signing.dumps({"pk": user.pk, "email": user.email}, salt="accounts.verify-email")
     verify_url = request.build_absolute_uri(reverse('verify_email', args=[uid, token]))
 
     # Email subject
@@ -78,7 +78,6 @@ def send_password_reset_email(user, reset_url):
         print(f"Password reset email sent to {user.email}")
     except Exception as e:
         print(f"Error sending password reset email: {e}")
-
 
 
 def send_otp_sms(phone_number, otp):

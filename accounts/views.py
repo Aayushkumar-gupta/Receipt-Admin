@@ -1,15 +1,12 @@
-from django.shortcuts import render
 from django.contrib.auth.models import User
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
 from django.contrib.auth.decorators import login_required
-from django.views.decorators.csrf import csrf_exempt
 from .models import UserProfile
 from django.contrib.auth.tokens import default_token_generator
 from django.utils.http import urlsafe_base64_decode
 from django.utils.encoding import force_str
-from .models import UserProfile
 from .utils import send_verification_email, send_otp_sms
 import random
 import logging
@@ -21,9 +18,7 @@ from .utils import send_password_reset_email
 from django.utils.http import urlsafe_base64_encode
 from django.utils.encoding import force_bytes
 from django.urls import reverse
-from django.contrib.auth import logout
-from django.http import HttpResponse
-
+from django.core import signing
 
 
 def sign_up(request):
@@ -56,7 +51,7 @@ def sign_up(request):
             is_active=True,  # Can login only after phone+email verification
         )
 
-        profile = UserProfile.objects.create(
+        UserProfile.objects.create(
             user=user,
             phone_number=phone_number,
             email_verified=False,
@@ -64,10 +59,10 @@ def sign_up(request):
         )
 
         # Step 1: Phone OTP
-        #otp = random.randint(100000, 999999)
-        #request.session['phone_otp'] = otp
-        #request.session['phone_user_id'] = user.id
-        #send_otp_sms(phone_number, otp)
+        # otp = random.randint(100000, 999999)
+        # request.session['phone_otp'] = otp
+        # request.session['phone_user_id'] = user.id
+        # send_otp_sms(phone_number, otp)
 
         # Step 2: Email verification (async)
         threading.Thread(target=send_email_async, args=(user, request)).start()
@@ -77,7 +72,8 @@ def sign_up(request):
 
     return render(request, 'sign_up.html')
 
-def user_login(request):  
+
+def user_login(request):
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
@@ -100,22 +96,25 @@ def user_login(request):
 
 
 def user_logout(request):
-    auth_logout(request) 
-    request.session.flush()   
+    auth_logout(request)
+    request.session.flush()
     return redirect('home')
+
 
 def forgot_password(request):
     return render(request, 'forgot_password.html')
+
 
 def verify_email(request, uidb64, token):
     try:
         uid = force_str(urlsafe_base64_decode(uidb64))
         user = User.objects.get(pk=uid)
-        profile = UserProfile.objects.get(user=user)
-    except:
-        user = profile = None
+        data = signing.loads(token, salt="accounts.verify-email", max_age=60 * 60 * 24 * 3)
+    except (User.DoesNotExist, signing.BadSignature, ValueError, TypeError, OverflowError):
+        user = None
 
-    if user and default_token_generator.check_token(user, token):
+    if user and data["pk"] == user.pk and data["email"] == user.email:
+        profile, _ = UserProfile.objects.get_or_create(user=user)
         profile.email_verified = True
         profile.save()
         messages.success(request, "Email verified successfully!")
@@ -126,7 +125,8 @@ def verify_email(request, uidb64, token):
     else:
         messages.error(request, "Invalid or expired verification link.")
         return redirect('sign_up')
-    
+
+
 def verify_account(request):
     if request.method == 'POST':
         entered_otp = request.POST.get('otp')
@@ -135,7 +135,7 @@ def verify_account(request):
 
         if str(entered_otp) == str(real_otp):
             user = User.objects.get(id=user_id)
-            profile = UserProfile.objects.get(user=user)
+            profile = UserProfile.objects.get_or_create(user=user)[0]
             profile.phone_verified = True
             profile.save()
 
@@ -156,11 +156,13 @@ def verify_account(request):
 
     return render(request, 'verify_account.html')
 
+
 def send_email_async(user, request):
     try:
         send_verification_email(user, request)
     except Exception as e:
         print("Failed to send verification email:", e)
+
 
 @login_required
 def resend_verification_email(request):
@@ -175,12 +177,11 @@ def resend_verification_email(request):
     return redirect('profile')
 
 
-    
 @login_required
 def resend_phone_otp(request):
     if request.method == "POST":
         user = request.user
-        profile = UserProfile.objects.get(user=user)
+        profile = UserProfile.objects.get_or_create(user=user)[0]
 
         # Generate OTP
         otp = random.randint(100000, 999999)
@@ -190,9 +191,10 @@ def resend_phone_otp(request):
         # Send OTP to user's phone
         messages.success(request, "OTP sent! Check your Phone.")
         send_otp_sms(profile.phone_number, otp)
-        
+
         return redirect('profile')
-    
+
+
 class CustomPasswordResetView(PasswordResetView):
     template_name = 'password_reset.html'  # The form page
     success_url = reverse_lazy('password_reset_done')
@@ -211,5 +213,3 @@ class CustomPasswordResetView(PasswordResetView):
             # Send custom email with reset URL
             send_password_reset_email(user, reset_url)
         return redirect(self.success_url)
-
-    

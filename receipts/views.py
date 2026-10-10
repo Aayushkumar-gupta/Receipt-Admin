@@ -1,13 +1,10 @@
 from django.shortcuts import render, redirect
-from .models import Receipts
 from django.shortcuts import get_object_or_404
 from django.template.loader import get_template
 from django.http import HttpResponse, JsonResponse
 from xhtml2pdf import pisa
 from .models import Receipts, ReceiptItem
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse
-from django.template.loader import get_template
 import json
 from decimal import Decimal
 from .forms import ReceiptForm
@@ -19,10 +16,11 @@ from django.views.decorators.http import require_POST
 def home(request):
     return render(request, 'home.html')
 
+
 @login_required
 def dashboard(request):
     user = request.user
-    profile = UserProfile.objects.get(user=user)
+    profile, _ = UserProfile.objects.get_or_create(user=user)
 
     if request.method == "POST":
         goal = request.POST.get("goal")
@@ -34,8 +32,7 @@ def dashboard(request):
     receipts = Receipts.objects.filter(user_id=user)
 
     total_receipts = receipts.count()
-    total_revenue = sum(r.sub_total for r in receipts 
-    if not r.refund and r.is_staged)
+    total_revenue = sum(r.sub_total for r in receipts if not r.refund and r.is_staged)
     pending_receipts = receipts.filter(is_staged=False).count()
     recent_receipts = receipts.order_by('-date')[:5]
 
@@ -49,6 +46,7 @@ def dashboard(request):
 
     return render(request, 'dashboard.html', context)
 
+
 @login_required
 def my_receipts(request):
     search_query = request.GET.get('search', '')
@@ -58,12 +56,16 @@ def my_receipts(request):
     receipts = receipts.order_by('-date')
     return render(request, 'my_receipts.html', {'receipts': receipts})
 
+
 def about(request):
     return render(request, 'about.html')
 
+
 @login_required
 def profile(request):
+    UserProfile.objects.get_or_create(user=request.user)
     return render(request, 'profile.html')
+
 
 @login_required
 def staging_area(request):
@@ -73,6 +75,7 @@ def staging_area(request):
         receipts = receipts.filter(invoice_number__icontains=search_query)
     receipts = receipts.order_by('-date')
     return render(request, 'staging_area.html', {'receipts': receipts})
+
 
 @login_required
 def view_receipt_pdf(request, pk):
@@ -108,12 +111,12 @@ def receipt_pdf(request, pk):
 
 @login_required
 def create_receipt(request):
-    profile = request.user.userprofile
+    profile, _ = UserProfile.objects.get_or_create(user=request.user)
 
     if not profile.email_verified:
         messages.info(request, "You must verify your email before creating a receipt.")
         return redirect("profile")
-    
+
     if not profile.address or profile.address.strip() == "":
         messages.warning(request, "You must add your address in your profile before creating a receipt.")
         return redirect("profile")
@@ -142,7 +145,7 @@ def create_receipt(request):
             tax_rate=Decimal(request.POST.get('tax_rate') or '0')
         )
 
-        items_json = request.POST.get('items', '[]')  
+        items_json = request.POST.get('items', '[]')
         items = json.loads(items_json)
 
         sub_total = Decimal('0.00')
@@ -172,7 +175,6 @@ def create_receipt(request):
     return render(request, 'receipt_form.html')
 
 
-
 @login_required
 @require_POST
 def stage(request, pk):
@@ -181,6 +183,7 @@ def stage(request, pk):
     receipt.save()
     messages.success(request, "Staging Successful!")
     return redirect('my_receipts')
+
 
 @login_required
 def staging_edit(request, pk):
@@ -232,6 +235,7 @@ def staging_edit(request, pk):
         "items": items,
     })
 
+
 @login_required
 @require_POST
 def staging_delete(request, pk):
@@ -240,11 +244,12 @@ def staging_delete(request, pk):
     messages.error(request, "Receipt Deleted.")
     return redirect("staging_area")
 
+
 @login_required
 def update_profile(request):
     if request.method == "POST":
         user = request.user
-        profile = user.userprofile
+        profile, _ = UserProfile.objects.get_or_create(user=user)
 
         new_email = request.POST.get("email")
         new_phone = request.POST.get("phone_number")
@@ -284,6 +289,7 @@ def update_profile(request):
 
     return redirect("profile")
 
+
 @login_required
 @require_POST
 def refund(request, pk):
@@ -292,6 +298,7 @@ def refund(request, pk):
     receipt.save()
     messages.info(request, "Refund Granted!")
     return redirect("my_receipts")
+
 
 def test(request):
     return JsonResponse({"status": "ok"})
