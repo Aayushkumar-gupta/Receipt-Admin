@@ -6,12 +6,15 @@ from xhtml2pdf import pisa
 from .models import Receipts, ReceiptItem
 from django.contrib.auth.decorators import login_required
 import json
+import re
 from decimal import Decimal, ROUND_HALF_UP, InvalidOperation
 from django.contrib import messages
 from accounts.models import UserProfile
 from django.views.decorators.http import require_POST
 from django.core.exceptions import ValidationError
 from django.db import transaction
+from django.db.models import Q
+from django.contrib.auth.models import User
 
 
 def home(request):
@@ -24,10 +27,13 @@ def dashboard(request):
     profile, _ = UserProfile.objects.get_or_create(user=user)
 
     if request.method == "POST":
-        goal = request.POST.get("goal")
-        profile.goal = goal
-        profile.save()
-        messages.success(request, "Your goal has been updated!")
+        goal = request.POST.get("goal", "").strip()
+        if len(goal) > 200:
+            messages.error(request, "Your goal must be 200 characters or fewer.")
+        else:
+            profile.goal = goal
+            profile.save()
+            messages.success(request, "Your goal has been updated!")
         return redirect('dashboard')
 
     receipts = Receipts.objects.filter(user_id=user)
@@ -257,35 +263,53 @@ def update_profile(request):
         user = request.user
         profile, _ = UserProfile.objects.get_or_create(user=user)
 
-        new_email = request.POST.get("email")
-        new_phone = request.POST.get("phone_number")
-        new_address = request.POST.get("address")
-        current_password = request.POST.get("current_password")
+        new_email = request.POST.get("email", user.email).strip()
+        new_phone = request.POST.get("phone_number", profile.phone_number).strip()
+        new_address = request.POST.get("address", "").strip()
+        current_password = request.POST.get("current_password", "")
 
         # Always allow address update (no password needed)
-        if new_address and new_address != profile.address:
+        if new_address:
             profile.address = new_address
 
-        sensitive_change = (new_email != user.email)
-
-        if sensitive_change:
-            # Password required for sensitive changes
-            if not current_password or not user.check_password(current_password):
+        # Password required for sensitive changes
+        if new_email != user.email or new_phone != profile.phone_number:
+            if not user.check_password(current_password):
                 messages.error(request, "Incorrect password. Cannot update email or phone number!")
                 return redirect("profile")
 
-            if new_email != user.email:
-                user.email = new_email
-                user.username = new_email
-                profile.email_verified = False  # reset verification
+        if new_email != user.email:
+            if len(new_email) > 150:
+                messages.error(request, "Email must be 150 characters or fewer.")
+                return redirect("profile")
+            if User.objects.filter(Q(email__iexact=new_email) | Q(username__iexact=new_email)).exclude(pk=user.pk).exists():
+                messages.error(request, "That email is already used by another account.")
+                return redirect("profile")
+            user.email = new_email
+            user.username = new_email
+            profile.email_verified = False  # reset verification
 
         if new_phone != profile.phone_number:
+            if not re.fullmatch(r'\d{10,15}', new_phone):
+                messages.error(request, "Phone number must be 10 to 15 digits.")
+                return redirect("profile")
             profile.phone_number = new_phone
             profile.phone_verified = False  # reset verification
 
         # Update first/last name (no password needed)
-        user.first_name = request.POST.get("first_name")
-        user.last_name = request.POST.get("last_name")
+        user.first_name = request.POST.get("first_name", user.first_name).strip()
+        user.last_name = request.POST.get("last_name", user.last_name).strip()
+        if not user.first_name or not user.last_name:
+            messages.error(request, "First name and last name are required.")
+            return redirect("profile")
+
+        try:
+            user.full_clean()
+            profile.full_clean(exclude=['phone_number'])
+        except ValidationError as e:
+            for field, errors in e.message_dict.items():
+                messages.error(request, f"{field.replace('_', ' ').capitalize()}: {errors[0]}")
+            return redirect("profile")
 
         user.save()
         profile.save()

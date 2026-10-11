@@ -127,7 +127,7 @@ def user_logout(request):
 
 
 def forgot_password(request):
-    return render(request, 'forgot_password.html')
+    return redirect('password_reset')
 
 
 def verify_email(request, uidb64, token):
@@ -218,6 +218,7 @@ def resend_phone_otp(request):
         send_otp_sms(profile.phone_number, otp)
 
         return redirect('profile')
+    return redirect('profile')
 
 
 class CustomPasswordResetView(PasswordResetView):
