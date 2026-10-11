@@ -6,11 +6,12 @@ from xhtml2pdf import pisa
 from .models import Receipts, ReceiptItem
 from django.contrib.auth.decorators import login_required
 import json
-from decimal import Decimal
-from .forms import ReceiptForm
+from decimal import Decimal, ROUND_HALF_UP, InvalidOperation
 from django.contrib import messages
 from accounts.models import UserProfile
 from django.views.decorators.http import require_POST
+from django.core.exceptions import ValidationError
+from django.db import transaction
 
 
 def home(request):
@@ -127,48 +128,48 @@ def create_receipt(request):
     seller_address = profile.address or "Default Address"
 
     if request.method == 'POST':
-        buyer_name = request.POST.get('buyer_name', '').strip()
-        buyer_address = request.POST.get('buyer_address', '').strip() or "N/A"
-        buyer_phone_number = request.POST.get('buyer_phone_number', '').strip()
-        buyer_email = request.POST.get('buyer_email', '').strip() or "N/A"
-
-        receipt = Receipts.objects.create(
+        receipt = Receipts(
             user_id=request.user,
             seller_name=seller_name,
             seller_address=seller_address,
             seller_phone_number=seller_phone,
             seller_email=seller_email,
-            buyer_name=buyer_name,
-            buyer_address=buyer_address,
-            buyer_phone_number=buyer_phone_number,
-            buyer_email=buyer_email,
-            tax_rate=Decimal(request.POST.get('tax_rate') or '0')
+            buyer_name=request.POST.get('buyer_name', '').strip(),
+            buyer_address=request.POST.get('buyer_address', '').strip() or "N/A",
+            buyer_phone_number=request.POST.get('buyer_phone_number', '').strip(),
+            buyer_email=request.POST.get('buyer_email', '').strip() or "N/A",
         )
+        try:
+            receipt.tax_rate = Decimal(request.POST.get('tax_rate') or '0')
+            items = [
+                ReceiptItem(
+                    description=str(item.get('description', '')).strip(),
+                    quantity=int(item.get('quantity')),
+                    unit_price=Decimal(str(item.get('unit_price'))),
+                )
+                for item in json.loads(request.POST.get('items', '[]'))
+            ]
+            if not items or not 0 <= receipt.tax_rate <= 100 or any(i.quantity < 1 or i.unit_price < 0 for i in items):
+                raise ValueError
+            receipt.sub_total = sum((i.quantity * i.unit_price for i in items), Decimal('0.00'))
+            receipt.total_amount = (receipt.sub_total * (1 + receipt.tax_rate / 100)).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+            for item in items:
+                item.full_clean(exclude=['receipt'])
+            receipt.full_clean()
+        except (ValueError, TypeError, AttributeError, InvalidOperation):
+            messages.error(request, "Some receipt values are invalid. Please check the items and tax rate.")
+            return render(request, 'receipt_form.html')
+        except ValidationError as e:
+            for field, errors in e.message_dict.items():
+                messages.error(request, f"{field.replace('_', ' ').capitalize()}: {errors[0]}")
+            return render(request, 'receipt_form.html')
 
-        items_json = request.POST.get('items', '[]')
-        items = json.loads(items_json)
-
-        sub_total = Decimal('0.00')
-        for item in items:
-            qty = int(item.get('quantity', 0))
-            unit = Decimal(str(item.get('unit_price') or '0'))
-            line_price = qty * unit
-
-            ReceiptItem.objects.create(
-                receipt=receipt,
-                description=item.get('description', ''),
-                quantity=qty,
-                unit_price=unit,
-                line_price=line_price
-            )
-            sub_total += line_price
-
-        tax_rate = receipt.tax_rate or Decimal('0.00')
-        total_amount = (sub_total + (sub_total * (tax_rate / Decimal('100')))).quantize(Decimal('0.01'))
-
-        receipt.sub_total = sub_total
-        receipt.total_amount = total_amount
-        receipt.save()
+        with transaction.atomic():
+            receipt.save()
+            for item in items:
+                item.receipt = receipt
+                item.line_price = item.quantity * item.unit_price
+                item.save()
 
         return redirect('staging_area')
 
@@ -194,43 +195,48 @@ def staging_edit(request, pk):
         return redirect("staging_area")
 
     if request.method == "POST":
-        form = ReceiptForm(request.POST, instance=receipt)
-        if form.is_valid():
-            updated_receipt = form.save(commit=False)
+        receipt.buyer_name = request.POST.get('buyer_name', '').strip()
+        receipt.buyer_address = request.POST.get('buyer_address', '').strip() or "N/A"
+        receipt.buyer_phone_number = request.POST.get('buyer_phone_number', '').strip()
+        receipt.buyer_email = request.POST.get('buyer_email', '').strip() or "N/A"
+        try:
+            receipt.tax_rate = Decimal(request.POST.get('tax_rate') or '0')
+            items = [
+                ReceiptItem(
+                    description=str(item.get('description', '')).strip(),
+                    quantity=int(item.get('quantity')),
+                    unit_price=Decimal(str(item.get('unit_price'))),
+                )
+                for item in json.loads(request.POST.get('items', '[]'))
+            ]
+            if not items or not 0 <= receipt.tax_rate <= 100 or any(i.quantity < 1 or i.unit_price < 0 for i in items):
+                raise ValueError
+            receipt.sub_total = sum((i.quantity * i.unit_price for i in items), Decimal('0.00'))
+            receipt.total_amount = (receipt.sub_total * (1 + receipt.tax_rate / 100)).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+            for item in items:
+                item.full_clean(exclude=['receipt'])
+            receipt.full_clean()
+        except (ValueError, TypeError, AttributeError, InvalidOperation):
+            messages.error(request, "Some receipt values are invalid. Please check the items and tax rate.")
+            return redirect("staging_edit", pk=receipt.pk)
+        except ValidationError as e:
+            for field, errors in e.message_dict.items():
+                messages.error(request, f"{field.replace('_', ' ').capitalize()}: {errors[0]}")
+            return redirect("staging_edit", pk=receipt.pk)
 
-            # Handle items from hidden JSON field
-            items_json = request.POST.get("items", "[]")
-            try:
-                items = json.loads(items_json)
-            except (ValueError, TypeError):
-                items = []
+        with transaction.atomic():
+            receipt.save()
+            receipt.items.all().delete()
+            for item in items:
+                item.receipt = receipt
+                item.line_price = item.quantity * item.unit_price
+                item.save()
 
-            updated_receipt.items.all().delete()
-            for it in items:
-                desc = it.get("description", "") or ""
-                qty = int(it.get("quantity") or 0)
-                try:
-                    unit = Decimal(str(it.get("unit_price") or 0))
-                except:
-                    unit = Decimal("0")
-                if desc or qty or unit:
-                    ReceiptItem.objects.create(
-                        receipt=updated_receipt,
-                        description=desc,
-                        quantity=qty,
-                        unit_price=unit,
-                    )
+        return redirect("staging_area")
 
-            updated_receipt.save()
-            return redirect("staging_area")
-    else:
-        form = ReceiptForm(instance=receipt)
-
-    # pass items to template for JS to load
     items = list(receipt.items.values("description", "quantity", "unit_price"))
 
     return render(request, "staging_edit.html", {
-        "form": form,
         "receipt": receipt,
         "items": items,
     })

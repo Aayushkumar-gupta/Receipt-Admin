@@ -94,11 +94,11 @@
                 <label>Buyer's Phone</label>
             </div>
             <div class="col-md-6 form-floating">
-                <input type="email" class="form-control" id="js-buyer_email" name="buyer_email" value="{{ receipt.buyer_email }}" required>
+                <input type="email" class="form-control" id="js-buyer_email" name="buyer_email" value="{% if receipt.buyer_email != 'N/A' %}{{ receipt.buyer_email }}{% endif %}">
                 <label>Buyer's Email</label>
             </div>
             <div class="col-md-6 form-floating">
-                <input type="text" class="form-control" id="js-buyer_address" name="buyer_address" value="{{ receipt.buyer_address }}" required>
+                <input type="text" class="form-control" id="js-buyer_address" name="buyer_address" value="{% if receipt.buyer_address != 'N/A' %}{{ receipt.buyer_address }}{% endif %}">
                 <label>Buyer's Address</label>
             </div>
         </div>
