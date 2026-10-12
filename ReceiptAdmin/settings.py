@@ -15,22 +15,23 @@ import os
 import ssl
 import certifi
 import dj_database_url
+from django.core.exceptions import ImproperlyConfigured
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-ENVIRONMENT = os.environ.get('DJANGO_ENV', 'local')
+ENVIRONMENT = os.environ.get('DJANGO_ENV', 'production' if os.environ.get('RENDER') else 'local')
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'insecure-development-key')
-
-
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
 if not SECRET_KEY:
-    raise ValueError("The SECRET_KEY environment variable is not set!")
+    if ENVIRONMENT != 'local':
+        raise ImproperlyConfigured("DJANGO_SECRET_KEY must be set in production.")
+    SECRET_KEY = 'insecure-development-key'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = ENVIRONMENT == 'local'
@@ -43,7 +44,7 @@ else:
 if ENVIRONMENT == 'local':
     ssl._create_default_https_context = ssl.create_default_context(cafile=certifi.where())
 
-   
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -55,18 +56,17 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'receipts',
     'accounts',
-    'sendgrid_backend',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
 ]
 
 ROOT_URLCONF = 'ReceiptAdmin.urls'
@@ -123,9 +123,8 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-PASSWORD_RESET_TIMEOUT = 60 * 60 
+PASSWORD_RESET_TIMEOUT = 60 * 60
 PASSWORD_RESET_EMAIL_TEMPLATE = 'password_reset_email.html'
-
 
 
 # Internationalization
@@ -149,8 +148,13 @@ SITE_URL = os.environ.get('SITE_URL', 'https://receiptadmin.com')
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-if ENVIRONMENT != 'local':
-    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+STORAGES = {
+    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+    "staticfiles": {
+        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage" if ENVIRONMENT == 'local'
+        else "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
@@ -164,20 +168,9 @@ FULL_MEDIA_URL = os.environ.get('FULL_MEDIA_URL', f"{SITE_URL}/media/")
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
-#Hybrid system (local = SMTP, Render = SendGrid API)
-if ENVIRONMENT == 'local':
-    # Local development using SMTP (works fine locally)
-    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-    DEFAULT_FROM_EMAIL = 'support@receiptadmin.com'
-else:
-    # use SendGrid Web API (since SMTP ports are blocked)
-    EMAIL_BACKEND = "sendgrid_backend.SendgridBackend"
-    SENDGRID_API_KEY = os.environ.get("SENDGRID_API_KEY")
-    SENDGRID_SANDBOX_MODE_IN_DEBUG = False
-    SENDGRID_ECHO_TO_STDOUT = False
-    SENDGRID_TRACK_EMAIL_OPENS = False  
-    SENDGRID_TRACK_EMAIL_CLICKS = False
-    DEFAULT_FROM_EMAIL = "support@receiptadmin.com"
+# Emails sent through Resend (accounts/utils.py)
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+DEFAULT_FROM_EMAIL = 'support@receiptadmin.com'
 
 # Resend API (used by accounts/utils.py to send verification and password reset emails)
 RESEND_API_KEY = os.environ.get("RESEND_API_KEY")
@@ -209,7 +202,7 @@ else:
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-    SESSION_EXPIRE_AT_BROWSER_CLOSE = True 
+    SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
 
 LOGGING = {
