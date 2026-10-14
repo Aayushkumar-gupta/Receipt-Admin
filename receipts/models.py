@@ -1,34 +1,41 @@
-from django.db import models
-from django.contrib.auth.models import User 
+import uuid
+
+from django.db import models, transaction
+from django.contrib.auth.models import User
 from decimal import Decimal
+
 
 class Receipts(models.Model):
     refund = models.BooleanField(default=False)
     is_staged = models.BooleanField(default=False)
     user_id = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
     invoice_number = models.CharField(max_length=20, blank=True, unique=True)
-    seller_name = models.CharField(max_length=100)
+    seller_name = models.CharField(max_length=301)
     seller_address = models.TextField(max_length=100)
     seller_phone_number = models.CharField(max_length=20)
-    seller_email = models.CharField(max_length=50, default='example@gmail.com')
-    buyer_name = models.CharField(max_length=100)
+    seller_email = models.CharField(max_length=254, default='example@gmail.com')
+    buyer_name = models.CharField(max_length=301)
     buyer_address = models.TextField(max_length=100)
     buyer_phone_number = models.CharField(max_length=20)
-    buyer_email = models.CharField(max_length=50, default='example@gmail.com')
+    buyer_email = models.CharField(max_length=254, default='example@gmail.com')
     date = models.DateField(auto_now_add=True)
     sub_total = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     tax_rate = models.DecimalField(max_digits=5, decimal_places=2, default=8.25)
     total_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
 
     def save(self, *args, **kwargs):
-        if not self.invoice_number:
-            last_receipt = Receipts.objects.all().order_by('id').last()
-            new_id = last_receipt.id + 1 if last_receipt else 1
-            self.invoice_number = f"INV-{new_id:04d}"
-        super().save(*args, **kwargs)
+        if self.invoice_number:
+            return super().save(*args, **kwargs)
+        # Number the invoice from the row's own id, so two receipts saved at once can't collide.
+        with transaction.atomic():
+            self.invoice_number = uuid.uuid4().hex[:20]
+            super().save(*args, **kwargs)
+            self.invoice_number = f"INV-{self.pk:04d}"
+            super().save(update_fields=['invoice_number'])
 
     def __str__(self):
         return f"Receipt #{self.invoice_number} for {self.buyer_name}"
+
 
 class ReceiptItem(models.Model):
     receipt = models.ForeignKey(Receipts, related_name="items", on_delete=models.CASCADE)
@@ -42,17 +49,3 @@ class ReceiptItem(models.Model):
             # Ensure both are Decimals
             self.line_price = Decimal(self.quantity) * Decimal(self.unit_price)
         super().save(*args, **kwargs)
-    
-
-class Driver(models.Model):
-    driver_name = models.CharField(max_length=100)
-    driver_date_of_birth = models.DateField()
-    driver_phone_number = models.CharField(max_length=14)
-    vehicle_number = models.CharField()
-
-    def __self__(self):
-        return self.driver_name
-    
-    class Meta:
-        verbose_name_plural = "Driver"  
-    

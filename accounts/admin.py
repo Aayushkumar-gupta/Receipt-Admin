@@ -8,7 +8,6 @@ class UserProfileInline(admin.StackedInline):
     model = UserProfile
     can_delete = False
     verbose_name_plural = 'Profile'
-    exclude = ('phone_verified',)
 
 
 class CustomUserAdmin(BaseUserAdmin):
