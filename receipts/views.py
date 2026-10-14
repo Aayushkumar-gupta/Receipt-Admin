@@ -294,7 +294,6 @@ def update_profile(request):
                 messages.error(request, "Phone number must be 10 to 15 digits.")
                 return redirect("profile")
             profile.phone_number = new_phone
-            profile.phone_verified = False  # reset verification
 
         # Update first/last name (no password needed)
         user.first_name = request.POST.get("first_name", user.first_name).strip()

@@ -145,31 +145,6 @@ body {
     background-color: #0077B6;
     color: white;
 }
-
-/* OTP Input */
-.otp-form {
-    margin-top: 10px;
-    display: none;
-}
-.otp-input {
-    width: 120px;
-    text-align: center;
-    border-radius: 8px;
-    border: 1px solid #CBD5E1;
-    padding: 5px;
-    margin-right: 10px;
-}
-.otp-submit {
-    background-color: #00C49A;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    padding: 5px 12px;
-    font-weight: 600;
-}
-.otp-submit:hover {
-    background-color: #009e84;
-}
 </style>
 
 <div class="profile-card">
@@ -204,7 +179,7 @@ body {
             </div>
             <div class="form-floating mb-3">
                 <input type="password" name="current_password" class="form-control" placeholder="Enter password" readonly>
-                <label>Current Password (If changing Email)</label>
+                <label>Current Password (If changing email or phone)</label>
             </div>
             <button type="submit" id="saveBtn" class="btn btn-save" style="display:none;">Save Changes</button>
         </div>
@@ -226,29 +201,6 @@ body {
                 </form>
             {% endif %}
         </div>
-
-
-        <!-- Phone Verification 
-        <div class="verify-status">
-            <span>Phone:</span>
-            {% if user.userprofile.phone_verified %}
-                <span class="verified"><i class="fa-solid fa-circle-check"></i> Verified</span>
-            {% else %}
-                <div>
-                    <form method="POST" action="{% url 'resend_phone_otp' %}" id="otpRequestForm">
-                        {% csrf_token %}
-                        <button type="button" class="verify-btn" id="requestOtpBtn"><i class="fa-solid fa-mobile-screen"></i> Verify Phone</button>
-                    </form>
-
-                    <form method="POST" action="{% url 'verify_phone_otp' %}" class="otp-form" id="otpForm">
-                        {% csrf_token %}
-                        <input type="text" name="otp" maxlength="6" placeholder="Enter OTP" class="otp-input" required>
-                        <button type="submit" class="otp-submit">Submit</button>
-                    </form>
-                </div>
-            {% endif %}
-        </div>
-        -->
     </div>
 </div>
 
@@ -256,8 +208,6 @@ body {
 const editBtn = document.getElementById('editBtn');
 const saveBtn = document.getElementById('saveBtn');
 const inputs = document.querySelectorAll('#profileForm input');
-const requestOtpBtn = document.getElementById('requestOtpBtn');
-const otpForm = document.getElementById('otpForm');
 
 // Enable editing when "Edit Profile" clicked
 editBtn.addEventListener('click', () => {
@@ -270,17 +220,5 @@ editBtn.addEventListener('click', () => {
     saveBtn.style.display = 'inline-block';
     editBtn.style.display = 'none';
 });
-
-if (requestOtpBtn) {
-    requestOtpBtn.addEventListener('click', () => {
-        fetch("{% url 'resend_phone_otp' %}", {
-            method: "POST",
-            headers: { "X-CSRFToken": "{{ csrf_token }}" }
-        }).then(() => {
-            otpForm.style.display = 'block';
-            requestOtpBtn.style.display = 'none';
-        });
-    });
-}
 </script>
 {% endblock %}

@@ -1,5 +1,4 @@
 import logging
-import random
 import re
 import threading
 
@@ -23,7 +22,7 @@ from django.utils.http import url_has_allowed_host_and_scheme, urlencode, urlsaf
 from django.views.decorators.http import require_POST
 
 from .models import UserProfile
-from .utils import send_otp_sms, send_password_reset_email, send_verification_email
+from .utils import send_password_reset_email, send_verification_email
 
 logger = logging.getLogger(__name__)
 
@@ -85,13 +84,7 @@ def sign_up(request):
             messages.error(request, "User already exists.")
             return render(request, 'sign_up.html')
 
-        # Step 1: Phone OTP
-        # otp = random.randint(100000, 999999)
-        # request.session['phone_otp'] = otp
-        # request.session['phone_user_id'] = user.id
-        # send_otp_sms(phone_number, otp)
-
-        # Step 2: Email verification (async)
+        # Email verification (async)
         threading.Thread(target=send_email_async, args=(user, request)).start()
 
         messages.success(request, "Account created! Check your email inbox for verification.")
@@ -163,36 +156,6 @@ def verify_email(request, uidb64, token):
         return redirect('sign_up')
 
 
-def verify_account(request):
-    if request.method == 'POST':
-        entered_otp = request.POST.get('otp')
-        user_id = request.session.get('phone_user_id')
-        real_otp = request.session.get('phone_otp')
-
-        if str(entered_otp) == str(real_otp):
-            user = User.objects.get(id=user_id)
-            profile = UserProfile.objects.get_or_create(user=user)[0]
-            profile.phone_verified = True
-            profile.save()
-
-            # Activate account if email is verified
-            if profile.email_verified:
-                user.is_active = True
-                user.save()
-
-            if request.user.is_authenticated and request.user.id == user.id:
-                messages.success(request, "Phone Number Verified!")
-                return redirect('profile')
-            else:
-                messages.success(request, "Phone verified! Verify your Email now.")
-                return redirect('login')
-        else:
-            messages.error(request, "Incorrect OTP. Try again.")
-            return redirect('profile')
-
-    return render(request, 'verify_account.html')
-
-
 def send_email_async(user, request):
     try:
         send_verification_email(user, request)
@@ -209,25 +172,6 @@ def resend_verification_email(request):
         messages.success(request, "Verification email sent successfully!")
     else:
         messages.error(request, "We couldn't send the verification email. Please try again later.")
-    return redirect('profile')
-
-
-@login_required
-def resend_phone_otp(request):
-    if request.method == "POST":
-        user = request.user
-        profile = UserProfile.objects.get_or_create(user=user)[0]
-
-        # Generate OTP
-        otp = random.randint(100000, 999999)
-        request.session['phone_otp'] = otp
-        request.session['phone_user_id'] = user.id
-
-        # Send OTP to user's phone
-        messages.success(request, "OTP sent! Check your Phone.")
-        send_otp_sms(profile.phone_number, otp)
-
-        return redirect('profile')
     return redirect('profile')
 
 

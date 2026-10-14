@@ -80,8 +80,3 @@ def send_password_reset_email(user, reset_url):
         print(f"Password reset email sent to {user.email}")
     except Exception as e:
         print(f"Error sending password reset email: {e}")
-
-
-def send_otp_sms(phone_number, otp):
-    print(f"[DEV] OTP for {phone_number} is {otp}")
-    return otp
