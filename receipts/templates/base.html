@@ -162,8 +162,11 @@
 
                     <!-- Logout -->
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'logout' %}" 
-                           onclick="return confirm('Are you sure you want to logout?');">Logout</a>
+                        <form method="post" action="{% url 'logout' %}" class="d-inline"
+                              onsubmit="return confirm('Are you sure you want to logout?');">
+                            {% csrf_token %}
+                            <button type="submit" class="nav-link border-0 bg-transparent">Logout</button>
+                        </form>
                     </li>
                 {% else %}
                     <!-- Login -->

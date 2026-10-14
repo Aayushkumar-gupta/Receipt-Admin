@@ -11,6 +11,7 @@ from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth.views import PasswordResetView
 from django.core import signing
+from django.core.cache import cache
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
 from django.db import IntegrityError, transaction
@@ -18,7 +19,8 @@ from django.db.models import Q
 from django.shortcuts import render, redirect
 from django.urls import reverse, reverse_lazy
 from django.utils.encoding import force_bytes, force_str
-from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
+from django.utils.http import url_has_allowed_host_and_scheme, urlencode, urlsafe_base64_decode, urlsafe_base64_encode
+from django.views.decorators.http import require_POST
 
 from .models import UserProfile
 from .utils import send_otp_sms, send_password_reset_email, send_verification_email
@@ -99,27 +101,36 @@ def sign_up(request):
 
 
 def user_login(request):
+    next_url = request.POST.get('next') or request.GET.get('next', '')
+    login_url = reverse('login') + (f"?{urlencode({'next': next_url})}" if next_url else '')
+
     if request.method == 'POST':
-        username = request.POST.get('username')
-        password = request.POST.get('password')
+        username = request.POST.get('username', '').strip()
+        password = request.POST.get('password', '')
+        fail_key = f"login-fails:{username.lower()}"
+
+        if cache.get(fail_key, 0) >= 5:
+            messages.error(request, "Too many failed login attempts. Please try again in 15 minutes.")
+            return redirect(login_url)
 
         user = authenticate(request, username=username, password=password)
 
         if user is not None:
             logger.info(f"LOGIN SUCCESS for {username}")
-            if user.is_active:
-                auth_login(request, user)
-                return redirect('dashboard')
-            else:
-                messages.error(request, "Account not verified. Please verify your email and phone.")
-        else:
-            messages.error(request, "Invalid username or password")
+            cache.delete(fail_key)
+            auth_login(request, user)
+            if url_has_allowed_host_and_scheme(next_url, allowed_hosts={request.get_host()}, require_https=request.is_secure()):
+                return redirect(next_url)
+            return redirect('dashboard')
 
-        return redirect('login')
+        cache.set(fail_key, cache.get(fail_key, 0) + 1, 15 * 60)
+        messages.error(request, "Invalid username or password")
+        return redirect(login_url)
 
     return render(request, 'login.html')
 
 
+@require_POST
 def user_logout(request):
     auth_logout(request)
     request.session.flush()
@@ -190,15 +201,14 @@ def send_email_async(user, request):
 
 
 @login_required
+@require_POST
 def resend_verification_email(request):
-    if request.method == 'POST':
-        user = request.user
-        try:
-            send_verification_email(user, request)
-            messages.success(request, "Verification email sent successfully!")
-        except Exception as e:
-            messages.error(request, f"Failed to send email: {e}")
-        return redirect('profile')
+    if not cache.add(f"verify-email-sent:{request.user.pk}", True, 60):
+        messages.error(request, "Please wait a minute before requesting another verification email.")
+    elif send_verification_email(request.user, request):
+        messages.success(request, "Verification email sent successfully!")
+    else:
+        messages.error(request, "We couldn't send the verification email. Please try again later.")
     return redirect('profile')
 
 

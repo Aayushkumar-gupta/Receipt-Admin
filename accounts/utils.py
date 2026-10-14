@@ -43,8 +43,10 @@ def send_verification_email(user, request):
             "text": text_content,
         })
         print(f"Email sent to {user.email}, id: {response['id']}")
+        return True
     except Exception as e:
         print(f"Error sending verification email: {e}")
+        return False
 
 
 def send_password_reset_email(user, reset_url):
