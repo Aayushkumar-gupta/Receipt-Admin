@@ -4,7 +4,11 @@ from django.utils.http import urlsafe_base64_encode
 from django.utils.encoding import force_bytes
 from django.conf import settings
 from django.template.loader import render_to_string
+import logging
+
 import resend
+
+logger = logging.getLogger(__name__)
 
 
 def send_verification_email(user, request):
@@ -42,10 +46,10 @@ def send_verification_email(user, request):
             "html": html_content,
             "text": text_content,
         })
-        print(f"Email sent to {user.email}, id: {response['id']}")
+        logger.info(f"Verification email sent to {user.email}, id: {response['id']}")
         return True
-    except Exception as e:
-        print(f"Error sending verification email: {e}")
+    except Exception:
+        logger.exception(f"Error sending verification email to {user.email}")
         return False
 
 
@@ -77,6 +81,6 @@ def send_password_reset_email(user, reset_url):
             "html": html_content,
             "text": text_content,
         })
-        print(f"Password reset email sent to {user.email}")
-    except Exception as e:
-        print(f"Error sending password reset email: {e}")
+        logger.info(f"Password reset email sent to {user.email}")
+    except Exception:
+        logger.exception(f"Error sending password reset email to {user.email}")

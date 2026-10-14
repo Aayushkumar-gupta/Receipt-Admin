@@ -93,12 +93,6 @@
 <div class="form-wrapper">
     <h2 class="form-title">Sign Up</h2>
 
-    {% if messages %}
-        {% for message in messages %}
-            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
-        {% endfor %}
-    {% endif %}
-
     <form method="POST" id="js-signup-form" novalidate>
         {% csrf_token %}
 

@@ -159,8 +159,8 @@ def verify_email(request, uidb64, token):
 def send_email_async(user, request):
     try:
         send_verification_email(user, request)
-    except Exception as e:
-        print("Failed to send verification email:", e)
+    except Exception:
+        logger.exception(f"Failed to send verification email to {user.email}")
 
 
 @login_required

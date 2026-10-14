@@ -15,6 +15,7 @@ import os
 import ssl
 import certifi
 import dj_database_url
+from django.contrib.messages import constants as message_constants
 from django.core.exceptions import ImproperlyConfigured
 
 
@@ -124,7 +125,6 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 PASSWORD_RESET_TIMEOUT = 60 * 60
-PASSWORD_RESET_EMAIL_TEMPLATE = 'password_reset_email.html'
 
 
 # Internationalization
@@ -138,6 +138,7 @@ USE_I18N = True
 
 USE_TZ = True
 
+MESSAGE_TAGS = {message_constants.ERROR: 'danger'}
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
