@@ -17,6 +17,7 @@ env/
 ENV/
 .venv/
 .env/
+.env
 .env.local
 
 # VSCode
@@ -32,7 +33,7 @@ uploads/
 # Node or frontend (if you use it later)
 node_modules/
 
-# Database dumps / migrations
+# Database dumps
 *.sql
 *.dump
 *.backup

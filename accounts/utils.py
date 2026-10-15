@@ -12,21 +12,22 @@ logger = logging.getLogger(__name__)
 
 
 def send_verification_email(user, request):
-    # Generate UID and token
     uid = urlsafe_base64_encode(force_bytes(user.pk))
     token = signing.dumps({"pk": user.pk, "email": user.email}, salt="accounts.verify-email")
     verify_url = request.build_absolute_uri(reverse('verify_email', args=[uid, token]))
 
-    # Email subject
+    # Local development without a Resend key: print the link instead of emailing it.
+    if settings.DEBUG and not settings.RESEND_API_KEY:
+        logger.info(f"RESEND_API_KEY not set; verification link for {user.email}: {verify_url}")
+        return True
+
     subject = "Verify Your Email!"
 
-    # Render HTML email template
     html_content = render_to_string('verify_email.html', {
         'user': user,
         'verify_url': verify_url
     })
 
-    # Fallback plain text
     text_content = f"""
     Hi {user.first_name},
 
@@ -36,7 +37,6 @@ def send_verification_email(user, request):
     Thank you!
     """
 
-    # Send the email
     try:
         resend.api_key = settings.RESEND_API_KEY
         response = resend.Emails.send({
@@ -54,15 +54,17 @@ def send_verification_email(user, request):
 
 
 def send_password_reset_email(user, reset_url):
+    if settings.DEBUG and not settings.RESEND_API_KEY:
+        logger.info(f"RESEND_API_KEY not set; password reset link for {user.email}: {reset_url}")
+        return
+
     subject = "Reset your Receipt Admin password."
 
-    # Render custom HTML email template
     html_content = render_to_string('password_reset_email.html', {
         'user': user,
         'reset_url': reset_url,
     })
 
-    # Plain text fallback
     text_content = f"""
     Hi {user.first_name},
 
