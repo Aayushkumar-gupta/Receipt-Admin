@@ -1,10 +1,9 @@
 import re
+
 from django.core.exceptions import ValidationError
 
-class StrongPasswordValidator:
-    # List of common passwords
-    common_passwords = ["password", "123456", "12345678", "qwerty", "abc123"]
 
+class StrongPasswordValidator:
     def validate(self, password, user=None):
         errors = []
 
@@ -13,15 +12,15 @@ class StrongPasswordValidator:
             errors.append("Password must be at least 8 characters long.")
 
         # Uppercase
-        if not re.search(r'[A-Z]', password):
+        if not re.search(r"[A-Z]", password):
             errors.append("Password must contain at least one uppercase letter.")
 
         # Lowercase
-        if not re.search(r'[a-z]', password):
+        if not re.search(r"[a-z]", password):
             errors.append("Password must contain at least one lowercase letter.")
 
         # Number
-        if not re.search(r'\d', password):
+        if not re.search(r"\d", password):
             errors.append("Password must contain at least one number.")
 
         # Special character
@@ -33,5 +32,6 @@ class StrongPasswordValidator:
 
     def get_help_text(self):
         return (
-            "Your password must be at least 8 characters long, contain at least one uppercase letter, one lowercase letter, one number, one special character, not be entirely numeric."
+            "Your password must be at least 8 characters long and contain at least one uppercase letter, "
+            "one lowercase letter, one number, and one special character."
         )

@@ -130,10 +130,10 @@ h1, h2 {
 
     <form id="goal-form" method="POST" class="mt-3" style="display: none;">
         {% csrf_token %}
-        <input 
-            type="text" 
-            name="goal" 
-            class="form-control" 
+        <input
+            type="text"
+            name="goal"
+            class="form-control"
             style="max-width: 400px; margin: 0 auto; border-radius: 10px;"
             placeholder="Enter your goal or motto"
             value="{{ profile.goal|default:'' }}"

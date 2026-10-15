@@ -3,7 +3,9 @@ import re
 import threading
 
 from django.contrib import messages
-from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
+from django.contrib.auth import authenticate
+from django.contrib.auth import login as auth_login
+from django.contrib.auth import logout as auth_logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib.auth.password_validation import validate_password
@@ -15,10 +17,15 @@ from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
 from django.db import IntegrityError, transaction
 from django.db.models import Q
-from django.shortcuts import render, redirect
+from django.shortcuts import redirect, render
 from django.urls import reverse, reverse_lazy
 from django.utils.encoding import force_bytes, force_str
-from django.utils.http import url_has_allowed_host_and_scheme, urlencode, urlsafe_base64_decode, urlsafe_base64_encode
+from django.utils.http import (
+    url_has_allowed_host_and_scheme,
+    urlencode,
+    urlsafe_base64_decode,
+    urlsafe_base64_encode,
+)
 from django.views.decorators.http import require_POST
 
 from .models import UserProfile
@@ -28,13 +35,13 @@ logger = logging.getLogger(__name__)
 
 
 def sign_up(request):
-    if request.method == 'POST':
-        first_name = request.POST.get('first_name', '').strip()
-        last_name = request.POST.get('last_name', '').strip()
-        email = request.POST.get('email', '').strip()
-        phone_number = request.POST.get('phonenumber', '').strip()
-        password = request.POST.get('password', '')
-        confirm_password = request.POST.get('confirm_password', '')
+    if request.method == "POST":
+        first_name = request.POST.get("first_name", "").strip()
+        last_name = request.POST.get("last_name", "").strip()
+        email = request.POST.get("email", "").strip()
+        phone_number = request.POST.get("phonenumber", "").strip()
+        password = request.POST.get("password", "")
+        confirm_password = request.POST.get("confirm_password", "")
 
         errors = []
         if not first_name or not last_name:
@@ -49,25 +56,37 @@ def sign_up(request):
         except ValidationError:
             errors.append("Enter a valid email address.")
 
-        if not re.fullmatch(r'\d{10,15}', phone_number):
+        if not re.fullmatch(r"\d{10,15}", phone_number):
             errors.append("Phone number must be 10 to 15 digits.")
 
         if password != confirm_password:
             errors.append("Passwords do not match.")
         else:
             try:
-                validate_password(password, user=User(username=email, email=email,
-                                                      first_name=first_name, last_name=last_name))
+                validate_password(
+                    password,
+                    user=User(
+                        username=email,
+                        email=email,
+                        first_name=first_name,
+                        last_name=last_name,
+                    ),
+                )
             except ValidationError as e:
                 errors.extend(e.messages)
 
-        if not errors and User.objects.filter(Q(email__iexact=email) | Q(username__iexact=email)).exists():
+        if (
+            not errors
+            and User.objects.filter(
+                Q(email__iexact=email) | Q(username__iexact=email)
+            ).exists()
+        ):
             errors.append("User already exists.")
 
         if errors:
             for error in errors:
                 messages.error(request, error)
-            return render(request, 'sign_up.html')
+            return render(request, "sign_up.html")
 
         try:
             with transaction.atomic():
@@ -82,28 +101,35 @@ def sign_up(request):
                 UserProfile.objects.create(user=user, phone_number=phone_number)
         except IntegrityError:
             messages.error(request, "User already exists.")
-            return render(request, 'sign_up.html')
+            return render(request, "sign_up.html")
 
         # Email verification (async)
         threading.Thread(target=send_email_async, args=(user, request)).start()
 
-        messages.success(request, "Account created! Check your email inbox for verification.")
-        return redirect('login')
+        messages.success(
+            request, "Account created! Check your email inbox for verification."
+        )
+        return redirect("login")
 
-    return render(request, 'sign_up.html')
+    return render(request, "sign_up.html")
 
 
 def user_login(request):
-    next_url = request.POST.get('next') or request.GET.get('next', '')
-    login_url = reverse('login') + (f"?{urlencode({'next': next_url})}" if next_url else '')
+    next_url = request.POST.get("next") or request.GET.get("next", "")
+    login_url = reverse("login") + (
+        f"?{urlencode({'next': next_url})}" if next_url else ""
+    )
 
-    if request.method == 'POST':
-        username = request.POST.get('username', '').strip()
-        password = request.POST.get('password', '')
+    if request.method == "POST":
+        username = request.POST.get("username", "").strip()
+        password = request.POST.get("password", "")
         fail_key = f"login-fails:{username.lower()}"
 
         if cache.get(fail_key, 0) >= 5:
-            messages.error(request, "Too many failed login attempts. Please try again in 15 minutes.")
+            messages.error(
+                request,
+                "Too many failed login attempts. Please try again in 15 minutes.",
+            )
             return redirect(login_url)
 
         user = authenticate(request, username=username, password=password)
@@ -112,34 +138,46 @@ def user_login(request):
             logger.info(f"LOGIN SUCCESS for {username}")
             cache.delete(fail_key)
             auth_login(request, user)
-            if url_has_allowed_host_and_scheme(next_url, allowed_hosts={request.get_host()}, require_https=request.is_secure()):
+            if url_has_allowed_host_and_scheme(
+                next_url,
+                allowed_hosts={request.get_host()},
+                require_https=request.is_secure(),
+            ):
                 return redirect(next_url)
-            return redirect('dashboard')
+            return redirect("dashboard")
 
         cache.set(fail_key, cache.get(fail_key, 0) + 1, 15 * 60)
         messages.error(request, "Invalid username or password")
         return redirect(login_url)
 
-    return render(request, 'login.html')
+    return render(request, "login.html")
 
 
 @require_POST
 def user_logout(request):
     auth_logout(request)
     request.session.flush()
-    return redirect('home')
+    return redirect("home")
 
 
 def forgot_password(request):
-    return redirect('password_reset')
+    return redirect("password_reset")
 
 
 def verify_email(request, uidb64, token):
     try:
         uid = force_str(urlsafe_base64_decode(uidb64))
         user = User.objects.get(pk=uid)
-        data = signing.loads(token, salt="accounts.verify-email", max_age=60 * 60 * 24 * 3)
-    except (User.DoesNotExist, signing.BadSignature, ValueError, TypeError, OverflowError):
+        data = signing.loads(
+            token, salt="accounts.verify-email", max_age=60 * 60 * 24 * 3
+        )
+    except (
+        User.DoesNotExist,
+        signing.BadSignature,
+        ValueError,
+        TypeError,
+        OverflowError,
+    ):
         user = None
 
     if user and data["pk"] == user.pk and data["email"] == user.email:
@@ -148,12 +186,12 @@ def verify_email(request, uidb64, token):
         profile.save()
         messages.success(request, "Email verified successfully!")
         if request.user.is_authenticated and request.user.id == user.id:
-            return redirect('profile')
+            return redirect("profile")
         else:
-            return redirect('login')
+            return redirect("login")
     else:
         messages.error(request, "Invalid or expired verification link.")
-        return redirect('sign_up')
+        return redirect("sign_up")
 
 
 def send_email_async(user, request):
@@ -167,17 +205,22 @@ def send_email_async(user, request):
 @require_POST
 def resend_verification_email(request):
     if not cache.add(f"verify-email-sent:{request.user.pk}", True, 60):
-        messages.error(request, "Please wait a minute before requesting another verification email.")
+        messages.error(
+            request,
+            "Please wait a minute before requesting another verification email.",
+        )
     elif send_verification_email(request.user, request):
         messages.success(request, "Verification email sent successfully!")
     else:
-        messages.error(request, "We couldn't send the verification email. Please try again later.")
-    return redirect('profile')
+        messages.error(
+            request, "We couldn't send the verification email. Please try again later."
+        )
+    return redirect("profile")
 
 
 class CustomPasswordResetView(PasswordResetView):
-    template_name = 'password_reset.html'
-    success_url = reverse_lazy('password_reset_done')
+    template_name = "password_reset.html"
+    success_url = reverse_lazy("password_reset_done")
 
     def form_valid(self, form):
         email = form.cleaned_data["email"]
@@ -188,7 +231,9 @@ class CustomPasswordResetView(PasswordResetView):
             token = default_token_generator.make_token(user)
             # Build full reset URL
             reset_url = self.request.build_absolute_uri(
-                reverse('password_reset_confirm', kwargs={'uidb64': uid, 'token': token})
+                reverse(
+                    "password_reset_confirm", kwargs={"uidb64": uid, "token": token}
+                )
             )
             # Send custom email with reset URL
             send_password_reset_email(user, reset_url)

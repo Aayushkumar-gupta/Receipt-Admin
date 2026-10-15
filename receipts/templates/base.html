@@ -25,7 +25,7 @@
 
         /* Navbar */
         .navbar {
-            background: rgba(240, 248, 255, 0.6); 
+            background: rgba(240, 248, 255, 0.6);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
             border-bottom: 1px solid rgba(255, 255, 255, 0.2);
@@ -97,7 +97,7 @@
 <!-- Navbar -->
 <nav class="navbar navbar-expand-lg sticky-top">
     <div class="container d-flex align-items-center">
-        <a class="navbar-brand d-flex align-items-center" 
+        <a class="navbar-brand d-flex align-items-center"
            href="{% if user.is_authenticated %}{% url 'dashboard' %}{% else %}{% url 'home' %}{% endif %}">
             <img src="{% static 'receipts/Logo.png' %}" alt="Logo" class="logo-img">
             Receipt Admin
@@ -111,7 +111,7 @@
                 {% if not user.is_authenticated %}
                 <!-- Home -->
                 <li class="nav-item">
-                    <a class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}" 
+                    <a class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}"
                        href="{% url 'home' %}">Home</a>
                 </li>
                 {% endif %}
@@ -119,39 +119,39 @@
                 {% if user.is_authenticated %}
                     <!-- Dashboard -->
                     <li class="nav-item">
-                        <a class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}" 
+                        <a class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}"
                            href="{% url 'dashboard' %}">Dashboard</a>
                     </li>
 
                     <!-- Create Receipt -->
                     <li class="nav-item">
-                        <a class="nav-link {% if request.resolver_match.url_name == 'create_receipt' %}active{% endif %}" 
+                        <a class="nav-link {% if request.resolver_match.url_name == 'create_receipt' %}active{% endif %}"
                            href="{% url 'create_receipt' %}">Create Receipt</a>
                     </li>
 
                     <!-- Staging Area -->
                     <li class="nav-item">
-                        <a class="nav-link {% if request.resolver_match.url_name == 'staging_area' %}active{% endif %}" 
+                        <a class="nav-link {% if request.resolver_match.url_name == 'staging_area' %}active{% endif %}"
                            href="{% url 'staging_area' %}">Staging Area</a>
                     </li>
 
                     <!-- My Receipts -->
                     <li class="nav-item">
-                        <a class="nav-link {% if request.resolver_match.url_name == 'my_receipts' %}active{% endif %}" 
+                        <a class="nav-link {% if request.resolver_match.url_name == 'my_receipts' %}active{% endif %}"
                            href="{% url 'my_receipts' %}">My Receipts</a>
                     </li>
                 {% endif %}
 
                 <!-- About -->
                 <li class="nav-item">
-                    <a class="nav-link {% if request.resolver_match.url_name == 'about' %}active{% endif %}" 
+                    <a class="nav-link {% if request.resolver_match.url_name == 'about' %}active{% endif %}"
                        href="{% url 'about' %}">About</a>
                 </li>
 
                 {% if user.is_authenticated %}
                     <!-- Profile -->
                     <li class="nav-item">
-                        <a class="nav-link {% if request.resolver_match.url_name == 'profile' %}active{% endif %}" 
+                        <a class="nav-link {% if request.resolver_match.url_name == 'profile' %}active{% endif %}"
                            href="{% url 'profile' %}">
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-person" viewBox="0 0 16 16">
                                 <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>
@@ -171,7 +171,7 @@
                 {% else %}
                     <!-- Login -->
                     <li class="nav-item">
-                        <a class="nav-link {% if request.resolver_match.url_name == 'login' %}active{% endif %}" 
+                        <a class="nav-link {% if request.resolver_match.url_name == 'login' %}active{% endif %}"
                            href="{% url 'login' %}">Login</a>
                         </li>
                 {% endif %}
@@ -187,7 +187,7 @@
         {% endfor %}
       </div>
     {% endif %}
-    
+
     <!-- Page Content -->
     <div class="container content-wrapper">
         {% block content %}
