@@ -5,10 +5,10 @@ from django.contrib.auth.models import User
 from django.db import models, transaction
 
 
-class Receipts(models.Model):
+class Receipt(models.Model):
     refund = models.BooleanField(default=False)
     is_staged = models.BooleanField(default=False)
-    user_id = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
     invoice_number = models.CharField(max_length=20, blank=True, unique=True)
     seller_name = models.CharField(max_length=301)
     seller_address = models.TextField(max_length=100)
@@ -38,9 +38,7 @@ class Receipts(models.Model):
 
 
 class ReceiptItem(models.Model):
-    receipt = models.ForeignKey(
-        Receipts, related_name="items", on_delete=models.CASCADE
-    )
+    receipt = models.ForeignKey(Receipt, related_name="items", on_delete=models.CASCADE)
     description = models.CharField(max_length=200)
     quantity = models.PositiveIntegerField()
     unit_price = models.DecimalField(max_digits=10, decimal_places=2)

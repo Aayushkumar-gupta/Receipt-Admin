@@ -16,7 +16,7 @@ from xhtml2pdf import pisa
 
 from accounts.models import UserProfile
 
-from .models import ReceiptItem, Receipts
+from .models import Receipt, ReceiptItem
 
 
 def home(request):
@@ -38,7 +38,7 @@ def dashboard(request):
             messages.success(request, "Your goal has been updated!")
         return redirect("dashboard")
 
-    receipts = Receipts.objects.filter(user_id=user)
+    receipts = Receipt.objects.filter(user=user)
 
     total_receipts = receipts.count()
     total_revenue = sum(r.sub_total for r in receipts if not r.refund and r.is_staged)
@@ -59,7 +59,7 @@ def dashboard(request):
 @login_required
 def my_receipts(request):
     search_query = request.GET.get("search", "")
-    receipts = Receipts.objects.filter(is_staged=True, user_id=request.user)
+    receipts = Receipt.objects.filter(is_staged=True, user=request.user)
     if search_query:
         receipts = receipts.filter(invoice_number__icontains=search_query)
     receipts = receipts.order_by("-date")
@@ -79,7 +79,7 @@ def profile(request):
 @login_required
 def staging_area(request):
     search_query = request.GET.get("search", "")
-    receipts = Receipts.objects.filter(is_staged=False, user_id=request.user)
+    receipts = Receipt.objects.filter(is_staged=False, user=request.user)
     if search_query:
         receipts = receipts.filter(invoice_number__icontains=search_query)
     receipts = receipts.order_by("-date")
@@ -88,7 +88,7 @@ def staging_area(request):
 
 @login_required
 def view_receipt_pdf(request, pk):
-    receipt = get_object_or_404(Receipts, pk=pk, user_id=request.user)
+    receipt = get_object_or_404(Receipt, pk=pk, user=request.user)
     template = get_template("receipt_pdf.html")
     html = template.render({"receipt": receipt})
 
@@ -106,7 +106,7 @@ def view_receipt_pdf(request, pk):
 
 @login_required
 def receipt_pdf(request, pk):
-    receipt = get_object_or_404(Receipts, pk=pk, user_id=request.user)
+    receipt = get_object_or_404(Receipt, pk=pk, user=request.user)
     template = get_template("receipt_pdf.html")
     html = template.render({"receipt": receipt, "is_staged": receipt.is_staged})
 
@@ -143,8 +143,8 @@ def create_receipt(request):
     seller_address = profile.address or "Default Address"
 
     if request.method == "POST":
-        receipt = Receipts(
-            user_id=request.user,
+        receipt = Receipt(
+            user=request.user,
             seller_name=seller_name,
             seller_address=seller_address,
             seller_phone_number=seller_phone,
@@ -207,7 +207,7 @@ def create_receipt(request):
 @login_required
 @require_POST
 def stage(request, pk):
-    receipt = get_object_or_404(Receipts, pk=pk, user_id=request.user, is_staged=False)
+    receipt = get_object_or_404(Receipt, pk=pk, user=request.user, is_staged=False)
     receipt.is_staged = True
     receipt.save()
     messages.success(request, "Staging Successful!")
@@ -216,7 +216,7 @@ def stage(request, pk):
 
 @login_required
 def staging_edit(request, pk):
-    receipt = get_object_or_404(Receipts, pk=pk, user_id=request.user)
+    receipt = get_object_or_404(Receipt, pk=pk, user=request.user)
 
     # prevent editing staged/confirmed receipts
     if receipt.is_staged:
@@ -290,7 +290,7 @@ def staging_edit(request, pk):
 @login_required
 @require_POST
 def staging_delete(request, pk):
-    receipt = get_object_or_404(Receipts, pk=pk, user_id=request.user, is_staged=False)
+    receipt = get_object_or_404(Receipt, pk=pk, user=request.user, is_staged=False)
     receipt.delete()
     messages.error(request, "Receipt Deleted.")
     return redirect("staging_area")
@@ -374,7 +374,7 @@ def update_profile(request):
 @require_POST
 def refund(request, pk):
     receipt = get_object_or_404(
-        Receipts, pk=pk, user_id=request.user, is_staged=True, refund=False
+        Receipt, pk=pk, user=request.user, is_staged=True, refund=False
     )
     receipt.refund = True
     receipt.save()
@@ -382,5 +382,5 @@ def refund(request, pk):
     return redirect("my_receipts")
 
 
-def test(request):
+def health(request):
     return JsonResponse({"status": "ok"})

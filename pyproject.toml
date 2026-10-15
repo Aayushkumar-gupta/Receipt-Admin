@@ -5,5 +5,5 @@ extend-exclude = ["*/migrations/*"]
 
 [tool.ruff.lint]
 select = ["E", "W", "F", "I", "B", "UP", "DJ", "SIM", "RUF"]
-# The formatter handles line length; DJ001 (null=True on CharField) needs a migration and is fixed separately.
-ignore = ["E501", "DJ001"]
+# The formatter handles line length.
+ignore = ["E501"]
