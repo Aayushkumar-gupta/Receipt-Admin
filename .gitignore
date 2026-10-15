@@ -40,3 +40,7 @@ node_modules/
 
 # collectstatic output (rebuilt on deploy)
 staticfiles/
+
+# Coverage reports
+.coverage
+htmlcov/

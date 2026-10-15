@@ -7,3 +7,11 @@ extend-exclude = ["*/migrations/*"]
 select = ["E", "W", "F", "I", "B", "UP", "DJ", "SIM", "RUF"]
 # The formatter handles line length.
 ignore = ["E501"]
+
+[tool.coverage.run]
+source = ["accounts", "receipts", "ReceiptAdmin"]
+omit = ["*/migrations/*", "*/tests.py", "ReceiptAdmin/asgi.py", "ReceiptAdmin/wsgi.py"]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = true
