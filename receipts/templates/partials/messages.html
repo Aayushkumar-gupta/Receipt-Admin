@@ -1,0 +1,7 @@
+{% if messages %}
+<div class="{% if user.is_authenticated %}px-4 sm:px-6 lg:px-8{% else %}page{% endif %} mt-4 space-y-2">
+    {% for message in messages %}
+    <p class="message" data-level="{{ message.level_tag }}"{% if message.level_tag == "danger" %} role="alert"{% endif %}>{{ message }}</p>
+    {% endfor %}
+</div>
+{% endif %}

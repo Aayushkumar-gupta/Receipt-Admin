@@ -1,0 +1,15 @@
+User-agent: *
+Disallow: /admin/
+Disallow: /accounts/verify-email/
+Disallow: /create/
+Disallow: /dashboard/
+Disallow: /download/
+Disallow: /my_receipts/
+Disallow: /password_reset/
+Disallow: /profile/
+Disallow: /reset/
+Disallow: /staging-edit/
+Disallow: /staging_area/
+Disallow: /view/
+
+Sitemap: {{ request.scheme }}://{{ request.get_host }}{% url 'sitemap' %}

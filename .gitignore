@@ -26,11 +26,11 @@ ENV/
 # MacOS
 .DS_Store
 
-# Media/uploads (if any)
+# Media/uploads
 media/
 uploads/
 
-# Node or frontend (if you use it later)
+# Node or frontend
 node_modules/
 
 # Database dumps
@@ -38,9 +38,12 @@ node_modules/
 *.dump
 *.backup
 
-# collectstatic output (rebuilt on deploy)
+# collectstatic output
 staticfiles/
 
 # Coverage reports
 .coverage
 htmlcov/
+
+# Tailwind standalone CLI binary
+bin/

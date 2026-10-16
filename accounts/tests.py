@@ -166,7 +166,7 @@ class SignUpTests(TestCase):
         response = self.post(email="not-an-email")
 
         self.assertContains(response, "Enter a valid email address.", count=1)
-        self.assertContains(response, 'class="alert alert-danger"')
+        self.assertContains(response, 'data-level="danger"')
 
 
 class LoginTests(TestCase):

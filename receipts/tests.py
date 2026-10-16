@@ -95,6 +95,48 @@ class HealthCheckTests(TestCase):
         self.assertEqual(self.client.get("/test/").status_code, 404)
 
 
+class SeoTests(TestCase):
+    def test_robots_txt_blocks_private_pages_and_points_to_sitemap(self):
+        response = self.client.get(reverse("robots"))
+
+        self.assertEqual(response["Content-Type"], "text/plain")
+        self.assertContains(response, "Disallow: /dashboard/")
+        self.assertContains(response, "Sitemap: http://testserver/sitemap.xml")
+
+    def test_sitemap_lists_only_public_pages(self):
+        response = self.client.get(reverse("sitemap"))
+
+        for name in ("home", "about", "sign_up", "login"):
+            with self.subTest(name):
+                self.assertContains(response, f"<loc>http://testserver{reverse(name)}")
+        self.assertNotContains(response, reverse("dashboard"))
+
+    def test_favicon_redirects_to_the_static_icon(self):
+        response = self.client.get("/favicon.ico")
+
+        self.assertEqual(response.status_code, 301)
+        self.assertTrue(response["Location"].endswith("receipts/favicon.ico"))
+
+    def test_home_has_search_and_social_metadata(self):
+        response = self.client.get(reverse("home"))
+
+        self.assertContains(response, "<title>Receipt Admin | Receipts for sellers")
+        self.assertContains(response, '<meta name="robots" content="index, follow">')
+        self.assertContains(
+            response, '<link rel="canonical" href="http://testserver/">'
+        )
+        self.assertContains(response, '<meta property="og:image"')
+        self.assertContains(response, '"@type": "WebApplication"')
+
+    def test_private_pages_are_not_indexed(self):
+        self.client.force_login(make_user())
+
+        for name in ("dashboard", "password_reset"):
+            with self.subTest(name):
+                response = self.client.get(reverse(name))
+                self.assertContains(response, '<meta name="robots" content="noindex">')
+
+
 class PublicPagesTests(TestCase):
     def test_public_pages_load(self):
         for name in ("home", "about", "login", "sign_up", "password_reset"):

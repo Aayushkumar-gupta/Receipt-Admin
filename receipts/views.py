@@ -11,6 +11,7 @@ from django.db.models import Q
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.loader import get_template
+from django.templatetags.static import static
 from django.views.decorators.http import require_POST
 from xhtml2pdf import pisa
 
@@ -384,3 +385,7 @@ def refund(request, pk):
 
 def health(request):
     return JsonResponse({"status": "ok"})
+
+
+def favicon(request):
+    return redirect(static("receipts/favicon.ico"), permanent=True)
