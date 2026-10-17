@@ -1,0 +1,164 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block robots %}noindex{% endblock %}
+{% block legacy_css %}{% endblock %}
+
+{% block content %}
+<div class="editor-page">
+    <h1 class="text-3xl font-bold tracking-tight sm:text-4xl">{% block heading %}{% endblock %}</h1>
+
+    <form
+        method="post"
+        action="{% block form_action %}{% endblock %}"
+        class="editor-grid"
+        data-receipt-form
+        data-validate
+        data-items="{{ request.POST.items|default:'' }}"
+        novalidate
+    >
+        {% csrf_token %}
+        <input type="hidden" name="items" id="items-input">
+
+        <div class="space-y-6">
+            <section class="panel" aria-labelledby="buyer-title">
+                <h2 id="buyer-title" class="panel-title">Buyer details</h2>
+                <div class="mt-5 grid gap-x-4 gap-y-5 sm:grid-cols-2">
+                    <div>
+                        <label for="buyer_name" class="label">Name</label>
+                        <input
+                            type="text"
+                            id="buyer_name"
+                            name="buyer_name"
+                            value="{% block buyer_name %}{{ request.POST.buyer_name }}{% endblock %}"
+                            class="field mt-1.5"
+                            maxlength="301"
+                            required
+                            data-required-message="Enter the buyer's name."
+                            aria-describedby="buyer_name-error"
+                        >
+                        <p id="buyer_name-error" class="field-error" hidden></p>
+                    </div>
+
+                    <div>
+                        <label for="buyer_phone_number" class="label">Phone number</label>
+                        <input
+                            type="tel"
+                            id="buyer_phone_number"
+                            name="buyer_phone_number"
+                            value="{% block buyer_phone %}{{ request.POST.buyer_phone_number }}{% endblock %}"
+                            class="field mt-1.5"
+                            inputmode="numeric"
+                            pattern="\d{10,20}"
+                            required
+                            data-required-message="Enter the buyer's phone number."
+                            data-pattern-message="Enter 10 to 20 digits, with no spaces or symbols."
+                            aria-describedby="buyer_phone_number-error"
+                        >
+                        <p id="buyer_phone_number-error" class="field-error" hidden></p>
+                    </div>
+
+                    <div>
+                        <label for="buyer_email" class="label">Email (optional)</label>
+                        <input
+                            type="email"
+                            id="buyer_email"
+                            name="buyer_email"
+                            value="{% block buyer_email %}{{ request.POST.buyer_email }}{% endblock %}"
+                            class="field mt-1.5"
+                            inputmode="email"
+                            maxlength="254"
+                            aria-describedby="buyer_email-error"
+                        >
+                        <p id="buyer_email-error" class="field-error" hidden></p>
+                    </div>
+
+                    <div>
+                        <label for="buyer_address" class="label">Address (optional)</label>
+                        <input
+                            type="text"
+                            id="buyer_address"
+                            name="buyer_address"
+                            value="{% block buyer_address %}{{ request.POST.buyer_address }}{% endblock %}"
+                            class="field mt-1.5"
+                            maxlength="100"
+                            aria-describedby="buyer_address-error"
+                        >
+                        <p id="buyer_address-error" class="field-error" hidden></p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="panel" aria-labelledby="items-title">
+                <h2 id="items-title" class="panel-title">Items</h2>
+                <div class="items-head" aria-hidden="true">
+                    <span>Item</span>
+                    <span>Qty</span>
+                    <span>Unit price</span>
+                    <span class="text-right">Amount</span>
+                </div>
+                <div id="item-rows" class="item-rows"></div>
+                <button type="button" class="btn-secondary mt-4" data-add-item>
+                    {% include "partials/icons/plus.html" with class="size-4" %}
+                    Add item
+                </button>
+            </section>
+        </div>
+
+        <aside class="panel summary-panel" aria-labelledby="summary-title">
+            <h2 id="summary-title" class="panel-title">Summary</h2>
+            <dl class="mt-5 space-y-3">
+                <div class="flex justify-between gap-4">
+                    <dt class="text-ink-2">Subtotal</dt>
+                    <dd data-total="subtotal">$0.00</dd>
+                </div>
+                <div class="flex items-center justify-between gap-4">
+                    <dt><label for="tax_rate" class="text-ink-2">Tax rate</label></dt>
+                    <dd class="flex items-center gap-2">
+                        <input
+                            type="number"
+                            id="tax_rate"
+                            name="tax_rate"
+                            value="{% block tax_rate %}{% endblock %}"
+                            class="field w-24 text-right"
+                            inputmode="decimal"
+                            min="0"
+                            max="100"
+                            step="0.01"
+                            required
+                            data-required-message="Enter a tax rate, or 0 for no tax."
+                            data-min-message="The tax rate can't be negative."
+                            data-max-message="The tax rate can't be more than 100."
+                            data-step-message="Use up to 2 decimal places."
+                            aria-describedby="tax_rate-error"
+                        >
+                        <span class="text-ink-2">%</span>
+                    </dd>
+                </div>
+                <p id="tax_rate-error" class="field-error" hidden></p>
+                <div class="flex justify-between gap-4">
+                    <dt class="text-ink-2">Tax</dt>
+                    <dd data-total="tax">$0.00</dd>
+                </div>
+                <div class="flex justify-between gap-4 border-t border-line pt-3 text-lg font-semibold">
+                    <dt>Total</dt>
+                    <dd data-total="total" aria-live="polite">$0.00</dd>
+                </div>
+            </dl>
+            <div class="mt-6 flex flex-col gap-3">
+                {% block actions %}{% endblock %}
+            </div>
+        </aside>
+    </form>
+</div>
+
+<template id="item-row-template">
+    {% include "partials/receipt_item_row.html" %}
+</template>
+{% block initial_items %}{% endblock %}
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'receipts/js/forms.js' %}" defer></script>
+<script src="{% static 'receipts/js/receipt_form.js' %}" defer></script>
+{% endblock %}

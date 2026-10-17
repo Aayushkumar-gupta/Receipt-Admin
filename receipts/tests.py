@@ -264,8 +264,18 @@ class CreateReceiptTests(TestCase):
     def post(self, **overrides):
         return self.client.post(self.url, {**RECEIPT_FORM, **overrides})
 
-    def test_form_page_loads(self):
-        self.assertTemplateUsed(self.client.get(self.url), "receipt_form.html")
+    def test_form_page_loads_with_the_default_tax_rate(self):
+        response = self.client.get(self.url)
+
+        self.assertTemplateUsed(response, "receipt_form.html")
+        self.assertContains(response, 'value="8.25"')
+
+    def test_rejected_form_keeps_what_was_entered(self):
+        response = self.post(buyer_name="Bob Ray", tax_rate="250")
+
+        self.assertContains(response, 'value="Bob Ray"')
+        self.assertContains(response, 'value="250"')
+        self.assertContains(response, "&quot;description&quot;: &quot;Widget&quot;")
 
     def test_requires_a_verified_email(self):
         UserProfile.objects.filter(user=self.user).update(email_verified=False)
@@ -369,6 +379,18 @@ class StagingEditTests(TestCase):
         self.receipt = make_receipt(self.user)
         self.url = reverse("staging_edit", args=[self.receipt.pk])
         self.client.force_login(self.user)
+
+    def test_form_shows_saved_values_without_placeholders(self):
+        Receipt.objects.filter(pk=self.receipt.pk).update(
+            buyer_email="N/A", tax_rate=Decimal("0.00")
+        )
+
+        response = self.client.get(self.url)
+
+        self.assertContains(response, 'value="Bob"')
+        self.assertContains(response, 'value="0.00"')
+        self.assertNotContains(response, 'value="N/A"')
+        self.assertContains(response, 'id="items-data"')
 
     def post(self, **overrides):
         return self.client.post(self.url, {**RECEIPT_FORM, **overrides})

@@ -1,0 +1,57 @@
+<div class="item-row">
+    <label class="item-description">
+        <span class="label item-label">Item</span>
+        <input
+            type="text"
+            class="field"
+            data-item="description"
+            maxlength="200"
+            required
+            data-required-message="Describe the item."
+        >
+        <span class="field-error" hidden></span>
+    </label>
+
+    <label>
+        <span class="label item-label">Qty</span>
+        <input
+            type="number"
+            class="field text-right"
+            data-item="quantity"
+            inputmode="numeric"
+            min="1"
+            step="1"
+            required
+            data-required-message="Enter a quantity."
+            data-min-message="Use 1 or more."
+            data-step-message="Use a whole number."
+        >
+        <span class="field-error" hidden></span>
+    </label>
+
+    <label>
+        <span class="label item-label">Unit price</span>
+        <input
+            type="number"
+            class="field text-right"
+            data-item="unit_price"
+            inputmode="decimal"
+            min="0"
+            step="0.01"
+            required
+            data-required-message="Enter a price."
+            data-min-message="The price can't be negative."
+            data-step-message="Use up to 2 decimal places."
+        >
+        <span class="field-error" hidden></span>
+    </label>
+
+    <div>
+        <span class="label item-label">Amount</span>
+        <output class="item-amount" data-item="amount">$0.00</output>
+    </div>
+
+    <button type="button" class="remove-item" data-remove-item aria-label="Remove item">
+        {% include "partials/icons/close.html" with class="size-4" %}
+    </button>
+</div>

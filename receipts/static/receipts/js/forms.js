@@ -1,6 +1,10 @@
 (function () {
     function errorFor(input) {
-        return document.getElementById(input.id + "-error");
+        if (input.id) {
+            return document.getElementById(input.id + "-error");
+        }
+        var label = input.closest("label");
+        return label ? label.querySelector(".field-error") : null;
     }
 
     function showError(input, message) {
@@ -24,6 +28,9 @@
     function problemWith(input) {
         var value = input.value.trim();
         var validity = input.validity;
+        if (validity.badInput) {
+            return "Enter a number.";
+        }
         if (validity.valueMissing || (input.required && !value)) {
             return input.dataset.requiredMessage || "This field is required.";
         }
@@ -32,6 +39,15 @@
         }
         if (validity.patternMismatch) {
             return input.dataset.patternMessage || "Check the format of this field.";
+        }
+        if (validity.rangeUnderflow) {
+            return input.dataset.minMessage || "Enter " + input.min + " or more.";
+        }
+        if (validity.rangeOverflow) {
+            return input.dataset.maxMessage || "Enter " + input.max + " or less.";
+        }
+        if (validity.stepMismatch) {
+            return input.dataset.stepMessage || "Check the value of this field.";
         }
         if (input.minLength > 0 && input.value.length < input.minLength) {
             return "Use at least " + input.minLength + " characters.";
