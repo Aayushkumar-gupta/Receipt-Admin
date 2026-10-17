@@ -1,7 +1,8 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block seo %}{% include "partials/seo.html" with title="Receipt Admin | Receipts for sellers without a shop" description="Receipt Admin helps Instagram sellers, Facebook Marketplace sellers and small vendors create PDF receipts for their sales and keep every sale on record. Free to sign up." %}{% endblock %}
+{% block title %}Receipt Admin | Receipts for sellers without a shop{% endblock %}
+{% block description %}Receipt Admin helps Instagram sellers, Facebook Marketplace sellers and small vendors create PDF receipts for their sales and keep every sale on record. Free to sign up.{% endblock %}
 
 {% block legacy_css %}{% endblock %}
 
@@ -27,22 +28,28 @@
             <h1 id="hero-title" class="text-5xl font-bold tracking-tight text-balance sm:text-6xl 2xl:text-7xl">
                 Every sale gets a receipt.
             </h1>
-            <p class="mt-5 max-w-2xl text-lg leading-relaxed text-ink-2 sm:text-xl 2xl:text-2xl 2xl:max-w-3xl">
-                Sold something on Instagram or Marketplace? Write it up in under a minute, send the buyer a PDF receipt,
-                and keep the record for tax season.
+            <p class="mt-5 max-w-2xl text-lg leading-relaxed text-ink-2 sm:text-xl 2xl:max-w-3xl 2xl:text-2xl">
+                Sold something on Instagram or Marketplace? Write it up in under a minute,
+                send the buyer a PDF receipt, and keep the record for tax season.
             </p>
         </div>
 
         <figure class="mt-10 pb-12 sm:mt-12 lg:pb-16">
-            <div class="overflow-hidden rounded-xl border border-line bg-canvas shadow-[0_12px_40px_-12px_rgba(15,23,42,0.18)]">
-                <div class="flex h-10 items-center gap-2 border-b border-line bg-surface px-4" aria-hidden="true">
-                    <span class="size-2.5 rounded-full bg-line"></span><span class="size-2.5 rounded-full bg-line"></span><span class="size-2.5 rounded-full bg-line"></span>
+            <div class="browser-frame">
+                <div class="browser-bar" aria-hidden="true">
+                    <span class="browser-dot"></span>
+                    <span class="browser-dot"></span>
+                    <span class="browser-dot"></span>
                     <span class="ml-3 text-sm text-ink-2">Dashboard</span>
                 </div>
-
-                <img src="{% static 'receipts/Dashboard.webp' %}" width="1600" height="1286" decoding="async"
-                     alt="Receipt Admin dashboard showing total receipts, revenue, pending receipts and recent receipts"
-                     class="block aspect-16/10 w-full object-cover object-top">
+                <img
+                    src="{% static 'receipts/Dashboard.webp' %}"
+                    width="1600"
+                    height="1286"
+                    decoding="async"
+                    alt="Receipt Admin dashboard showing total receipts, revenue, pending receipts and recent receipts"
+                    class="block aspect-16/10 w-full object-cover object-top"
+                >
             </div>
         </figure>
     </div>
@@ -50,59 +57,82 @@
 
 <section aria-labelledby="sellers-title">
     <div class="page py-16 lg:py-20">
-        <h2 id="sellers-title" class="max-w-xl text-3xl font-bold tracking-tight sm:text-4xl">Made for every kind of seller</h2>
-        <p class="mt-4 max-w-2xl text-ink-2">You don't need a shop or accounting software. If you sell things, you can give your buyers a proper receipt.</p>
+        <h2 id="sellers-title" class="section-title">Made for every kind of seller</h2>
+        <p class="mt-4 max-w-2xl text-ink-2">
+            You don't need a shop or accounting software. If you sell things,
+            you can give your buyers a proper receipt.
+        </p>
+
         <ul class="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <li class="rounded-xl bg-accent-soft p-6">
-                <span class="flex size-10 items-center justify-center rounded-lg bg-surface text-brand">{% include "partials/icons/chat.html" %}</span>
+            <li class="seller-card">
+                <span class="seller-icon">{% include "partials/icons/chat.html" %}</span>
                 <h3 class="mt-4 font-semibold">Instagram sellers</h3>
-                <p class="mt-2 text-ink-2">Close the sale in your DMs, then send the buyer a receipt they can keep.</p>
+                <p class="mt-2 text-ink-2">
+                    Close the sale in your DMs, then send the buyer a receipt they can keep.
+                </p>
             </li>
-            <li class="rounded-xl bg-accent-soft p-6">
-                <span class="flex size-10 items-center justify-center rounded-lg bg-surface text-brand">{% include "partials/icons/tag.html" %}</span>
+            <li class="seller-card">
+                <span class="seller-icon">{% include "partials/icons/tag.html" %}</span>
                 <h3 class="mt-4 font-semibold">Marketplace sellers</h3>
-                <p class="mt-2 text-ink-2">Sold a sofa, a bike or a phone on Facebook Marketplace? Hand over a receipt with it.</p>
+                <p class="mt-2 text-ink-2">
+                    Sold a sofa, a bike or a phone on Facebook Marketplace? Hand over a receipt with it.
+                </p>
             </li>
-            <li class="rounded-xl bg-accent-soft p-6">
-                <span class="flex size-10 items-center justify-center rounded-lg bg-surface text-brand">{% include "partials/icons/stall.html" %}</span>
+            <li class="seller-card">
+                <span class="seller-icon">{% include "partials/icons/stall.html" %}</span>
                 <h3 class="mt-4 font-semibold">Local vendors</h3>
-                <p class="mt-2 text-ink-2">Selling at a weekend market or a local meetup? Record each sale on the spot from your phone.</p>
+                <p class="mt-2 text-ink-2">
+                    Selling at a weekend market or a local meetup? Record each sale on the spot from your phone.
+                </p>
             </li>
-            <li class="rounded-xl bg-accent-soft p-6">
-                <span class="flex size-10 items-center justify-center rounded-lg bg-surface text-brand">{% include "partials/icons/bag.html" %}</span>
+            <li class="seller-card">
+                <span class="seller-icon">{% include "partials/icons/bag.html" %}</span>
                 <h3 class="mt-4 font-semibold">Small businesses</h3>
-                <p class="mt-2 text-ink-2">Keep every sale in one place, with revenue and refunds at a glance.</p>
+                <p class="mt-2 text-ink-2">
+                    Keep every sale in one place, with revenue and refunds at a glance.
+                </p>
             </li>
         </ul>
+
         <p class="mt-10 max-w-2xl text-ink-2">
-            It works for anything you sell, from shoes and clothing to home decor and furniture. Describe the items, set the prices and the receipt is ready.
+            It works for anything you sell, from shoes and clothing to home decor and furniture.
+            Describe the items, set the prices and the receipt is ready.
         </p>
     </div>
 </section>
 
 <section class="border-t border-line bg-surface" aria-labelledby="flow-title">
     <div class="page py-16 lg:py-20">
-        <h2 id="flow-title" class="max-w-xl text-3xl font-bold tracking-tight sm:text-4xl">From sale to receipt in four steps</h2>
+        <h2 id="flow-title" class="section-title">From sale to receipt in four steps</h2>
+
         <ol class="mt-10 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
             <li class="border-t-2 border-line pt-5">
-                <span class="flex size-8 items-center justify-center rounded-full bg-accent text-base font-semibold text-ink">1</span>
+                <span class="step-number">1</span>
                 <h3 class="mt-4 font-semibold">Add the sale</h3>
-                <p class="mt-2 text-ink-2">Enter who bought it and what they bought. Prices, tax and the total add up automatically.</p>
+                <p class="mt-2 text-ink-2">
+                    Enter who bought it and what they bought. Prices, tax and the total add up automatically.
+                </p>
             </li>
             <li class="border-t-2 border-line pt-5">
-                <span class="flex size-8 items-center justify-center rounded-full bg-accent text-base font-semibold text-ink">2</span>
+                <span class="step-number">2</span>
                 <h3 class="mt-4 font-semibold">Check the draft</h3>
-                <p class="mt-2 text-ink-2">New receipts wait in your staging area, so you can fix a typo or delete a mistake.</p>
+                <p class="mt-2 text-ink-2">
+                    New receipts wait in your staging area, so you can fix a typo or delete a mistake.
+                </p>
             </li>
             <li class="border-t-2 border-line pt-5">
-                <span class="flex size-8 items-center justify-center rounded-full bg-accent text-base font-semibold text-ink">3</span>
+                <span class="step-number">3</span>
                 <h3 class="mt-4 font-semibold">Confirm it</h3>
-                <p class="mt-2 text-ink-2">The receipt becomes final and gets its own invoice number.</p>
+                <p class="mt-2 text-ink-2">
+                    The receipt becomes final and gets its own invoice number.
+                </p>
             </li>
             <li class="border-t-2 border-brand pt-5">
-                <span class="flex size-8 items-center justify-center rounded-full bg-brand text-base font-semibold text-white">4</span>
+                <span class="step-number step-number-final">4</span>
                 <h3 class="mt-4 font-semibold">Send the PDF</h3>
-                <p class="mt-2 text-ink-2">Download the receipt and send it to the buyer in the same chat where you made the sale.</p>
+                <p class="mt-2 text-ink-2">
+                    Download the receipt and send it to the buyer in the same chat where you made the sale.
+                </p>
             </li>
         </ol>
     </div>

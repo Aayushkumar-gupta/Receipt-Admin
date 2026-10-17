@@ -41,6 +41,12 @@ INSTALLED_APPS = [
     "accounts",
 ]
 
+if ENVIRONMENT == "local":
+    # Serve static files through WhiteNoise and make the browser revalidate them,
+    # so a rebuilt app.css shows up without a hard refresh.
+    INSTALLED_APPS.insert(0, "whitenoise.runserver_nostatic")
+    WHITENOISE_MAX_AGE = 0
+
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",

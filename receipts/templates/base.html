@@ -4,12 +4,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    {% block seo %}{% include "partials/seo.html" with title="Receipt Admin" %}{% endblock %}
+    <title>{% block title %}Receipt Admin{% endblock %}</title>
+    <meta name="description" content="{% block description %}Create receipts for your sales and keep every sale on record.{% endblock %}">
+    <meta name="robots" content="{% block robots %}index, follow{% endblock %}">
+    <link rel="canonical" href="{{ request.scheme }}://{{ request.get_host }}{{ request.path }}">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Receipt Admin">
+    <meta property="og:url" content="{{ request.scheme }}://{{ request.get_host }}{{ request.path }}">
+    <meta
+        property="og:image"
+        content="{{ request.scheme }}://{{ request.get_host }}{% static 'receipts/og-image.jpg' %}"
+    >
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta name="twitter:card" content="summary_large_image">
     <meta name="theme-color" content="#F8FAFC">
     <link rel="icon" href="{% static 'receipts/favicon.ico' %}" sizes="48x48">
     <link rel="icon" href="{% static 'receipts/favicon-32.png' %}" type="image/png" sizes="32x32">
     <link rel="apple-touch-icon" href="{% static 'receipts/apple-touch-icon.png' %}">
-    <link rel="preload" href="{% static 'receipts/fonts/Archivo-latin.woff2' %}" as="font" type="font/woff2" crossorigin>
+    <link
+        rel="preload"
+        href="{% static 'receipts/fonts/Archivo-latin.woff2' %}"
+        as="font"
+        type="font/woff2"
+        crossorigin
+    >
 
     {# Bootstrap sits in its own cascade layer, below Tailwind utilities, until every page is migrated. #}
     <style>@layer theme, base, legacy, components, utilities;</style>
@@ -17,42 +36,48 @@
     <style>@import url("https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css") layer(legacy);</style>
     {% endblock %}
     <link rel="stylesheet" href="{% static 'receipts/css/app.css' %}">
+    <script src="{% static 'receipts/js/nav.js' %}" defer></script>
     {% block head %}{% endblock %}
 </head>
 <body class="min-h-screen bg-canvas text-ink antialiased">
-
-<a href="#main" class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-ink focus:px-4 focus:py-2 focus:text-white">Skip to content</a>
+<a href="#main" class="skip-link">Skip to content</a>
 
 {% with current=request.resolver_match.url_name %}
 {% if user.is_authenticated %}
-
 <div class="lg:flex">
-    <header class="sticky top-0 z-40 border-b border-line bg-surface font-sans lg:fixed lg:inset-y-0 lg:left-0 lg:flex lg:w-64 lg:flex-col lg:border-b-0 lg:border-r">
+    <header class="sidebar">
         <div class="flex h-16 items-center justify-between px-4 lg:px-5">
             <a href="{% url 'dashboard' %}" class="text-ink no-underline">
                 {% include "partials/brand.html" %}
             </a>
-            <button type="button" id="nav-toggle"
-                    class="-mr-2 inline-flex size-11 items-center justify-center rounded-md text-ink-2 hover:bg-canvas lg:hidden"
-                    aria-controls="nav-menu" aria-expanded="false">
+            <button
+                type="button"
+                id="nav-toggle"
+                class="menu-toggle lg:hidden"
+                aria-controls="nav-menu"
+                aria-expanded="false"
+            >
                 <span class="sr-only">Menu</span>
                 {% include "partials/icons/menu.html" %}
             </button>
         </div>
 
-        <nav id="nav-menu" aria-label="Main"
-             class="hidden border-t border-line px-3 pb-4 pt-3 lg:flex lg:flex-1 lg:flex-col lg:border-0 lg:pt-2">
+        <nav
+            id="nav-menu"
+            class="hidden border-t border-line px-3 pt-3 pb-4 lg:flex lg:flex-1 lg:flex-col lg:border-0 lg:pt-2"
+            aria-label="Main"
+        >
             <ul class="mb-0 list-none space-y-1 p-0">
-                {% url 'dashboard' as u %}{% include "partials/nav_link.html" with href=u label="Dashboard" icon="dashboard" page="dashboard" %}
-                {% url 'create_receipt' as u %}{% include "partials/nav_link.html" with href=u label="Create receipt" icon="create" page="create_receipt" %}
-                {% url 'staging_area' as u %}{% include "partials/nav_link.html" with href=u label="Staging area" icon="staging" page="staging_area" %}
-                {% url 'my_receipts' as u %}{% include "partials/nav_link.html" with href=u label="My receipts" icon="receipts" page="my_receipts" %}
+                {% include "partials/nav_link.html" with page="dashboard" icon="dashboard" label="Dashboard" %}
+                {% include "partials/nav_link.html" with page="create_receipt" icon="create" label="Create receipt" %}
+                {% include "partials/nav_link.html" with page="staging_area" icon="staging" label="Staging area" %}
+                {% include "partials/nav_link.html" with page="my_receipts" icon="receipts" label="My receipts" %}
             </ul>
-            <ul class="mb-0 mt-6 list-none space-y-1 border-t border-line p-0 pt-4 lg:mt-auto">
-                {% url 'profile' as u %}{% include "partials/nav_link.html" with href=u label="Profile" icon="profile" page="profile" %}
-                {% url 'about' as u %}{% include "partials/nav_link.html" with href=u label="About" icon="about" page="about" %}
+            <ul class="mt-6 mb-0 list-none space-y-1 border-t border-line p-0 pt-4 lg:mt-auto">
+                {% include "partials/nav_link.html" with page="profile" icon="profile" label="Profile" %}
+                {% include "partials/nav_link.html" with page="about" icon="about" label="About" %}
                 <li>
-                    <form method="post" action="{% url 'logout' %}" onsubmit="return confirm('Log out of Receipt Admin?');">
+                    <form method="post" action="{% url 'logout' %}" data-confirm="Log out of Receipt Admin?">
                         {% csrf_token %}
                         <button type="submit" class="nav-link">
                             {% include "partials/icons/logout.html" %}
@@ -65,33 +90,44 @@
     </header>
 
     <div class="min-w-0 flex-1 lg:pl-64">
-
 {% else %}
-
 <div class="flex min-h-screen flex-col">
     <header class="sticky top-0 z-40 border-b border-line bg-surface/90 font-sans backdrop-blur">
         <nav class="page relative flex h-16 items-center gap-2" aria-label="Main">
             <a href="{% url 'home' %}" class="mr-auto text-ink no-underline">
                 {% include "partials/brand.html" %}
             </a>
-            <div id="nav-menu"
-                 class="absolute inset-x-0 top-full hidden border-b border-line bg-surface px-4 py-3 md:static md:flex md:items-center md:gap-2 md:border-0 md:bg-transparent md:p-0">
-                <a href="{% url 'about' %}" class="block rounded-md px-3 py-2.5 font-medium text-ink-2 no-underline hover:text-ink aria-[current=page]:text-ink"{% if current == 'about' %} aria-current="page"{% endif %}>About</a>
-                <a href="{% url 'login' %}" class="block rounded-md px-3 py-2.5 font-medium text-ink-2 no-underline hover:text-ink aria-[current=page]:text-ink"{% if current == 'login' %} aria-current="page"{% endif %}>Log in</a>
+            <div id="nav-menu" class="public-menu hidden md:flex">
+                <a
+                    href="{% url 'about' %}"
+                    class="top-link"
+                    {% if current == "about" %}aria-current="page"{% endif %}
+                >About</a>
+                {% block header_login %}
+                <a href="{% url 'login' %}" class="top-link">Log in</a>
+                {% endblock %}
             </div>
-            <a href="{% url 'sign_up' %}" class="btn-primary px-3 text-[0.9375rem] sm:px-4.5 sm:text-base md:ml-2">Create account</a>
-            <button type="button" id="nav-toggle"
-                    class="-mr-2 inline-flex size-11 items-center justify-center rounded-md text-ink-2 hover:bg-canvas md:hidden"
-                    aria-controls="nav-menu" aria-expanded="false">
+            {% block header_signup %}
+            <a href="{% url 'sign_up' %}" class="btn-primary btn-header md:ml-2">Create account</a>
+            {% endblock %}
+            <button
+                type="button"
+                id="nav-toggle"
+                class="menu-toggle md:hidden"
+                aria-controls="nav-menu"
+                aria-expanded="false"
+            >
                 <span class="sr-only">Menu</span>
                 {% include "partials/icons/menu.html" %}
             </button>
         </nav>
     </header>
-
 {% endif %}
 
+    {% block messages %}
     {% include "partials/messages.html" %}
+    {% endblock %}
+
     <main id="main" class="flex-1">
         {% block main %}
         <div class="{% if user.is_authenticated %}px-4 sm:px-6 lg:px-8{% else %}page{% endif %} py-6">
@@ -107,27 +143,18 @@
     <footer class="border-t border-line bg-surface font-sans">
         <div class="page flex flex-col gap-2 py-6 text-ink-2 sm:flex-row sm:items-center sm:justify-between">
             <p>&copy; {% now "Y" %} Receipt Admin</p>
-            <p>Questions? <a href="mailto:support@receiptadmin.com" class="font-medium text-brand underline">support@receiptadmin.com</a></p>
+            <p>
+                Questions?
+                <a href="mailto:support@receiptadmin.com" class="text-link">
+                    support@receiptadmin.com
+                </a>
+            </p>
         </div>
     </footer>
 </div>
-
 {% endif %}
 {% endwith %}
 
-<script>
-    (function () {
-        var toggle = document.getElementById("nav-toggle");
-        var menu = document.getElementById("nav-menu");
-        toggle.addEventListener("click", function () {
-            var open = toggle.getAttribute("aria-expanded") !== "true";
-            toggle.setAttribute("aria-expanded", String(open));
-            menu.classList.toggle("hidden", !open);
-            toggle.querySelector('[data-icon="open"]').classList.toggle("hidden", open);
-            toggle.querySelector('[data-icon="close"]').classList.toggle("hidden", !open);
-        });
-    })();
-</script>
 {% block scripts %}{% endblock %}
 </body>
 </html>

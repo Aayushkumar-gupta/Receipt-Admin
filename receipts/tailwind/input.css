@@ -23,6 +23,7 @@
   --color-line-strong: #CBD5E1;
   --color-ink: #1E293B;
   --color-ink-2: #475569;
+  --color-ink-3: #64748B;
   --color-danger: #B91C1C;
 
   --font-sans: "Archivo", ui-sans-serif, system-ui, sans-serif;
@@ -56,6 +57,11 @@
     caret-color: var(--color-brand);
   }
 
+  ::placeholder {
+    color: var(--color-ink-3);
+    opacity: 1;
+  }
+
   a {
     text-underline-offset: 0.2em;
     text-decoration-thickness: 1px;
@@ -82,6 +88,93 @@
     }
   }
 
+  .skip-link {
+    position: absolute;
+    left: -9999px;
+  }
+
+  .skip-link:focus {
+    position: fixed;
+    top: 1rem;
+    left: 1rem;
+    z-index: 50;
+    border-radius: 0.375rem;
+    background: var(--color-ink);
+    padding: 0.5rem 1rem;
+    color: #fff;
+  }
+
+  .sidebar {
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    border-bottom: 1px solid var(--color-line);
+    background: var(--color-surface);
+    font-family: var(--font-sans);
+  }
+
+  @media (width >= 64rem) {
+    .sidebar {
+      position: fixed;
+      inset-block: 0;
+      left: 0;
+      display: flex;
+      flex-direction: column;
+      width: 16rem;
+      border-bottom: 0;
+      border-right: 1px solid var(--color-line);
+    }
+  }
+
+  .menu-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    margin-right: -0.5rem;
+    border-radius: 0.375rem;
+    color: var(--color-ink-2);
+  }
+
+  .menu-toggle:hover {
+    background: var(--color-canvas);
+  }
+
+  .public-menu {
+    position: absolute;
+    inset-inline: 0;
+    top: 100%;
+    border-bottom: 1px solid var(--color-line);
+    background: var(--color-surface);
+    padding: 0.75rem 1rem;
+  }
+
+  @media (width >= 48rem) {
+    .public-menu {
+      position: static;
+      align-items: center;
+      gap: 0.5rem;
+      border-bottom: 0;
+      background: transparent;
+      padding: 0;
+    }
+  }
+
+  .top-link {
+    display: block;
+    border-radius: 0.375rem;
+    padding: 0.625rem 0.75rem;
+    color: var(--color-ink-2);
+    font-weight: 500;
+    text-decoration: none;
+  }
+
+  .top-link:hover,
+  .top-link[aria-current="page"] {
+    color: var(--color-ink);
+  }
+
   .btn-primary {
     display: inline-flex;
     align-items: center;
@@ -99,6 +192,18 @@
 
   .btn-primary:hover {
     background: var(--color-brand-deep);
+  }
+
+  .btn-header {
+    padding-inline: 0.75rem;
+    font-size: 0.9375rem;
+  }
+
+  @media (width >= 40rem) {
+    .btn-header {
+      padding-inline: 1.125rem;
+      font-size: 1rem;
+    }
   }
 
   .btn-secondary {
@@ -127,19 +232,173 @@
     border: 1px solid var(--color-line);
     border-radius: 0.375rem;
     background: var(--color-surface);
-    padding: 0.4375rem 0.625rem;
+    min-height: 2.75rem;
+    padding: 0.4375rem 0.75rem;
     color: var(--color-ink);
     transition: border-color 150ms ease, box-shadow 150ms ease;
+  }
+
+  .label {
+    display: block;
+    font-size: 0.9375rem;
+    font-weight: 500;
+  }
+
+  .hint {
+    margin-top: 0.375rem;
+    color: var(--color-ink-2);
+    font-size: 0.9375rem;
+  }
+
+  .field-error {
+    margin-top: 0.375rem;
+    color: var(--color-danger);
+    font-size: 0.9375rem;
   }
 
   .field:hover {
     border-color: var(--color-line-strong);
   }
 
+  .field[aria-invalid="true"] {
+    border-color: var(--color-danger);
+  }
+
   .field:focus {
     outline: none;
     border-color: var(--color-brand);
     box-shadow: 0 0 0 3px color-mix(in oklab, var(--color-brand) 20%, transparent);
+  }
+
+  .icon {
+    flex-shrink: 0;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .brand {
+    font-size: 1.375rem;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+  }
+
+  @media (width >= 40rem) {
+    .brand {
+      font-size: 1.75rem;
+    }
+  }
+
+  .text-link {
+    color: var(--color-brand);
+    font-weight: 500;
+    text-decoration: underline;
+  }
+
+  .text-link:hover {
+    color: var(--color-brand-deep);
+  }
+
+  .password-toggle {
+    position: absolute;
+    inset-block: 0;
+    right: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.75rem;
+    border-radius: 0 0.375rem 0.375rem 0;
+    color: var(--color-ink-2);
+  }
+
+  .password-toggle:hover {
+    color: var(--color-ink);
+  }
+
+  .check-badge {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 9999px;
+    background: rgb(255 255 255 / 0.15);
+  }
+
+  .section-title {
+    max-width: 36rem;
+    font-size: 1.875rem;
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -0.025em;
+  }
+
+  @media (width >= 40rem) {
+    .section-title {
+      font-size: 2.25rem;
+    }
+  }
+
+  .browser-frame {
+    overflow: hidden;
+    border: 1px solid var(--color-line);
+    border-radius: 0.75rem;
+    background: var(--color-canvas);
+    box-shadow: 0 12px 40px -12px rgb(15 23 42 / 0.18);
+  }
+
+  .browser-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    height: 2.5rem;
+    border-bottom: 1px solid var(--color-line);
+    background: var(--color-surface);
+    padding-inline: 1rem;
+  }
+
+  .browser-dot {
+    width: 0.625rem;
+    height: 0.625rem;
+    border-radius: 9999px;
+    background: var(--color-line);
+  }
+
+  .seller-card {
+    border-radius: 0.75rem;
+    background: var(--color-accent-soft);
+    padding: 1.5rem;
+  }
+
+  .seller-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 0.5rem;
+    background: var(--color-surface);
+    color: var(--color-brand);
+  }
+
+  .step-number {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 9999px;
+    background: var(--color-accent);
+    color: var(--color-ink);
+    font-weight: 600;
+  }
+
+  .step-number-final {
+    background: var(--color-brand);
+    color: #fff;
   }
 
   .nav-link {

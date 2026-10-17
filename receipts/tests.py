@@ -125,7 +125,7 @@ class SeoTests(TestCase):
         self.assertContains(
             response, '<link rel="canonical" href="http://testserver/">'
         )
-        self.assertContains(response, '<meta property="og:image"')
+        self.assertContains(response, 'property="og:image"')
         self.assertContains(response, '"@type": "WebApplication"')
 
     def test_private_pages_are_not_indexed(self):
