@@ -631,6 +631,13 @@ class ProfileUpdateTests(TestCase):
     def test_get_redirects_to_the_profile_page(self):
         self.assertRedirects(self.client.get(self.url), reverse("profile"))
 
+    def test_profile_page_never_reveals_the_password(self):
+        response = self.client.get(reverse("profile"))
+
+        self.assertNotContains(response, "data-password-toggle")
+        self.assertNotContains(response, PASSWORD)
+        self.assertNotContains(response, self.user.password)
+
     def test_name_and_address_change_without_password(self):
         response = self.post(first_name="Annie", address="2 Oak Ave")
 
