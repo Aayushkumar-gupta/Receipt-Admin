@@ -1,228 +1,123 @@
 {% extends 'base.html' %}
+
 {% block title %}Dashboard | Receipt Admin{% endblock %}
 {% block description %}See your receipt count, revenue, drafts waiting for review and your most recent sales.{% endblock %}
 {% block robots %}noindex{% endblock %}
+{% block legacy_css %}{% endblock %}
 
 {% block content %}
-<style>
-body {
-    background: linear-gradient(135deg, #F8FAFC, #E2E8F0, #F8FAFC);
-    background-size: 300% 300%;
-    animation: gradientBG 18s ease infinite;
-    font-family: 'Segoe UI', Tahoma, sans-serif;
-    color: #1E293B;
-}
-@keyframes gradientBG {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
-}
-
-.glass-box {
-    background: rgba(255, 255, 255, 0.9);
-    border-radius: 25px;
-    padding: 60px 50px;
-    margin-bottom: 50px;
-    box-shadow: 0 10px 35px rgba(0, 119, 182, 0.2);
-    backdrop-filter: blur(15px) saturate(150%);
-    -webkit-backdrop-filter: blur(15px) saturate(150%);
-    border: 1px solid rgba(226, 232, 240, 0.85);
-    max-width: 1200px;
-    margin-left: auto;
-    margin-right: auto;
-}
-
-/* Titles */
-h1, h2 {
-    color: #0077B6;
-    font-weight: 700;
-    margin-bottom: 25px;
-    text-align: center;
-}
-
-/* Cards */
-.card {
-    background: #FFFFFF;
-    border-radius: 20px;
-    box-shadow: 0 5px 20px rgba(0, 119, 182, 0.2);
-    transition: transform 0.3s ease;
-    text-align: center;
-    padding: 30px 10px;
-}
-.card:hover {
-    transform: translateY(-5px);
-}
-.card h5 {
-    color: #0077B6;
-    font-weight: 600;
-    margin-bottom: 10px;
-}
-.card p {
-    font-size: 2rem;
-    font-weight: 700;
-    color: #00C49A;
-}
-
-/* Table */
-.table {
-    background: white;
-    border-radius: 15px;
-    overflow: hidden;
-}
-.table th {
-    background-color: #0077B6;
-    color: white;
-    font-weight: 600;
-}
-.table td {
-    color: #334155;
-    vertical-align: middle;
-}
-
-/* Goal Section */
-.goal-wrapper {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    margin-top: 10px;
-}
-#goal-display {
-    font-style: italic;
-    color: #0077B6;
-    font-size: 1.5rem;
-    font-weight: 600;
-    margin: 0;
-    transition: all 0.3s ease;
-}
-.edit-icon {
-    margin-left: 10px;
-    color: #0077B6;
-    cursor: pointer;
-    font-size: 1.2rem;
-    opacity: 0;
-    transition: opacity 0.3s ease, transform 0.2s ease;
-}
-.goal-wrapper:hover .edit-icon {
-    opacity: 1;
-}
-.edit-icon:hover {
-    transform: scale(1.2);
-}
-</style>
-
-<!-- Include Font Awesome for icons -->
-<link
-  rel="stylesheet"
-  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-/>
-
-<!-- Welcome Section -->
-<div class="glass-box text-center">
-    <h1>Welcome back, {{ user.first_name|default:user.username }}!</h1>
-
-    <div class="goal-wrapper">
-        {% if profile.goal %}
-            <p id="goal-display">“{{ profile.goal }}”</p>
-        {% else %}
-            <p id="goal-display" style="color: #64748B;">Click here to set a goal or motto.</p>
-        {% endif %}
-        <i id="edit-goal-btn" class="fas fa-pencil-alt edit-icon" title="Edit Goal"></i>
-    </div>
-
-    <form id="goal-form" method="POST" class="mt-3" style="display: none;">
-        {% csrf_token %}
-        <input
-            type="text"
-            name="goal"
-            class="form-control"
-            style="max-width: 400px; margin: 0 auto; border-radius: 10px;"
-            placeholder="Enter your goal or motto"
-            value="{{ profile.goal|default:'' }}"
-        >
-        <button type="submit" class="btn btn-outline-primary mt-3">Save Goal</button>
-    </form>
-
-    <!-- Moved this line below the goal -->
-    <p class="mt-4">Here’s an overview of your business performance.</p>
-</div>
-
-<!-- Stats Section -->
-<div class="glass-box">
-    <h2>Quick Stats</h2>
-    <div class="row g-4">
-        <div class="col-md-4">
-            <div class="card">
-                <h5>Total Receipts</h5>
-                <p>{{ total_receipts }}</p>
-            </div>
+<div class="list-page">
+    <section class="welcome" aria-labelledby="welcome-title">
+        <div class="welcome-main">
+            <h1 id="welcome-title" class="welcome-title">
+                Welcome back, {{ user.first_name|default:user.username }}
+            </h1>
+            <p class="welcome-date">{% now "l, F j" %}</p>
+            <p class="welcome-status">
+                {% if pending_receipts %}
+                You have {{ pending_receipts }} draft{{ pending_receipts|pluralize }} waiting to be confirmed.
+                {% elif total_receipts %}
+                All your receipts are confirmed.
+                {% else %}
+                Write up your first sale to see it here.
+                {% endif %}
+            </p>
         </div>
-        <div class="col-md-4">
-            <div class="card">
-                <h5>Total Revenue</h5>
-                <p>${{ total_revenue }}</p>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card">
-                <h5>Pending Receipts</h5>
-                <p>{{ pending_receipts }}</p>
-            </div>
-        </div>
-    </div>
-</div>
 
-<!-- Recent Receipts Section -->
-<div class="glass-box">
-    <h2>Recent Receipts</h2>
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>Date</th>
-                <th>Receipt ID</th>
-                <th>Total Amount</th>
-                <th>Status</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for receipt in recent_receipts %}
-            <tr>
-                <td>{{ receipt.date }}</td>
-                <td>{{ receipt.invoice_number }}</td>
-                <td>${{ receipt.total_amount }}</td>
-                <td>
-                    {% if receipt.is_staged and not receipt.refund %}
-                        <span style="color: #00C49A; font-weight: 300;">Final</span>
-                    {% elif receipt.is_staged and receipt.refund%}
-                        <span style="color: #EF4444; font-weight: 300;">Refunded</span>
-                    {% elif not receipt.is_staged and not receipt.refund%}
-                        <span style="color: #E0A800; font-weight: 300;">Unstaged</span>
+        <div class="welcome-goal">
+            <div class="goal-summary">
+                <span class="goal-icon">{% include "partials/icons/target.html" with class="size-6" %}</span>
+                <div class="goal-text">
+                    <h2 class="goal-label">Your goal</h2>
+                    {% if profile.goal %}
+                    <p class="goal-value">{{ profile.goal }}</p>
+                    {% else %}
+                    <p class="goal-empty">Set a goal to keep yourself on track.</p>
                     {% endif %}
-                </td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="4" class="text-center text-muted">No recent receipts found.</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    <div class="text-center mt-3">
-        <a href="{% url 'my_receipts' %}" class="btn btn-outline-primary">View All Receipts</a>
-    </div>
+                </div>
+            </div>
+            <button
+                type="button"
+                class="btn-secondary btn-small mt-4"
+                data-toggle="goal-form"
+                aria-controls="goal-form"
+                aria-expanded="false"
+            >
+                {% include "partials/icons/pencil.html" with class="size-4" %}
+                {% if profile.goal %}Edit goal{% else %}Set goal{% endif %}
+            </button>
+
+            <form method="post" id="goal-form" class="goal-form" hidden>
+                {% csrf_token %}
+                <label for="goal" class="label">Goal or motto</label>
+                <input
+                    type="text"
+                    id="goal"
+                    name="goal"
+                    value="{{ profile.goal }}"
+                    class="field mt-1.5"
+                    maxlength="200"
+                    placeholder="For example, 50 sales this month"
+                >
+                <div class="mt-3 flex gap-2">
+                    <button type="submit" class="btn-primary">Save goal</button>
+                    <button type="button" class="btn-secondary" data-toggle="goal-form">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </section>
+
+    <section class="stat-grid" aria-label="Summary">
+        <div class="stat">
+            <p class="stat-label">Receipts</p>
+            <p class="stat-value">{{ total_receipts }}</p>
+            <p class="stat-hint">Drafts and confirmed receipts</p>
+        </div>
+        <div class="stat">
+            <p class="stat-label">Revenue</p>
+            <p class="stat-value">${{ total_revenue|floatformat:2 }}</p>
+            <p class="stat-hint">Confirmed receipts, before tax</p>
+        </div>
+        <div class="stat">
+            <p class="stat-label">Drafts</p>
+            <p class="stat-value">{{ pending_receipts }}</p>
+            <p class="stat-hint">Waiting to be confirmed</p>
+        </div>
+    </section>
+
+    <section class="mt-10" aria-labelledby="recent-title">
+        <h2 id="recent-title" class="panel-title">Recent receipts</h2>
+        {% if recent_receipts %}
+        <div class="list-panel">
+            <table class="receipt-table">
+                <thead>
+                    <tr>
+                        <th scope="col">Invoice</th>
+                        <th scope="col">Buyer</th>
+                        <th scope="col">Date</th>
+                        <th scope="col" class="text-right">Total</th>
+                        <th scope="col">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for receipt in recent_receipts %}
+                    <tr>
+                        <td class="cell-invoice">{{ receipt.invoice_number }}</td>
+                        <td class="cell-buyer">{{ receipt.buyer_name }}</td>
+                        <td class="cell-date">{{ receipt.date|date:"M j, Y" }}</td>
+                        <td class="cell-total">${{ receipt.total_amount }}</td>
+                        <td class="cell-status">{% include "partials/status_badge.html" %}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <p class="font-semibold">No receipts yet</p>
+            <p class="mt-1 text-ink-2">Your five most recent receipts will show up here.</p>
+        </div>
+        {% endif %}
+    </section>
 </div>
-
-<script>
-document.addEventListener("DOMContentLoaded", function() {
-    const editBtn = document.getElementById("edit-goal-btn");
-    const form = document.getElementById("goal-form");
-    const goalDisplay = document.getElementById("goal-display");
-
-    editBtn.addEventListener("click", function() {
-        const isHidden = form.style.display === "none";
-        form.style.display = isHidden ? "block" : "none";
-        goalDisplay.style.display = isHidden ? "none" : "block";
-    });
-});
-</script>
 {% endblock %}

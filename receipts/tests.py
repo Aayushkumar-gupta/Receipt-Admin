@@ -224,13 +224,13 @@ class ReceiptListTests(TestCase):
         self.assertEqual(list(response.context["receipts"]), [draft])
 
     def test_lists_show_buyer_status_and_confirmations(self):
-        make_receipt(self.user, refunded=True, staged=True, buyer_name="Leo")
-        draft = make_receipt(self.user, buyer_name="Sam")
+        make_receipt(self.user, refunded=True, staged=True, buyer_name="Robert")
+        draft = make_receipt(self.user, buyer_name="Linda")
 
         staging = self.client.get(reverse("staging_area"))
         mine = self.client.get(reverse("my_receipts"))
 
-        self.assertContains(staging, "Sam")
+        self.assertContains(staging, "Linda")
         self.assertContains(staging, 'class="badge badge-draft"')
         self.assertContains(staging, f"Confirm {draft.invoice_number}?")
         self.assertContains(mine, 'class="badge badge-refunded"', count=1)

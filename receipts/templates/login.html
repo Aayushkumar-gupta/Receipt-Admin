@@ -19,6 +19,7 @@
             autocomplete="username"
             inputmode="email"
             required
+            data-required-message="Enter your email address."
             aria-describedby="username-error"
         >
         <p id="username-error" class="field-error" hidden></p>
@@ -34,6 +35,7 @@
                 class="field pr-12"
                 autocomplete="current-password"
                 required
+                data-required-message="Enter your password."
                 aria-describedby="password-error"
             >
             {% include "partials/password_toggle.html" with field="password" %}

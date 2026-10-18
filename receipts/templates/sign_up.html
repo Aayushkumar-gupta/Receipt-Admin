@@ -21,6 +21,7 @@
                 autocomplete="given-name"
                 maxlength="150"
                 required
+                data-required-message="Enter your first name."
                 aria-describedby="first_name-error"
             >
             <p id="first_name-error" class="field-error" hidden></p>
@@ -37,6 +38,7 @@
                 autocomplete="family-name"
                 maxlength="150"
                 required
+                data-required-message="Enter your last name."
                 aria-describedby="last_name-error"
             >
             <p id="last_name-error" class="field-error" hidden></p>
@@ -54,6 +56,7 @@
                 inputmode="email"
                 maxlength="150"
                 required
+                data-required-message="Enter your email address."
                 aria-describedby="email-error"
             >
             <p id="email-error" class="field-error" hidden></p>
@@ -72,6 +75,7 @@
                 pattern="\d{10,15}"
                 placeholder="10 to 15 digits"
                 required
+                data-required-message="Enter your phone number."
                 data-pattern-message="Enter 10 to 15 digits, with no spaces or symbols."
                 aria-describedby="phonenumber-error"
             >
@@ -89,6 +93,7 @@
                     autocomplete="new-password"
                     minlength="8"
                     required
+                    data-required-message="Choose a password."
                     aria-describedby="password-rules password-error"
                 >
                 {% include "partials/password_toggle.html" with field="password" %}
@@ -106,6 +111,7 @@
                     class="field pr-12"
                     autocomplete="new-password"
                     required
+                    data-required-message="Enter your password again."
                     data-match="password"
                     aria-describedby="confirm_password-error"
                 >

@@ -784,6 +784,246 @@
     text-align: center;
   }
 
+  .welcome {
+    display: grid;
+    gap: 1.5rem;
+    border-radius: 1rem;
+    background: var(--color-brand-deep);
+    padding: 1.75rem 1.5rem;
+    color: #fff;
+  }
+
+  @media (width >= 64rem) {
+    .welcome {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 24rem);
+      align-items: center;
+      gap: 2.5rem;
+      padding: 2.25rem 2.5rem;
+    }
+  }
+
+  .welcome-title {
+    font-size: 1.875rem;
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.025em;
+    text-wrap: balance;
+  }
+
+  @media (width >= 40rem) {
+    .welcome-title {
+      font-size: 2.5rem;
+    }
+  }
+
+  .welcome-date {
+    margin-top: 0.5rem;
+    color: var(--color-accent-soft);
+    font-weight: 500;
+  }
+
+  .welcome-status {
+    margin-top: 1rem;
+    max-width: 32rem;
+    font-size: 1.125rem;
+  }
+
+  .welcome-goal {
+    border-radius: 0.75rem;
+    background: var(--color-accent-soft);
+    padding: 1.25rem 1.5rem;
+    color: var(--color-ink);
+    box-shadow: 0 10px 30px -12px rgb(0 0 0 / 0.35);
+  }
+
+  .goal-summary {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .goal-icon {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    width: 3rem;
+    height: 3rem;
+    border-radius: 9999px;
+    background: var(--color-brand);
+    color: #fff;
+  }
+
+  .goal-text {
+    min-width: 0;
+  }
+
+  .goal-label {
+    color: var(--color-ink-2);
+    font-size: 0.9375rem;
+    font-weight: 500;
+  }
+
+  .goal-value {
+    margin-top: 0.125rem;
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1.25;
+    overflow-wrap: anywhere;
+  }
+
+  .goal-empty {
+    margin-top: 0.125rem;
+    font-size: 1.0625rem;
+  }
+
+  .goal-form {
+    margin-top: 1rem;
+    border-top: 1px solid color-mix(in oklab, var(--color-accent) 40%, transparent);
+    padding-top: 1rem;
+  }
+
+  .stat-grid {
+    display: grid;
+    gap: 1rem;
+    margin-top: 2rem;
+  }
+
+  @media (width >= 40rem) {
+    .stat-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
+  .stat {
+    border: 1px solid var(--color-line);
+    border-radius: 0.75rem;
+    background: var(--color-surface);
+    padding: 1.25rem 1.5rem;
+  }
+
+  .stat-label {
+    color: var(--color-ink-2);
+    font-weight: 500;
+  }
+
+  .stat-value {
+    margin-top: 0.25rem;
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+  }
+
+  .stat-hint {
+    margin-top: 0.25rem;
+    color: var(--color-ink-2);
+    font-size: 0.9375rem;
+  }
+
+  .profile-page {
+    width: 100%;
+    max-width: 72rem;
+    margin-inline: auto;
+  }
+
+  .profile-layout {
+    display: grid;
+    gap: 1.5rem;
+    margin-top: 2rem;
+  }
+
+  @media (width >= 64rem) {
+    .profile-layout {
+      grid-template-columns: 20rem minmax(0, 1fr);
+      align-items: start;
+    }
+  }
+
+  .profile-summary {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 4.5rem;
+    height: 4.5rem;
+    border-radius: 9999px;
+    background: var(--color-brand);
+    color: #fff;
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+  }
+
+  .profile-facts {
+    display: grid;
+    gap: 0.875rem;
+    width: 100%;
+    margin-top: 1.5rem;
+    border-top: 1px solid var(--color-line);
+    padding-top: 1.25rem;
+    color: var(--color-ink-2);
+  }
+
+  .profile-facts li {
+    display: flex;
+    gap: 0.75rem;
+  }
+
+  .profile-facts .icon {
+    margin-top: 0.2rem;
+    color: var(--color-brand);
+  }
+
+  .profile-verify {
+    width: 100%;
+    margin-top: 1.5rem;
+    border-top: 1px solid var(--color-line);
+    padding-top: 1.25rem;
+  }
+
+  .profile-form {
+    padding: 0;
+  }
+
+  .settings-section {
+    display: grid;
+    gap: 1.25rem;
+    padding: 1.5rem;
+  }
+
+  .settings-section + .settings-section {
+    border-top: 1px solid var(--color-line);
+  }
+
+  @media (width >= 48rem) {
+    .settings-section {
+      grid-template-columns: 14rem minmax(0, 1fr);
+      gap: 2rem;
+      padding: 1.75rem 2rem;
+    }
+  }
+
+  .settings-help {
+    margin-top: 0.375rem;
+    color: var(--color-ink-2);
+    font-size: 0.9375rem;
+  }
+
+  .settings-footer {
+    display: flex;
+    justify-content: flex-end;
+    border-top: 1px solid var(--color-line);
+    border-radius: 0 0 0.75rem 0.75rem;
+    background: var(--color-canvas);
+    padding: 1rem 1.5rem;
+  }
+
   .nav-link {
     display: flex;
     align-items: center;

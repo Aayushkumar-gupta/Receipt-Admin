@@ -13,14 +13,13 @@
     <meta property="og:url" content="{{ request.scheme }}://{{ request.get_host }}{{ request.path }}">
     <meta
         property="og:image"
-        content="{{ request.scheme }}://{{ request.get_host }}{% static 'receipts/og-image.jpg' %}"
+        content="{{ request.scheme }}://{{ request.get_host }}{% static 'receipts/og-image.png' %}"
     >
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="theme-color" content="#F8FAFC">
-    <link rel="icon" href="{% static 'receipts/favicon.ico' %}" sizes="48x48">
-    <link rel="icon" href="{% static 'receipts/favicon-32.png' %}" type="image/png" sizes="32x32">
+    <link rel="icon" href="{% static 'receipts/favicon.ico' %}" sizes="any">
     <link rel="apple-touch-icon" href="{% static 'receipts/apple-touch-icon.png' %}">
     <link
         rel="preload"

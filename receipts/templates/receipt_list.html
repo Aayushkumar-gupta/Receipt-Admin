@@ -41,7 +41,7 @@
                     <td class="cell-buyer">{{ receipt.buyer_name }}</td>
                     <td class="cell-date">{{ receipt.date|date:"M j, Y" }}</td>
                     <td class="cell-total">${{ receipt.total_amount }}</td>
-                    <td class="cell-status">{% block status %}{% endblock %}</td>
+                    <td class="cell-status">{% include "partials/status_badge.html" %}</td>
                     <td class="cell-actions">
                         <div class="row-actions">{% block actions %}{% endblock %}</div>
                     </td>

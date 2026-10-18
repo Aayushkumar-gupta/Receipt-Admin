@@ -1,0 +1,7 @@
+{% if not receipt.is_staged %}
+<span class="badge badge-draft">Draft</span>
+{% elif receipt.refund %}
+<span class="badge badge-refunded">Refunded</span>
+{% else %}
+<span class="badge badge-final">Final</span>
+{% endif %}

@@ -38,3 +38,22 @@ document.addEventListener("keydown", function (event) {
         menu.querySelector("summary").focus();
     });
 });
+
+document.addEventListener("click", function (event) {
+    var trigger = event.target.closest("[data-toggle]");
+    if (!trigger) {
+        return;
+    }
+    var panel = document.getElementById(trigger.dataset.toggle);
+    var open = panel.hidden;
+    panel.hidden = !open;
+    document.querySelectorAll('[data-toggle="' + panel.id + '"][aria-expanded]').forEach(function (button) {
+        button.setAttribute("aria-expanded", String(open));
+    });
+    if (open) {
+        var field = panel.querySelector("input:not([type=hidden]), textarea");
+        if (field) {
+            field.focus();
+        }
+    }
+});
