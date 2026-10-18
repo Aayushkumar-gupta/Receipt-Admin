@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+
+{% block robots %}noindex{% endblock %}
+{% block legacy_css %}{% endblock %}
+
+{% block content %}
+<div class="list-page">
+    <div class="list-header">
+        <h1 class="text-3xl font-bold tracking-tight sm:text-4xl">{% block heading %}{% endblock %}</h1>
+        <form method="get" class="search-form" role="search">
+            <label for="search" class="sr-only">Search by invoice number</label>
+            <input
+                type="search"
+                id="search"
+                name="search"
+                value="{{ request.GET.search }}"
+                class="field"
+                placeholder="Search by invoice number"
+            >
+            <button type="submit" class="btn-secondary">Search</button>
+        </form>
+    </div>
+
+    {% if receipts %}
+    <div class="list-panel">
+        <table class="receipt-table">
+            <thead>
+                <tr>
+                    <th scope="col">Invoice</th>
+                    <th scope="col">Buyer</th>
+                    <th scope="col">Date</th>
+                    <th scope="col" class="text-right">Total</th>
+                    <th scope="col">Status</th>
+                    <th scope="col"><span class="sr-only">Actions</span></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for receipt in receipts %}
+                <tr>
+                    <td class="cell-invoice">{{ receipt.invoice_number }}</td>
+                    <td class="cell-buyer">{{ receipt.buyer_name }}</td>
+                    <td class="cell-date">{{ receipt.date|date:"M j, Y" }}</td>
+                    <td class="cell-total">${{ receipt.total_amount }}</td>
+                    <td class="cell-status">{% block status %}{% endblock %}</td>
+                    <td class="cell-actions">
+                        <div class="row-actions">{% block actions %}{% endblock %}</div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% elif request.GET.search %}
+    <div class="empty-state">
+        <p class="font-semibold">No receipts match "{{ request.GET.search }}"</p>
+        <p class="mt-1 text-ink-2">Check the invoice number and try again.</p>
+        <a href="{{ request.path }}" class="btn-secondary mt-5">Clear search</a>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        {% block empty %}{% endblock %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

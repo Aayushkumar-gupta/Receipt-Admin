@@ -563,6 +563,227 @@
     }
   }
 
+  .list-page {
+    width: 100%;
+    max-width: 80rem;
+    margin-inline: auto;
+  }
+
+  .list-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .search-form {
+    display: flex;
+    gap: 0.5rem;
+    width: 100%;
+  }
+
+  @media (width >= 40rem) {
+    .search-form {
+      width: auto;
+      min-width: 22rem;
+    }
+  }
+
+  .list-panel {
+    margin-top: 1.5rem;
+    border: 1px solid var(--color-line);
+    border-radius: 0.75rem;
+    background: var(--color-surface);
+  }
+
+  .receipt-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .receipt-table thead {
+    display: none;
+  }
+
+  .receipt-table tbody tr {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.25rem 1rem;
+    padding: 1rem 1.25rem;
+  }
+
+  .receipt-table tbody tr + tr {
+    border-top: 1px solid var(--color-line);
+  }
+
+  .cell-invoice {
+    font-weight: 600;
+  }
+
+  .cell-buyer,
+  .cell-date {
+    grid-column: 1;
+    color: var(--color-ink-2);
+  }
+
+  .cell-total {
+    grid-row: 2;
+    grid-column: 2;
+    font-weight: 600;
+    text-align: right;
+  }
+
+  .cell-status {
+    grid-row: 1;
+    grid-column: 2;
+    justify-self: end;
+  }
+
+  .cell-actions {
+    grid-column: 1 / -1;
+    margin-top: 0.5rem;
+  }
+
+  @media (width >= 48rem) {
+    .receipt-table thead {
+      display: table-header-group;
+    }
+
+    .receipt-table th {
+      border-bottom: 1px solid var(--color-line);
+      padding: 0.75rem 1.25rem;
+      color: var(--color-ink-2);
+      font-size: 0.9375rem;
+      font-weight: 500;
+      text-align: left;
+    }
+
+    .receipt-table tbody tr {
+      display: table-row;
+    }
+
+    .receipt-table td {
+      padding: 0.875rem 1.25rem;
+      vertical-align: middle;
+    }
+
+    .receipt-table tbody tr + tr td {
+      border-top: 1px solid var(--color-line);
+    }
+
+    .cell-actions {
+      margin-top: 0;
+    }
+  }
+
+  .row-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.75rem;
+  }
+
+  .btn-small {
+    min-height: 2.25rem;
+    padding-inline: 0.875rem;
+    font-size: 0.9375rem;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 9999px;
+    padding: 0.125rem 0.625rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  .badge-draft {
+    border: 1px solid var(--color-line-strong);
+    background: var(--color-canvas);
+    color: var(--color-ink-2);
+  }
+
+  .badge-final {
+    background: var(--color-accent-soft);
+    color: var(--color-ink);
+  }
+
+  .badge-refunded {
+    background: #FEF2F2;
+    color: var(--color-danger);
+  }
+
+  .icon-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: 0.375rem;
+    color: var(--color-ink-2);
+    cursor: pointer;
+    list-style: none;
+  }
+
+  .icon-button::-webkit-details-marker {
+    display: none;
+  }
+
+  .icon-button:hover,
+  .row-menu[open] .icon-button {
+    background: var(--color-canvas);
+    color: var(--color-ink);
+  }
+
+  .row-menu {
+    position: relative;
+  }
+
+  .menu-panel {
+    position: absolute;
+    right: 0;
+    z-index: 30;
+    min-width: 11rem;
+    margin-top: 0.25rem;
+    border: 1px solid var(--color-line);
+    border-radius: 0.5rem;
+    background: var(--color-surface);
+    padding: 0.25rem;
+    box-shadow: 0 8px 24px -8px rgb(15 23 42 / 0.2);
+  }
+
+  .menu-item {
+    display: block;
+    width: 100%;
+    border-radius: 0.375rem;
+    padding: 0.625rem 0.75rem;
+    color: var(--color-ink);
+    text-align: left;
+    text-decoration: none;
+  }
+
+  .menu-item:hover {
+    background: var(--color-canvas);
+  }
+
+  .menu-item-danger {
+    color: var(--color-danger);
+  }
+
+  .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 1.5rem;
+    border: 1px dashed var(--color-line-strong);
+    border-radius: 0.75rem;
+    padding: 3rem 1.5rem;
+    text-align: center;
+  }
+
   .nav-link {
     display: flex;
     align-items: center;

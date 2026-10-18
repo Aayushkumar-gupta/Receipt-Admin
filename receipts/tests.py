@@ -223,6 +223,25 @@ class ReceiptListTests(TestCase):
 
         self.assertEqual(list(response.context["receipts"]), [draft])
 
+    def test_lists_show_buyer_status_and_confirmations(self):
+        make_receipt(self.user, refunded=True, staged=True, buyer_name="Leo")
+        draft = make_receipt(self.user, buyer_name="Sam")
+
+        staging = self.client.get(reverse("staging_area"))
+        mine = self.client.get(reverse("my_receipts"))
+
+        self.assertContains(staging, "Sam")
+        self.assertContains(staging, 'class="badge badge-draft"')
+        self.assertContains(staging, f"Confirm {draft.invoice_number}?")
+        self.assertContains(mine, 'class="badge badge-refunded"', count=1)
+        self.assertContains(mine, 'class="badge badge-final"', count=2)
+
+    def test_search_without_matches_offers_to_clear_it(self):
+        response = self.client.get(reverse("my_receipts"), {"search": "nothing"})
+
+        self.assertContains(response, "No receipts match")
+        self.assertContains(response, "Clear search")
+
 
 class PdfTests(TestCase):
     def setUp(self):

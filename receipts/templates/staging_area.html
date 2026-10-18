@@ -1,146 +1,46 @@
-{% extends 'base.html' %}
+{% extends 'receipt_list.html' %}
 
 {% block title %}Staging area | Receipt Admin{% endblock %}
 {% block description %}Review your draft receipts, then confirm, edit or delete them.{% endblock %}
-{% block robots %}noindex{% endblock %}
 
-{% block content %}
+{% block heading %}Staging area{% endblock %}
 
-<style>
-    body {
-        background-color: #F8FAFC;
-        font-family: 'Segoe UI', Tahoma, sans-serif;
-        color: #1E293B;
-    }
+{% block status %}<span class="badge badge-draft">Draft</span>{% endblock %}
 
-    .receipt-wrapper {
-        max-width: 960px;
-        margin: 50px auto;
-        background: rgba(255, 255, 255, 0.85);
-        padding: 40px;
-        border-radius: 20px;
-        box-shadow: 0 8px 25px rgba(0, 119, 182, 0.15);
-        border: 1px solid #E2E8F0;
-    }
-
-    .receipt-title {
-        font-size: 1.5rem;
-        font-weight: 600;
-        color: #0077B6;
-        margin-bottom: 0;
-        border-bottom: 2px solid #E2E8F0;
-        padding-bottom: 8px;
-    }
-
-    .table th {
-        background-color: #F1F5F9;
-        color: #1E293B;
-    }
-
-    .table td, .table th {
-        vertical-align: middle;
-    }
-
-    .btn-sm {
-        border-radius: 8px;
-        font-weight: 500;
-        transition: all 0.2s ease;
-    }
-
-    .btn-primary {
-        background-color: #00C49A;
-        border-color: #00C49A;
-        color: #fff;
-    }
-
-    .btn-primary:hover {
-        background-color: #009e84;
-        border-color: #009e84;
-    }
-
-    .btn-secondary {
-        background-color: #0077B6;
-        border-color: #0077B6;
-        color: #fff;
-    }
-
-    .btn-secondary:hover {
-        background-color: #005f8a;
-        border-color: #005f8a;
-    }
-
-    .btn-delete {
-        background-color: #EF4444;
-        border-color: #EF4444;
-        color: #fff;
-    }
-
-    .btn-delete:hover {
-        background-color: #c53030;
-        border-color: #c53030;
-    }
-
-    .no-receipts {
-        text-align: center;
-        margin-top: 40px;
-        color: #475569;
-        font-style: italic;
-    }
-</style>
-
-<div class="receipt-wrapper">
-
-    <!-- Title and Search Bar -->
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <div class="receipt-title">📑 Unstaged Receipts</div>
-        <form method="GET" action="" class="d-flex">
-            <input type="text" name="search" class="form-control form-control-sm" placeholder="Search receipts..." value="{{ request.GET.search }}">
-            <button type="submit" class="btn btn-sm btn-primary ms-2">Search</button>
+{% block actions %}
+<a href="{% url 'staging_edit' receipt.id %}" class="text-link">Edit</a>
+<form
+    method="post"
+    action="{% url 'stage' receipt.id %}"
+    data-confirm="Confirm {{ receipt.invoice_number }}? You won't be able to edit it afterwards."
+>
+    {% csrf_token %}
+    <button type="submit" class="btn-primary btn-small">Confirm</button>
+</form>
+<details class="row-menu">
+    <summary class="icon-button" aria-label="More actions for {{ receipt.invoice_number }}">
+        {% include "partials/icons/more.html" %}
+    </summary>
+    <div class="menu-panel">
+        <a
+            href="{% url 'view_receipt_pdf' receipt.id %}"
+            class="menu-item"
+            target="_blank"
+            rel="noopener"
+        >Preview PDF</a>
+        <form
+            method="post"
+            action="{% url 'staging_delete' receipt.id %}"
+            data-confirm="Delete {{ receipt.invoice_number }}? This can't be undone."
+        >
+            {% csrf_token %}
+            <button type="submit" class="menu-item menu-item-danger">Delete draft</button>
         </form>
     </div>
+</details>
+{% endblock %}
 
-    {% if receipts %}
-    <div class="table-responsive">
-        <table class="table table-bordered table-hover align-middle text-center">
-            <thead>
-                <tr>
-                    <th>Invoice #</th>
-                    <th>Date</th>
-                    <th>Total</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for receipt in receipts %}
-                <tr>
-                    <td>{{ receipt.invoice_number }}</td>
-                    <td>{{ receipt.date }}</td>
-                    <td>${{ receipt.total_amount }}</td>
-                    <td>
-                        <a href="{% url 'view_receipt_pdf' receipt.id %}" class="btn btn-sm btn-primary">View</a>
-                        <a href="{% url 'staging_edit' receipt.id %}" class="btn btn-sm btn-primary">Edit</a>
-                        <form method="post" action="{% url 'stage' receipt.id %}" style="display:inline;">
-                            {% csrf_token %}
-                            <button type="submit" class="btn btn-sm btn-secondary"
-                                onclick="return confirm('Are you sure you want to Confirm the receipt? NOTE: You won\'t be able to edit it afterwards.');">
-                                Confirm
-                            </button>
-                        </form>
-                        <form method="post" action="{% url 'staging_delete' receipt.id %}" style="display:inline;">
-                            {% csrf_token %}
-                            <button type="submit" class="btn btn-sm btn-delete"
-                                onclick="return confirm('Are you sure you want to delete this receipt?');">
-                                Delete
-                            </button>
-                        </form>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-    {% else %}
-        <p class="no-receipts">No receipts in staging area. Check 'My Receipts' section for final receipts!</p>
-    {% endif %}
-</div>
+{% block empty %}
+<p class="font-semibold">No drafts waiting</p>
+<p class="mt-1 text-ink-2">New receipts wait here until you confirm them.</p>
 {% endblock %}
