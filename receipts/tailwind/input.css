@@ -416,12 +416,8 @@
   }
 
   .editor-page {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
     width: 100%;
     max-width: 80rem;
-    min-height: calc(100vh - 3rem);
     margin-inline: auto;
   }
 
@@ -924,7 +920,7 @@
 
   .profile-page {
     width: 100%;
-    max-width: 72rem;
+    max-width: 80rem;
     margin-inline: auto;
   }
 
@@ -936,7 +932,7 @@
 
   @media (width >= 64rem) {
     .profile-layout {
-      grid-template-columns: 20rem minmax(0, 1fr);
+      grid-template-columns: 22rem minmax(0, 1fr);
       align-items: start;
     }
   }
@@ -951,12 +947,12 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 4.5rem;
-    height: 4.5rem;
+    width: 5rem;
+    height: 5rem;
     border-radius: 9999px;
     background: var(--color-brand);
     color: #fff;
-    font-size: 1.5rem;
+    font-size: 1.75rem;
     font-weight: 700;
     letter-spacing: 0.02em;
   }
@@ -1004,9 +1000,23 @@
 
   @media (width >= 48rem) {
     .settings-section {
-      grid-template-columns: 14rem minmax(0, 1fr);
-      gap: 2rem;
-      padding: 1.75rem 2rem;
+      gap: 1.5rem;
+      padding: 2.25rem 2.5rem;
+    }
+
+    .settings-footer {
+      padding: 1.25rem 2.5rem;
+    }
+
+    .profile-summary {
+      padding: 2rem;
+    }
+  }
+
+  @media (width >= 96rem) {
+    .settings-section {
+      grid-template-columns: 16rem minmax(0, 1fr);
+      gap: 2.5rem;
     }
   }
 

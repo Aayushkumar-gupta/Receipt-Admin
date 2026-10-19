@@ -63,7 +63,7 @@ Receipts are financial records, so the app is built to keep them correct and pri
 | Database | PostgreSQL in production (psycopg 3), SQLite for local development |
 | PDF generation | xhtml2pdf |
 | Email | Resend API |
-| Frontend | Django templates, Bootstrap 5 |
+| Frontend | Django templates, Tailwind CSS 4, vanilla JavaScript |
 | Hosting | Render (Gunicorn, WhiteNoise for static files) |
 | Quality | Django test suite, coverage, Ruff, pre-commit, GitHub Actions, Dependabot |
 
@@ -85,6 +85,21 @@ python manage.py runserver
 Then open http://127.0.0.1:8000.
 
 No configuration is needed: the app uses SQLite and a development secret key, and prints email verification and password reset links to the terminal instead of sending them. To use the admin site, create an account with `python manage.py createsuperuser`.
+
+### Styles
+
+The compiled stylesheet, `receipts/static/receipts/css/app.css`, is committed, so the app runs and deploys without any frontend tooling. To change the styles, edit `receipts/tailwind/input.css` or the templates, then rebuild with the [Tailwind CSS standalone CLI](https://tailwindcss.com/blog/standalone-cli), which needs no Node.js:
+
+```bash
+# one time: download the CLI for your platform (macOS Apple silicon shown)
+curl -sLo bin/tailwindcss https://github.com/tailwindlabs/tailwindcss/releases/download/v4.3.3/tailwindcss-macos-arm64
+chmod +x bin/tailwindcss
+
+# rebuild after a change, or add --watch while working
+bin/tailwindcss -i receipts/tailwind/input.css -o receipts/static/receipts/css/app.css --minify
+```
+
+Builds for other platforms are listed on the [release page](https://github.com/tailwindlabs/tailwindcss/releases/tag/v4.3.3).
 
 ## Configuration
 
