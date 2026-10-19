@@ -28,6 +28,8 @@ from django.utils.http import (
 )
 from django.views.decorators.http import require_POST
 
+from receipts.models import Receipt
+
 from .models import UserProfile
 from .utils import send_password_reset_email, send_verification_email
 
@@ -238,3 +240,22 @@ class CustomPasswordResetView(PasswordResetView):
             )
             send_password_reset_email(user, reset_url)
         return redirect(self.success_url)
+
+
+@login_required
+@require_POST
+def delete_account(request):
+    user = request.user
+    if not user.check_password(request.POST.get("password", "")):
+        messages.error(
+            request, "Your password is incorrect. Your account was not deleted."
+        )
+        return redirect("profile")
+
+    with transaction.atomic():
+        Receipt.objects.filter(user=user).delete()
+        user.delete()
+
+    auth_logout(request)
+    messages.success(request, "Your account and all your receipts are deleted.")
+    return redirect("home")

@@ -12,6 +12,9 @@ from django.test import RequestFactory, TestCase, override_settings
 from django.urls import reverse
 from django.utils.http import urlsafe_base64_encode
 
+from receipts.models import Receipt, ReceiptItem
+from receipts.tests import make_receipt
+
 from .models import UserProfile
 from .utils import send_password_reset_email, send_verification_email
 from .views import send_email_async
@@ -511,3 +514,58 @@ class AdminTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Email Verified")
+
+
+class DeleteAccountTests(TestCase):
+    url = reverse("delete_account")
+
+    def setUp(self):
+        self.user = make_user()
+        self.client.force_login(self.user)
+
+    def test_requires_post(self):
+        self.assertEqual(self.client.get(self.url).status_code, 405)
+
+    def test_requires_login(self):
+        self.client.logout()
+
+        response = self.client.post(self.url, {"password": PASSWORD})
+
+        self.assertRedirects(response, f"{reverse('login')}?next={self.url}")
+        self.assertTrue(User.objects.filter(pk=self.user.pk).exists())
+
+    def test_wrong_password_keeps_the_account(self):
+        receipt = make_receipt(self.user)
+
+        response = self.client.post(self.url, {"password": "wrong"})
+
+        self.assertRedirects(response, reverse("profile"))
+        self.assertIn(
+            "Your password is incorrect. Your account was not deleted.",
+            messages_of(response),
+        )
+        self.assertTrue(User.objects.filter(pk=self.user.pk).exists())
+        self.assertTrue(Receipt.objects.filter(pk=receipt.pk).exists())
+
+    def test_deletes_the_user_and_their_receipts_and_logs_out(self):
+        mine = make_receipt(self.user)
+        theirs = make_receipt(make_user("bob@example.com"))
+
+        response = self.client.post(self.url, {"password": PASSWORD})
+
+        self.assertRedirects(response, reverse("home"))
+        self.assertIn(
+            "Your account and all your receipts are deleted.", messages_of(response)
+        )
+        self.assertFalse(User.objects.filter(pk=self.user.pk).exists())
+        self.assertFalse(UserProfile.objects.filter(user_id=self.user.pk).exists())
+        self.assertFalse(Receipt.objects.filter(pk=mine.pk).exists())
+        self.assertFalse(ReceiptItem.objects.filter(receipt_id=mine.pk).exists())
+        self.assertTrue(Receipt.objects.filter(pk=theirs.pk).exists())
+        self.assertNotIn("_auth_user_id", self.client.session)
+
+    def test_profile_page_shows_the_delete_form(self):
+        response = self.client.get(reverse("profile"))
+
+        self.assertContains(response, f'action="{self.url}"')
+        self.assertContains(response, 'id="delete_password"')
