@@ -3,204 +3,153 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>{% block title %}Receipt App{% endblock %}</title>
-
-    <!-- Bootstrap 5 CSS CDN -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-
-    <style>
-        html, body {
-            height: 100%;
-            margin: 0;
-        }
-
-        body {
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-            font-family: 'Segoe UI', Tahoma, sans-serif;
-            background-color: #F8FAFC;
-            color: #1E293B;
-        }
-
-        /* Navbar */
-        .navbar {
-            background: rgba(240, 248, 255, 0.6);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
-        }
-
-        .navbar-brand {
-            color: #0077B6 !important;
-            font-weight: 700;
-            font-size: 1.4rem;
-            letter-spacing: 0.5px;
-        }
-
-        .navbar-nav .nav-link {
-            color: #334155;
-            font-weight: 500;
-            margin-left: 10px;
-            transition: color 0.3s ease, border-bottom 0.3s ease;
-        }
-
-        .navbar-nav .nav-link:hover,
-        .navbar-nav .nav-link.active {
-            color: #0077B6;
-            border-bottom: 2px solid #00C49A;
-            padding-bottom: 2px;
-        }
-
-        .navbar-toggler {
-            border: none;
-        }
-
-        .navbar-toggler-icon {
-            background-image: url("data:image/svg+xml;charset=utf8,%3Csvg viewBox='0 0 30 30' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath stroke='rgba(30,41,59,0.85)' stroke-width='2' stroke-linecap='round' stroke-miterlimit='10' d='M4 7h22M4 15h22M4 23h22'/%3E%3C/svg%3E");
-        }
-
-        /* Page content should grow */
-        .content-wrapper {
-            flex: 1 0 auto;
-            padding-top: 1rem;
-            padding-bottom: 1rem;
-        }
-
-        .logo-img {
-            height: 45px;   /* increase size */
-            width: auto;
-            object-fit: contain;
-            margin-right: 10px;
-        }
-
-
-        /* Footer always at bottom */
-        footer {
-            flex-shrink: 0;
-            background: #F8FAFC;
-            border-top: 1px solid #E2E8F0;
-            text-align: center;
-            padding: 1rem;
-            color: #475569;
-            font-size: 0.9rem;
-            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
-        }
-
-        footer strong {
-            color: #0077B6;
-        }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Receipt Admin{% endblock %}</title>
+    <meta name="description" content="{% block description %}Create receipts for your sales and keep every sale on record.{% endblock %}">
+    <meta name="robots" content="{% block robots %}index, follow{% endblock %}">
+    <link rel="canonical" href="{{ request.scheme }}://{{ request.get_host }}{{ request.path }}">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Receipt Admin">
+    <meta property="og:url" content="{{ request.scheme }}://{{ request.get_host }}{{ request.path }}">
+    <meta
+        property="og:image"
+        content="{{ request.scheme }}://{{ request.get_host }}{% static 'receipts/og-image.png' %}"
+    >
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="theme-color" content="#F8FAFC">
+    <link rel="icon" href="{% static 'receipts/favicon.ico' %}" sizes="any">
+    <link rel="apple-touch-icon" href="{% static 'receipts/apple-touch-icon.png' %}">
+    <link
+        rel="preload"
+        href="{% static 'receipts/fonts/Archivo-latin.woff2' %}"
+        as="font"
+        type="font/woff2"
+        crossorigin
+    >
+    <link rel="stylesheet" href="{% static 'receipts/css/app.css' %}">
+    <script src="{% static 'receipts/js/nav.js' %}" defer></script>
+    {% block head %}{% endblock %}
 </head>
-<body>
-<!-- Navbar -->
-<nav class="navbar navbar-expand-lg sticky-top">
-    <div class="container d-flex align-items-center">
-        <a class="navbar-brand d-flex align-items-center"
-           href="{% if user.is_authenticated %}{% url 'dashboard' %}{% else %}{% url 'home' %}{% endif %}">
-            <img src="{% static 'receipts/Logo.png' %}" alt="Logo" class="logo-img">
-            Receipt Admin
-        </a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-            <span class="navbar-toggler-icon"></span>
-        </button>
+<body class="min-h-screen bg-canvas text-ink antialiased">
+<a href="#main" class="skip-link">Skip to content</a>
 
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav ms-auto">
-                {% if not user.is_authenticated %}
-                <!-- Home -->
-                <li class="nav-item">
-                    <a class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}"
-                       href="{% url 'home' %}">Home</a>
-                </li>
-                {% endif %}
-
-                {% if user.is_authenticated %}
-                    <!-- Dashboard -->
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}"
-                           href="{% url 'dashboard' %}">Dashboard</a>
-                    </li>
-
-                    <!-- Create Receipt -->
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.resolver_match.url_name == 'create_receipt' %}active{% endif %}"
-                           href="{% url 'create_receipt' %}">Create Receipt</a>
-                    </li>
-
-                    <!-- Staging Area -->
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.resolver_match.url_name == 'staging_area' %}active{% endif %}"
-                           href="{% url 'staging_area' %}">Staging Area</a>
-                    </li>
-
-                    <!-- My Receipts -->
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.resolver_match.url_name == 'my_receipts' %}active{% endif %}"
-                           href="{% url 'my_receipts' %}">My Receipts</a>
-                    </li>
-                {% endif %}
-
-                <!-- About -->
-                <li class="nav-item">
-                    <a class="nav-link {% if request.resolver_match.url_name == 'about' %}active{% endif %}"
-                       href="{% url 'about' %}">About</a>
-                </li>
-
-                {% if user.is_authenticated %}
-                    <!-- Profile -->
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.resolver_match.url_name == 'profile' %}active{% endif %}"
-                           href="{% url 'profile' %}">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-person" viewBox="0 0 16 16">
-                                <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>
-                                <path fill-rule="evenodd" d="M8 9a5 5 0 0 0-5 5v1h10v-1a5 5 0 0 0-5-5z"/>
-                            </svg>
-                        </a>
-                    </li>
-
-                    <!-- Logout -->
-                    <li class="nav-item">
-                        <form method="post" action="{% url 'logout' %}" class="d-inline"
-                              onsubmit="return confirm('Are you sure you want to logout?');">
-                            {% csrf_token %}
-                            <button type="submit" class="nav-link border-0 bg-transparent">Logout</button>
-                        </form>
-                    </li>
-                {% else %}
-                    <!-- Login -->
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.resolver_match.url_name == 'login' %}active{% endif %}"
-                           href="{% url 'login' %}">Login</a>
-                        </li>
-                {% endif %}
-            </ul>
+{% with current=request.resolver_match.url_name %}
+{% if user.is_authenticated %}
+<div class="lg:flex">
+    <header class="sidebar">
+        <div class="flex h-16 items-center justify-between px-4 lg:px-5">
+            <a href="{% url 'dashboard' %}" class="text-ink no-underline">
+                {% include "partials/brand.html" %}
+            </a>
+            <button
+                type="button"
+                id="nav-toggle"
+                class="menu-toggle lg:hidden"
+                aria-controls="nav-menu"
+                aria-expanded="false"
+            >
+                <span class="sr-only">Menu</span>
+                {% include "partials/icons/menu.html" %}
+            </button>
         </div>
-    </div>
-</nav>
 
-    {% if messages %}
-      <div class="container mt-3">
-        {% for message in messages %}
-            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
-        {% endfor %}
-      </div>
-    {% endif %}
+        <nav
+            id="nav-menu"
+            class="hidden border-t border-line px-3 pt-3 pb-4 lg:flex lg:flex-1 lg:flex-col lg:border-0 lg:pt-2"
+            aria-label="Main"
+        >
+            <ul class="mb-0 list-none space-y-1 p-0">
+                {% include "partials/nav_link.html" with page="dashboard" icon="dashboard" label="Dashboard" %}
+                {% include "partials/nav_link.html" with page="create_receipt" icon="create" label="Create receipt" %}
+                {% include "partials/nav_link.html" with page="staging_area" icon="staging" label="Staging area" %}
+                {% include "partials/nav_link.html" with page="my_receipts" icon="receipts" label="My receipts" %}
+            </ul>
+            <ul class="mt-6 mb-0 list-none space-y-1 border-t border-line p-0 pt-4 lg:mt-auto">
+                {% include "partials/nav_link.html" with page="profile" icon="profile" label="Profile" %}
+                {% include "partials/nav_link.html" with page="about" icon="about" label="About" %}
+                <li>
+                    <form method="post" action="{% url 'logout' %}" data-confirm="Log out of Receipt Admin?">
+                        {% csrf_token %}
+                        <button type="submit" class="nav-link">
+                            {% include "partials/icons/logout.html" %}
+                            Log out
+                        </button>
+                    </form>
+                </li>
+            </ul>
+        </nav>
+    </header>
 
-    <!-- Page Content -->
-    <div class="container content-wrapper">
-        {% block content %}
+    <div class="min-w-0 flex-1 lg:pl-64">
+{% else %}
+<div class="flex min-h-screen flex-col">
+    <header class="sticky top-0 z-40 border-b border-line bg-surface/90 font-sans backdrop-blur">
+        <nav class="page relative flex h-16 items-center gap-2" aria-label="Main">
+            <a href="{% url 'home' %}" class="mr-auto text-ink no-underline">
+                {% include "partials/brand.html" %}
+            </a>
+            <div id="nav-menu" class="public-menu hidden md:flex">
+                <a
+                    href="{% url 'about' %}"
+                    class="top-link"
+                    {% if current == "about" %}aria-current="page"{% endif %}
+                >About</a>
+                {% block header_login %}
+                <a href="{% url 'login' %}" class="top-link">Log in</a>
+                {% endblock %}
+            </div>
+            {% block header_signup %}
+            <a href="{% url 'sign_up' %}" class="btn-primary btn-header md:ml-2">Create account</a>
+            {% endblock %}
+            <button
+                type="button"
+                id="nav-toggle"
+                class="menu-toggle md:hidden"
+                aria-controls="nav-menu"
+                aria-expanded="false"
+            >
+                <span class="sr-only">Menu</span>
+                {% include "partials/icons/menu.html" %}
+            </button>
+        </nav>
+    </header>
+{% endif %}
+
+    {% block messages %}
+    {% include "partials/messages.html" %}
+    {% endblock %}
+
+    <main id="main" class="flex-1">
+        {% block main %}
+        <div class="{% if user.is_authenticated %}px-4 sm:px-6 lg:px-8{% else %}page{% endif %} py-6">
+            {% block content %}{% endblock %}
+        </div>
         {% endblock %}
+    </main>
+
+{% if user.is_authenticated %}
     </div>
-
-    <!-- Footer -->
-    <footer>
-        &copy; {% now "Y" %} <strong>Receipt Admin</strong>. All rights reserved.
+</div>
+{% else %}
+    <footer class="border-t border-line bg-surface font-sans">
+        <div class="page flex flex-col gap-2 py-6 text-ink-2 sm:flex-row sm:items-center sm:justify-between">
+            <p>&copy; {% now "Y" %} Receipt Admin</p>
+            {% block footer_contact %}
+            <p>
+                Questions?
+                <a href="mailto:support@receiptadmin.com" class="text-link">
+                    support@receiptadmin.com
+                </a>
+            </p>
+            {% endblock %}
+        </div>
     </footer>
+</div>
+{% endif %}
+{% endwith %}
 
-    <!-- Bootstrap JS CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    {% block scripts %}{% endblock %}
+{% block scripts %}{% endblock %}
 </body>
 </html>

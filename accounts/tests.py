@@ -98,7 +98,9 @@ class SignUpTests(TestCase):
         response = self.post(email="BO@Example.com")
 
         self.assertEqual(response.status_code, 200)
-        self.assertIn("User already exists.", messages_of(response))
+        self.assertIn(
+            "An account with this email already exists.", messages_of(response)
+        )
         self.assertEqual(User.objects.count(), 1)
 
     def test_weak_password_is_rejected_on_the_server(self, thread):
@@ -159,14 +161,16 @@ class SignUpTests(TestCase):
         ):
             response = self.post()
 
-        self.assertIn("User already exists.", messages_of(response))
+        self.assertIn(
+            "An account with this email already exists.", messages_of(response)
+        )
         self.assertFalse(User.objects.exists())
 
     def test_error_message_is_shown_once(self, thread):
         response = self.post(email="not-an-email")
 
         self.assertContains(response, "Enter a valid email address.", count=1)
-        self.assertContains(response, 'class="alert alert-danger"')
+        self.assertContains(response, 'data-level="danger"')
 
 
 class LoginTests(TestCase):
@@ -207,7 +211,7 @@ class LoginTests(TestCase):
             f"{self.url}?next=%2Fmy_receipts%2F",
             fetch_redirect_response=False,
         )
-        self.assertIn("Invalid username or password", messages_of(response))
+        self.assertIn("Incorrect email or password.", messages_of(response))
         self.assertNotIn("_auth_user_id", self.client.session)
 
     def test_five_failures_lock_out_even_the_correct_password(self):
@@ -305,7 +309,9 @@ class EmailVerificationTests(TestCase):
         with mock.patch("django.core.signing.time.time", return_value=future):
             response = self.client.get(link)
 
-        self.assertIn("Invalid or expired verification link.", messages_of(response))
+        self.assertIn(
+            "This confirmation link has expired or is not valid.", messages_of(response)
+        )
         self.assertFalse(self.verified())
 
     def test_tampered_or_mismatched_links_are_rejected(self):
@@ -365,6 +371,7 @@ class SendEmailTests(TestCase):
         payload = send.call_args.args[0]
         self.assertEqual(payload["to"], [self.user.email])
         self.assertIn("http://testserver/reset/x/y/", payload["text"])
+        self.assertIn('href="http://testserver/reset/x/y/"', payload["html"])
 
     @mock.patch("accounts.utils.resend.Emails.send", side_effect=Exception("down"))
     def test_password_reset_email_failure_is_logged(self, send):
@@ -409,7 +416,9 @@ class ResendVerificationTests(TestCase):
     @mock.patch("accounts.utils.resend.Emails.send", return_value={"id": "abc"})
     def test_success_and_one_minute_cooldown(self, send):
         response = self.client.post(self.url)
-        self.assertIn("Verification email sent successfully!", messages_of(response))
+        self.assertIn(
+            "We sent a new confirmation email. Check your inbox.", messages_of(response)
+        )
 
         response = self.client.post(self.url)
         self.assertIn(
@@ -424,7 +433,7 @@ class ResendVerificationTests(TestCase):
             response = self.client.post(self.url)
 
         self.assertIn(
-            "We couldn't send the verification email. Please try again later.",
+            "We could not send the confirmation email. Try again in a few minutes.",
             messages_of(response),
         )
 

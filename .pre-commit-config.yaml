@@ -4,6 +4,7 @@ repos:
     hooks:
       - id: trailing-whitespace
       - id: end-of-file-fixer
+        exclude: ^receipts/static/receipts/css/app\.css$
       - id: check-yaml
       - id: check-merge-conflict
       - id: check-added-large-files

@@ -1,166 +1,249 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Receipt - {{ receipt.invoice_number }}</title>
+    <title>Receipt {{ receipt.invoice_number }}</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            font-size: 12px;
-            margin: 0;
-            padding: 0;
-        }
-        .container {
-            width: 100%;
-            padding: 20px 30px;
-            border: 1px solid #333;
-        }
-        .header {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        .header h2 {
-            margin: 0;
-            font-size: 18px;
-        }
-        .section {
-            border: 1px solid #333;
-            padding: 10px;
-            margin-bottom: 15px;
-        }
-        .section strong {
-            font-size: 13px;
-            margin-bottom: 5px;
-            display: block;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 15px;
-        }
-        table, th, td {
-            border: 1px solid #333;
-        }
-        th, td {
-            padding: 5px;
-            text-align: left;
-        }
-        .totals {
-            width: 40%;
-            float: right;
-            margin-top: 10px;
-        }
-        .totals table {
-            border: none;
-        }
-        .totals td {
-            border: none;
-            padding: 5px 0;
-        }
-        .footer {
-            clear: both;
-            text-align: center;
-            margin-top: 30px;
-            font-size: 12px;
-        }
-        .tiny-text {
-            font-size: 8px;
-            color: #555;
-            text-align: center;
-            margin-top: 10px;
+        @page {
+            size: letter;
+            margin: 1.8cm 1.8cm 3.6cm;
+
+            @frame footer {
+                -pdf-frame-content: page-footer;
+                left: 1.8cm;
+                width: 17.99cm;
+                top: 25.2cm;
+                height: 1.8cm;
+            }
         }
 
+        body {
+            font-family: Helvetica, Arial, sans-serif;
+            font-size: 10pt;
+            line-height: 1.4;
+            color: #1E293B;
+        }
+
+        table {
+            width: 100%;
+        }
+
+        td,
+        th {
+            vertical-align: top;
+            text-align: left;
+        }
+
+        .doc-title {
+            font-size: 18pt;
+            font-weight: bold;
+            letter-spacing: 1pt;
+        }
+
+        .meta-label {
+            padding: 1pt 10pt 1pt 0;
+            color: #64748B;
+            text-align: right;
+        }
+
+        .meta-value {
+            padding: 1pt 0;
+        }
+
+        .rule {
+            margin: 14pt 0 20pt;
+            border-top: 1.5pt solid #0077B6;
+        }
+
+        .status {
+            font-weight: bold;
+        }
+
+        .status-refunded {
+            color: #B91C1C;
+        }
+
+        .right {
+            text-align: right;
+        }
+
+        .party-label {
+            padding-bottom: 4pt;
+            font-size: 8.5pt;
+            color: #64748B;
+        }
+
+        .party-name {
+            font-size: 11pt;
+            font-weight: bold;
+        }
+
+        .party-detail {
+            color: #475569;
+        }
+
+        .divider {
+            margin-top: 18pt;
+            border-top: 0.5pt solid #CBD5E1;
+        }
+
+        .items {
+            margin-top: 18pt;
+        }
+
+        .items th {
+            padding: 7pt 6pt 6pt;
+            background-color: #F1F5F9;
+            border-bottom: 1pt solid #1E293B;
+            font-size: 8.5pt;
+            color: #475569;
+        }
+
+        .items td {
+            padding: 7pt 6pt;
+            border-bottom: 0.5pt solid #CBD5E1;
+        }
+
+        .number {
+            text-align: right;
+        }
+
+        .totals {
+            margin-top: 16pt;
+        }
+
+        .totals td {
+            padding: 3pt 6pt;
+        }
+
+        .totals .sum {
+            background-color: #F1F5F9;
+        }
+
+        .totals .sum-first {
+            padding-top: 8pt;
+        }
+
+        .totals .grand-total {
+            padding-top: 7pt;
+            padding-bottom: 8pt;
+            border-top: 1pt solid #1E293B;
+            font-size: 11pt;
+            font-weight: bold;
+        }
+
+        .thanks {
+            padding-top: 10pt;
+            border-top: 0.5pt solid #CBD5E1;
+            text-align: center;
+        }
+
+        .made-with {
+            margin-top: 6pt;
+            font-size: 9pt;
+            color: #64748B;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h2>Invoice: {{ receipt.invoice_number }}</h2>
-            <p>Date: {{ receipt.date }}</p>
-        </div>
+    <table>
+        <tr>
+            <td class="doc-title" width="50%">RECEIPT</td>
+            <td width="50%">
+                <table>
+                    <tr>
+                        <td class="meta-label" width="70%">Receipt number</td>
+                        <td class="meta-value" width="30%">{{ receipt.invoice_number }}</td>
+                    </tr>
+                    <tr>
+                        <td class="meta-label">Date</td>
+                        <td class="meta-value">{{ receipt.date|date:"M j, Y" }}</td>
+                    </tr>
+                    <tr>
+                        <td class="meta-label">Status</td>
+                        {% if receipt.refund %}
+                        <td class="meta-value status status-refunded">Refunded</td>
+                        {% elif receipt.is_staged %}
+                        <td class="meta-value status">Paid</td>
+                        {% else %}
+                        <td class="meta-value status">Draft</td>
+                        {% endif %}
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
 
-        <div class="section draft">
-        {% if not receipt.is_staged %}
-            <div style="position: fixed; top: 40%; left: 20%;
-                font-size: 20px; color: rgba(200,0,0,0.3);
-                transform: rotate(-30deg);
-                font-weight: bold; z-index: -1; text-align: center; padding-top: 25px;">
-                DRAFT - NOT A FINAL RECEIPT
-            </div>
-        {% endif %}
-        </div>
+    <div class="rule"></div>
 
-        <div class="section draft">
-        {% if receipt.refund %}
-            <div style="position: fixed; top: 40%; left: 20%;
-                font-size: 20px; color: rgba(200,0,0,0.3);
-                transform: rotate(-30deg);
-                font-weight: bold; z-index: -1; text-align: center; padding-top: 25px;">
-                REFUNDED - TOTAL AMOUNT
-            </div>
-        {% endif %}
-        </div>
+    <table>
+        <tr>
+            <td width="50%">
+                <div class="party-label">From</div>
+                <div class="party-name">{{ receipt.seller_name }}</div>
+                <div class="party-detail">{{ receipt.seller_address }}</div>
+                {% if receipt.seller_phone_number %}
+                <div class="party-detail">{{ receipt.seller_phone_number }}</div>
+                {% endif %}
+                {% if receipt.seller_email %}
+                <div class="party-detail">{{ receipt.seller_email }}</div>
+                {% endif %}
+            </td>
+            <td class="right" width="50%">
+                <div class="party-label">Billed to</div>
+                <div class="party-name">{{ receipt.buyer_name }}</div>
+                <div class="party-detail">{{ receipt.buyer_address }}</div>
+                {% if receipt.buyer_phone_number %}
+                <div class="party-detail">{{ receipt.buyer_phone_number }}</div>
+                {% endif %}
+                {% if receipt.buyer_email %}
+                <div class="party-detail">{{ receipt.buyer_email }}</div>
+                {% endif %}
+            </td>
+        </tr>
+    </table>
 
-        <div class="section">
-            <strong>Seller Information</strong>
-            {{ receipt.seller_name }}<br>
-            {{ receipt.seller_address }}<br>
-            {{ receipt.seller_phone_number }}<br>
-            {{ receipt.seller_email }}
-        </div>
+    <div class="divider"></div>
 
-        <div class="section">
-            <strong>Buyer Information</strong>
-            {{ receipt.buyer_name }}<br>
-            {{ receipt.buyer_address }}<br>
-            {{ receipt.buyer_phone_number }}<br>
-            {{ receipt.buyer_email }}
-        </div>
+    <table class="items">
+        <tr>
+            <th width="52%">Item</th>
+            <th class="number" width="12%">Qty</th>
+            <th class="number" width="18%">Price</th>
+            <th class="number" width="18%">Amount</th>
+        </tr>
+        {% for item in receipt.items.all %}
+        <tr>
+            <td>{{ item.description }}</td>
+            <td class="number">{{ item.quantity }}</td>
+            <td class="number">${{ item.unit_price }}</td>
+            <td class="number">${{ item.line_price }}</td>
+        </tr>
+        {% endfor %}
+    </table>
 
-        <div class="section">
-            <strong>Items</strong>
-            <table>
-                <tr>
-                    <th>Description</th>
-                    <th>Quantity</th>
-                    <th>Unit Price</th>
-                    <th>Line Price</th>
-                </tr>
-                {% for item in receipt.items.all %}
-                <tr>
-                    <td>{{ item.description }}</td>
-                    <td>{{ item.quantity }}</td>
-                    <td>${{ item.unit_price }}</td>
-                    <td>${{ item.line_price }}</td>
-                </tr>
-                {% endfor %}
-            </table>
-        </div>
+    <table class="totals">
+        <tr>
+            <td width="55%"></td>
+            <td class="sum sum-first" width="27%">Subtotal</td>
+            <td class="sum sum-first number" width="18%">${{ receipt.sub_total }}</td>
+        </tr>
+        <tr>
+            <td></td>
+            <td class="sum">Tax at {{ receipt.tax_rate|floatformat:"-2" }}%</td>
+            <td class="sum number">${{ receipt.tax_amount }}</td>
+        </tr>
+        <tr>
+            <td></td>
+            <td class="sum grand-total">Total</td>
+            <td class="sum grand-total number">${{ receipt.total_amount }}</td>
+        </tr>
+    </table>
 
-        <div class="totals">
-            <table>
-                <tr>
-                    <td>Subtotal:</td>
-                    <td>${{ receipt.sub_total }}</td>
-                </tr>
-                <tr>
-                    <td>Tax Rate:</td>
-                    <td>{{ receipt.tax_rate }}%</td>
-                </tr>
-                <tr>
-                    <td><strong>Total:</strong></td>
-                    <td><strong>${{ receipt.total_amount }}</strong></td>
-                </tr>
-            </table>
-        </div>
-
-        <div class="footer">
-            Thank you for your business!
-        </div>
-
-        <div class="tiny-text">
-            This receipt was generated with Receipt Admin.
-        </div>
+    <div id="page-footer">
+        <div class="thanks">Thank you for your business.</div>
+        <div class="made-with">Made with Receipt Admin</div>
     </div>
 </body>
 </html>

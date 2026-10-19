@@ -11,12 +11,18 @@ from django.db.models import Q
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.loader import get_template
+from django.templatetags.static import static
 from django.views.decorators.http import require_POST
 from xhtml2pdf import pisa
 
 from accounts.models import UserProfile
 
 from .models import Receipt, ReceiptItem
+
+
+def add_field_errors(request, error):
+    for field, errors in error.message_dict.items():
+        messages.error(request, f"Check the {field.replace('_', ' ')}. {errors[0]}")
 
 
 def home(request):
@@ -35,7 +41,7 @@ def dashboard(request):
         else:
             profile.goal = goal
             profile.save()
-            messages.success(request, "Your goal has been updated!")
+            messages.success(request, "Your goal is saved.")
         return redirect("dashboard")
 
     receipts = Receipt.objects.filter(user=user)
@@ -43,7 +49,7 @@ def dashboard(request):
     total_receipts = receipts.count()
     total_revenue = sum(r.sub_total for r in receipts if not r.refund and r.is_staged)
     pending_receipts = receipts.filter(is_staged=False).count()
-    recent_receipts = receipts.order_by("-date")[:5]
+    recent_receipts = receipts.order_by("-date", "-pk")[:5]
 
     context = {
         "total_receipts": total_receipts,
@@ -62,7 +68,7 @@ def my_receipts(request):
     receipts = Receipt.objects.filter(is_staged=True, user=request.user)
     if search_query:
         receipts = receipts.filter(invoice_number__icontains=search_query)
-    receipts = receipts.order_by("-date")
+    receipts = receipts.order_by("-date", "-pk")
     return render(request, "my_receipts.html", {"receipts": receipts})
 
 
@@ -82,7 +88,7 @@ def staging_area(request):
     receipts = Receipt.objects.filter(is_staged=False, user=request.user)
     if search_query:
         receipts = receipts.filter(invoice_number__icontains=search_query)
-    receipts = receipts.order_by("-date")
+    receipts = receipts.order_by("-date", "-pk")
     return render(request, "staging_area.html", {"receipts": receipts})
 
 
@@ -186,10 +192,7 @@ def create_receipt(request):
             )
             return render(request, "receipt_form.html")
         except ValidationError as e:
-            for field, errors in e.message_dict.items():
-                messages.error(
-                    request, f"{field.replace('_', ' ').capitalize()}: {errors[0]}"
-                )
+            add_field_errors(request, e)
             return render(request, "receipt_form.html")
 
         with transaction.atomic():
@@ -210,7 +213,7 @@ def stage(request, pk):
     receipt = get_object_or_404(Receipt, pk=pk, user=request.user, is_staged=False)
     receipt.is_staged = True
     receipt.save()
-    messages.success(request, "Staging Successful!")
+    messages.success(request, f"Receipt {receipt.invoice_number} confirmed.")
     return redirect("my_receipts")
 
 
@@ -218,7 +221,6 @@ def stage(request, pk):
 def staging_edit(request, pk):
     receipt = get_object_or_404(Receipt, pk=pk, user=request.user)
 
-    # prevent editing staged/confirmed receipts
     if receipt.is_staged:
         return redirect("staging_area")
 
@@ -259,10 +261,7 @@ def staging_edit(request, pk):
             )
             return redirect("staging_edit", pk=receipt.pk)
         except ValidationError as e:
-            for field, errors in e.message_dict.items():
-                messages.error(
-                    request, f"{field.replace('_', ' ').capitalize()}: {errors[0]}"
-                )
+            add_field_errors(request, e)
             return redirect("staging_edit", pk=receipt.pk)
 
         with transaction.atomic():
@@ -292,7 +291,7 @@ def staging_edit(request, pk):
 def staging_delete(request, pk):
     receipt = get_object_or_404(Receipt, pk=pk, user=request.user, is_staged=False)
     receipt.delete()
-    messages.error(request, "Receipt Deleted.")
+    messages.success(request, "Draft deleted.")
     return redirect("staging_area")
 
 
@@ -307,15 +306,16 @@ def update_profile(request):
         new_address = request.POST.get("address", "").strip()
         current_password = request.POST.get("current_password", "")
 
-        # Always allow address update (no password needed)
         if new_address:
             profile.address = new_address
 
-        # Password required for sensitive changes
+        # Email and phone appear on receipts, so changing them needs the password.
         sensitive_change = new_email != user.email or new_phone != profile.phone_number
         if sensitive_change and not user.check_password(current_password):
             messages.error(
-                request, "Incorrect password. Cannot update email or phone number!"
+                request,
+                "Your current password is incorrect. "
+                "Enter it to change your email or phone number.",
             )
             return redirect("profile")
 
@@ -336,7 +336,7 @@ def update_profile(request):
                 return redirect("profile")
             user.email = new_email
             user.username = new_email
-            profile.email_verified = False  # reset verification
+            profile.email_verified = False
 
         if new_phone != profile.phone_number:
             if not re.fullmatch(r"\d{10,15}", new_phone):
@@ -344,7 +344,6 @@ def update_profile(request):
                 return redirect("profile")
             profile.phone_number = new_phone
 
-        # Update first/last name (no password needed)
         user.first_name = request.POST.get("first_name", user.first_name).strip()
         user.last_name = request.POST.get("last_name", user.last_name).strip()
         if not user.first_name or not user.last_name:
@@ -355,16 +354,13 @@ def update_profile(request):
             user.full_clean()
             profile.full_clean(exclude=["phone_number"])
         except ValidationError as e:
-            for field, errors in e.message_dict.items():
-                messages.error(
-                    request, f"{field.replace('_', ' ').capitalize()}: {errors[0]}"
-                )
+            add_field_errors(request, e)
             return redirect("profile")
 
         user.save()
         profile.save()
 
-        messages.success(request, "Profile updated successfully!")
+        messages.success(request, "Your profile is saved.")
         return redirect("profile")
 
     return redirect("profile")
@@ -378,9 +374,13 @@ def refund(request, pk):
     )
     receipt.refund = True
     receipt.save()
-    messages.info(request, "Refund Granted!")
+    messages.success(request, f"Receipt {receipt.invoice_number} refunded.")
     return redirect("my_receipts")
 
 
 def health(request):
     return JsonResponse({"status": "ok"})
+
+
+def favicon(request):
+    return redirect(static("receipts/favicon.ico"), permanent=True)

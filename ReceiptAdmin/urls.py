@@ -17,13 +17,28 @@ Including another URLconf
 
 from django.contrib import admin
 from django.contrib.auth import views as auth_views
+from django.contrib.sitemaps.views import sitemap
 from django.urls import include, path
+from django.views.generic import TemplateView
 
 from accounts import views as account_views
 from receipts import views
+from receipts.sitemaps import PublicPagesSitemap
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+    path(
+        "robots.txt",
+        TemplateView.as_view(template_name="seo/robots.txt", content_type="text/plain"),
+        name="robots",
+    ),
+    path(
+        "sitemap.xml",
+        sitemap,
+        {"sitemaps": {"pages": PublicPagesSitemap}},
+        name="sitemap",
+    ),
+    path("favicon.ico", views.favicon, name="favicon"),
     path("", include("receipts.urls")),
     path("accounts/", include("accounts.urls")),
     path(

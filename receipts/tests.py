@@ -6,6 +6,7 @@ from unittest import mock
 from django.contrib.auth.models import User
 from django.contrib.messages import get_messages
 from django.db import DatabaseError
+from django.template.loader import get_template
 from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
@@ -95,6 +96,48 @@ class HealthCheckTests(TestCase):
         self.assertEqual(self.client.get("/test/").status_code, 404)
 
 
+class SeoTests(TestCase):
+    def test_robots_txt_blocks_private_pages_and_points_to_sitemap(self):
+        response = self.client.get(reverse("robots"))
+
+        self.assertEqual(response["Content-Type"], "text/plain")
+        self.assertContains(response, "Disallow: /dashboard/")
+        self.assertContains(response, "Sitemap: http://testserver/sitemap.xml")
+
+    def test_sitemap_lists_only_public_pages(self):
+        response = self.client.get(reverse("sitemap"))
+
+        for name in ("home", "about", "sign_up", "login"):
+            with self.subTest(name):
+                self.assertContains(response, f"<loc>http://testserver{reverse(name)}")
+        self.assertNotContains(response, reverse("dashboard"))
+
+    def test_favicon_redirects_to_the_static_icon(self):
+        response = self.client.get("/favicon.ico")
+
+        self.assertEqual(response.status_code, 301)
+        self.assertTrue(response["Location"].endswith("receipts/favicon.ico"))
+
+    def test_home_has_search_and_social_metadata(self):
+        response = self.client.get(reverse("home"))
+
+        self.assertContains(response, "<title>Receipt Admin | Receipts for sellers")
+        self.assertContains(response, '<meta name="robots" content="index, follow">')
+        self.assertContains(
+            response, '<link rel="canonical" href="http://testserver/">'
+        )
+        self.assertContains(response, 'property="og:image"')
+        self.assertContains(response, '"@type": "WebApplication"')
+
+    def test_private_pages_are_not_indexed(self):
+        self.client.force_login(make_user())
+
+        for name in ("dashboard", "password_reset"):
+            with self.subTest(name):
+                response = self.client.get(reverse(name))
+                self.assertContains(response, '<meta name="robots" content="noindex">')
+
+
 class PublicPagesTests(TestCase):
     def test_public_pages_load(self):
         for name in ("home", "about", "login", "sign_up", "password_reset"):
@@ -174,12 +217,41 @@ class ReceiptListTests(TestCase):
 
         self.assertEqual(list(response.context["receipts"]), [self.second])
 
+    def test_newest_receipts_come_first_within_a_day(self):
+        third = make_receipt(self.user, staged=True)
+
+        mine = self.client.get(reverse("my_receipts"))
+        dashboard = self.client.get(reverse("dashboard"))
+
+        expected = [third, self.second, self.first]
+        self.assertEqual(list(mine.context["receipts"]), expected)
+        self.assertEqual(list(dashboard.context["recent_receipts"]), expected)
+
     def test_staging_area_lists_drafts_only(self):
         draft = make_receipt(self.user)
 
         response = self.client.get(reverse("staging_area"), {"search": "INV"})
 
         self.assertEqual(list(response.context["receipts"]), [draft])
+
+    def test_lists_show_buyer_status_and_confirmations(self):
+        make_receipt(self.user, refunded=True, staged=True, buyer_name="Robert")
+        draft = make_receipt(self.user, buyer_name="Linda")
+
+        staging = self.client.get(reverse("staging_area"))
+        mine = self.client.get(reverse("my_receipts"))
+
+        self.assertContains(staging, "Linda")
+        self.assertContains(staging, 'class="badge badge-draft"')
+        self.assertContains(staging, f"Confirm {draft.invoice_number}?")
+        self.assertContains(mine, 'class="badge badge-refunded"', count=1)
+        self.assertContains(mine, 'class="badge badge-final"', count=2)
+
+    def test_search_without_matches_offers_to_clear_it(self):
+        response = self.client.get(reverse("my_receipts"), {"search": "nothing"})
+
+        self.assertContains(response, "No receipts match")
+        self.assertContains(response, "Clear search")
 
 
 class PdfTests(TestCase):
@@ -205,6 +277,19 @@ class PdfTests(TestCase):
                         response, "We had some errors while generating the PDF"
                     )
 
+    def test_pdf_shows_the_tax_amount_and_the_receipt_status(self):
+        draft = make_receipt(self.user)
+        refunded = make_receipt(self.user, staged=True, refunded=True)
+        cases = {self.receipt: "Paid", draft: "Draft", refunded: "Refunded"}
+
+        for receipt, status in cases.items():
+            with self.subTest(status):
+                html = get_template("receipt_pdf.html").render({"receipt": receipt})
+                self.assertIn("$0.83", html)
+                self.assertRegex(html, rf"status[^>]*>{status}</td>")
+                for other in set(cases.values()) - {status}:
+                    self.assertNotRegex(html, rf"status[^>]*>{other}</td>")
+
     def test_download_pdf_as_attachment(self):
         response = self.client.get(reverse("receipt_pdf", args=[self.receipt.pk]))
 
@@ -222,8 +307,18 @@ class CreateReceiptTests(TestCase):
     def post(self, **overrides):
         return self.client.post(self.url, {**RECEIPT_FORM, **overrides})
 
-    def test_form_page_loads(self):
-        self.assertTemplateUsed(self.client.get(self.url), "receipt_form.html")
+    def test_form_page_loads_with_the_default_tax_rate(self):
+        response = self.client.get(self.url)
+
+        self.assertTemplateUsed(response, "receipt_form.html")
+        self.assertContains(response, 'value="8.25"')
+
+    def test_rejected_form_keeps_what_was_entered(self):
+        response = self.post(buyer_name="Bob Ray", tax_rate="250")
+
+        self.assertContains(response, 'value="Bob Ray"')
+        self.assertContains(response, 'value="250"')
+        self.assertContains(response, "&quot;description&quot;: &quot;Widget&quot;")
 
     def test_requires_a_verified_email(self):
         UserProfile.objects.filter(user=self.user).update(email_verified=False)
@@ -290,19 +385,19 @@ class CreateReceiptTests(TestCase):
         cases = {
             "blank buyer name": (
                 {"buyer_name": " "},
-                "Buyer name: This field cannot be blank.",
+                "Check the buyer name. This field cannot be blank.",
             ),
             "buyer name too long": (
                 {"buyer_name": "B" * 302},
-                "Buyer name: Ensure this value has at most 301 characters (it has 302).",
+                "Check the buyer name. Ensure this value has at most 301 characters (it has 302).",
             ),
             "blank description": (
                 {"items": items_json((" ", "1", "1"))},
-                "Description: This field cannot be blank.",
+                "Check the description. This field cannot be blank.",
             ),
             "too many decimals": (
                 {"items": items_json(("W", "1", "1.005"))},
-                "Unit price: Ensure that there are no more than 2 decimal places.",
+                "Check the unit price. Ensure that there are no more than 2 decimal places.",
             ),
         }
         for name, (overrides, message) in cases.items():
@@ -327,6 +422,18 @@ class StagingEditTests(TestCase):
         self.receipt = make_receipt(self.user)
         self.url = reverse("staging_edit", args=[self.receipt.pk])
         self.client.force_login(self.user)
+
+    def test_form_shows_saved_values_without_placeholders(self):
+        Receipt.objects.filter(pk=self.receipt.pk).update(
+            buyer_email="N/A", tax_rate=Decimal("0.00")
+        )
+
+        response = self.client.get(self.url)
+
+        self.assertContains(response, 'value="Bob"')
+        self.assertContains(response, 'value="0.00"')
+        self.assertNotContains(response, 'value="N/A"')
+        self.assertContains(response, 'id="items-data"')
 
     def post(self, **overrides):
         return self.client.post(self.url, {**RECEIPT_FORM, **overrides})
@@ -356,7 +463,9 @@ class StagingEditTests(TestCase):
     def test_field_errors_are_reported_and_nothing_changes(self):
         response = self.post(buyer_name=" ")
 
-        self.assertIn("Buyer name: This field cannot be blank.", messages_of(response))
+        self.assertIn(
+            "Check the buyer name. This field cannot be blank.", messages_of(response)
+        )
         self.receipt.refresh_from_db()
         self.assertEqual(self.receipt.buyer_name, "Bob")
 
@@ -412,13 +521,19 @@ class StageDeleteRefundTests(TestCase):
         self.assertRedirects(response, reverse("my_receipts"))
         draft.refresh_from_db()
         self.assertTrue(draft.is_staged)
+        self.assertEqual(
+            messages_of(response), [f"Receipt {draft.invoice_number} confirmed."]
+        )
 
     def test_delete_removes_drafts_only(self):
         draft = make_receipt(self.user)
         final = make_receipt(self.user, staged=True)
 
-        self.client.post(reverse("staging_delete", args=[draft.pk]))
+        deleted = self.client.post(reverse("staging_delete", args=[draft.pk]))
         response = self.client.post(reverse("staging_delete", args=[final.pk]))
+
+        (message,) = get_messages(deleted.wsgi_request)
+        self.assertEqual((str(message), message.tags), ("Draft deleted.", "success"))
 
         self.assertFalse(Receipt.objects.filter(pk=draft.pk).exists())
         self.assertEqual(response.status_code, 404)
@@ -432,6 +547,9 @@ class StageDeleteRefundTests(TestCase):
         self.assertRedirects(response, reverse("my_receipts"))
         final.refresh_from_db()
         self.assertTrue(final.refund)
+        self.assertEqual(
+            messages_of(response), [f"Receipt {final.invoice_number} refunded."]
+        )
 
         self.assertEqual(
             self.client.post(reverse("refund", args=[final.pk])).status_code, 404
@@ -548,10 +666,17 @@ class ProfileUpdateTests(TestCase):
     def test_get_redirects_to_the_profile_page(self):
         self.assertRedirects(self.client.get(self.url), reverse("profile"))
 
+    def test_profile_page_never_reveals_the_password(self):
+        response = self.client.get(reverse("profile"))
+
+        self.assertNotContains(response, "data-password-toggle")
+        self.assertNotContains(response, PASSWORD)
+        self.assertNotContains(response, self.user.password)
+
     def test_name_and_address_change_without_password(self):
         response = self.post(first_name="Annie", address="2 Oak Ave")
 
-        self.assertIn("Profile updated successfully!", messages_of(response))
+        self.assertIn("Your profile is saved.", messages_of(response))
         user, profile = self.reload()
         self.assertEqual(user.first_name, "Annie")
         self.assertEqual(profile.address, "2 Oak Ave")
@@ -563,7 +688,8 @@ class ProfileUpdateTests(TestCase):
                     phone_number="9999999999", current_password=password
                 )
                 self.assertIn(
-                    "Incorrect password. Cannot update email or phone number!",
+                    "Your current password is incorrect. "
+                    "Enter it to change your email or phone number.",
                     messages_of(response),
                 )
         self.post(phone_number="9999999999", current_password=PASSWORD)
@@ -586,7 +712,7 @@ class ProfileUpdateTests(TestCase):
             ),
             "invalid email": (
                 {"email": "not-an-email"},
-                "Email: Enter a valid email address.",
+                "Check the email. Enter a valid email address.",
             ),
             "email too long": (
                 {"email": "a" * 145 + "@x.com"},
@@ -602,7 +728,7 @@ class ProfileUpdateTests(TestCase):
             ),
             "address too long": (
                 {"address": "x" * 256},
-                "Address: Ensure this value has at most 255 characters (it has 256).",
+                "Check the address. Ensure this value has at most 255 characters (it has 256).",
             ),
         }
         for name, (overrides, message) in cases.items():

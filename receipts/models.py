@@ -36,6 +36,10 @@ class Receipt(models.Model):
             self.invoice_number = f"INV-{self.pk:04d}"
             super().save(update_fields=["invoice_number"])
 
+    @property
+    def tax_amount(self):
+        return self.total_amount - self.sub_total
+
 
 class ReceiptItem(models.Model):
     receipt = models.ForeignKey(Receipt, related_name="items", on_delete=models.CASCADE)
@@ -51,6 +55,5 @@ class ReceiptItem(models.Model):
 
     def save(self, *args, **kwargs):
         if self.quantity and self.unit_price:
-            # Ensure both are Decimals
             self.line_price = Decimal(self.quantity) * Decimal(self.unit_price)
         super().save(*args, **kwargs)

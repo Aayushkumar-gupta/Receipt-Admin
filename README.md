@@ -25,7 +25,7 @@ It isn't tied to any one kind of business. Whether someone sells shoes, T-shirts
 
 1. **Write up the sale:** add the buyer's details and the items sold. Line prices, tax, and totals are calculated automatically.
 2. **Review the draft:** new receipts wait in a staging area, where mistakes can be fixed or the draft deleted.
-3. **Confirm it:** the receipt becomes final, with its own invoice number (`INV-0001`, `INV-0002`, …).
+3. **Confirm it:** the receipt becomes final, with its own invoice number (`INV-0001`, `INV-0002` and so on).
 4. **Send it:** download the receipt as a PDF and share it with the buyer.
 5. **Stay on top of the business:** the dashboard shows total receipts, revenue, and pending drafts; refunds are tracked per receipt.
 
@@ -36,7 +36,7 @@ It isn't tied to any one kind of business. Whether someone sells shoes, T-shirts
 ## Features
 
 - Receipts with any number of line items and a configurable tax rate
-- Draft → review → final workflow, so mistakes are caught before a receipt is official
+- Draft, review and confirm workflow, so mistakes are caught before a receipt is official
 - PDF receipts to view in the browser or download and send
 - Refund tracking and search by invoice number
 - Dashboard with receipt count, revenue, pending drafts, and recent sales
@@ -63,7 +63,7 @@ Receipts are financial records, so the app is built to keep them correct and pri
 | Database | PostgreSQL in production (psycopg 3), SQLite for local development |
 | PDF generation | xhtml2pdf |
 | Email | Resend API |
-| Frontend | Django templates, Bootstrap 5 |
+| Frontend | Django templates, Tailwind CSS 4, vanilla JavaScript |
 | Hosting | Render (Gunicorn, WhiteNoise for static files) |
 | Quality | Django test suite, coverage, Ruff, pre-commit, GitHub Actions, Dependabot |
 
@@ -85,6 +85,21 @@ python manage.py runserver
 Then open http://127.0.0.1:8000.
 
 No configuration is needed: the app uses SQLite and a development secret key, and prints email verification and password reset links to the terminal instead of sending them. To use the admin site, create an account with `python manage.py createsuperuser`.
+
+### Styles
+
+The compiled stylesheet, `receipts/static/receipts/css/app.css`, is committed, so the app runs and deploys without any frontend tooling. To change the styles, edit `receipts/tailwind/input.css` or the templates, then rebuild with the [Tailwind CSS standalone CLI](https://tailwindcss.com/blog/standalone-cli), which needs no Node.js:
+
+```bash
+# one time: download the CLI for your platform (macOS Apple silicon shown)
+curl -sLo bin/tailwindcss https://github.com/tailwindlabs/tailwindcss/releases/download/v4.3.3/tailwindcss-macos-arm64
+chmod +x bin/tailwindcss
+
+# rebuild after a change, or add --watch while working
+bin/tailwindcss -i receipts/tailwind/input.css -o receipts/static/receipts/css/app.css --minify
+```
+
+Builds for other platforms are listed on the [release page](https://github.com/tailwindlabs/tailwindcss/releases/tag/v4.3.3).
 
 ## Configuration
 

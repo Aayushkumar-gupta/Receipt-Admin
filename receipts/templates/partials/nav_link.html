@@ -1,0 +1,7 @@
+{% url page as href %}
+<li>
+    <a href="{{ href }}" class="nav-link"{% if current == page %} aria-current="page"{% endif %}>
+        {% include "partials/icons/"|add:icon|add:".html" %}
+        {{ label }}
+    </a>
+</li>

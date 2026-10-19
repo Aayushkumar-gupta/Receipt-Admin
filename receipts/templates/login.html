@@ -1,128 +1,59 @@
-{% extends 'base.html' %}
+{% extends 'auth_base.html' %}
 
-{% block title %}Login{% endblock %}
+{% block title %}Log in | Receipt Admin{% endblock %}
+{% block description %}Log in to Receipt Admin to create receipts, review drafts and see your sales.{% endblock %}
 
-{% block content %}
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+{% block heading %}Log in{% endblock %}
+{% block intro %}Welcome back. Log in to create receipts and see your sales.{% endblock %}
 
-<style>
-    body {
-        background-color: #F8FAFC;
-        font-family: 'Segoe UI', Tahoma, sans-serif;
-        color: #1E293B;
-    }
+{% block panel %}
+<form method="post" class="space-y-5" data-validate novalidate>
+    {% csrf_token %}
+    <div>
+        <label for="username" class="label">Email</label>
+        <input
+            type="email"
+            id="username"
+            name="username"
+            class="field mt-1.5"
+            autocomplete="username"
+            inputmode="email"
+            required
+            data-required-message="Enter your email address."
+            aria-describedby="username-error"
+        >
+        <p id="username-error" class="field-error" hidden></p>
+    </div>
 
-    .form-wrapper {
-        max-width: 480px;
-        margin: 80px auto;
-        background: rgba(255, 255, 255, 0.85);
-        padding: 40px;
-        border-radius: 20px;
-        box-shadow: 0 8px 25px rgba(0, 119, 182, 0.15);
-        border: 1px solid #E2E8F0;
-    }
-
-    .form-title {
-        font-size: 1.5rem;
-        font-weight: 600;
-        color: #0077B6;
-        margin-bottom: 25px;
-        border-bottom: 2px solid #E2E8F0;
-        padding-bottom: 8px;
-        text-align: center;
-    }
-
-    .form-floating input {
-        border-radius: 8px;
-        border: 1px solid #CBD5E1;
-        background: #ffffff;
-    }
-
-    .form-floating label {
-        color: #475569;
-    }
-
-    .btn-primary {
-        background-color: #00C49A;
-        border-color: #00C49A;
-        font-weight: 600;
-        padding: 12px 24px;
-        font-size: 16px;
-        border-radius: 10px;
-        width: 100%;
-        transition: background 0.3s ease;
-    }
-
-    .btn-primary:hover {
-        background-color: #009e84;
-        border-color: #009e84;
-    }
-
-    .btn-link {
-        display: block;
-        text-align: center;
-        margin-top: 15px;
-        color: #0077B6;
-        font-weight: 600;
-        text-decoration: none;
-    }
-
-    .btn-link:hover {
-        text-decoration: underline;
-    }
-
-    .toggle-password {
-        position: absolute;
-        top: 50%;
-        right: 10px;
-        transform: translateY(-50%);
-        border: none;
-        background: none;
-        cursor: pointer;
-        color: #475569;
-        font-size: 1.2rem;
-    }
-</style>
-
-<div class="form-wrapper">
-    <h2 class="form-title">Login</h2>
-    <form method="POST" novalidate>
-        {% csrf_token %}
-        <div class="form-floating mb-3">
-            <input type="text" name="username" class="form-control" id="username" placeholder="Email" required>
-            <label for="username">Email</label>
+    <div>
+        <label for="password" class="label">Password</label>
+        <div class="relative mt-1.5">
+            <input
+                type="password"
+                id="password"
+                name="password"
+                class="field pr-12"
+                autocomplete="current-password"
+                required
+                data-required-message="Enter your password."
+                aria-describedby="password-error"
+            >
+            {% include "partials/password_toggle.html" with field="password" %}
         </div>
+        <p id="password-error" class="field-error" hidden></p>
+    </div>
 
-        <div class="form-floating mb-4 position-relative">
-            <input type="password" name="password" class="form-control" id="password" placeholder="Password" required>
-            <label for="password">Password</label>
-            <button type="button" class="toggle-password" onclick="togglePassword('password', this)">
-                <i class="bi bi-eye"></i>
-            </button>
-        </div>
+    <div class="flex justify-end">
+        <a href="{% url 'password_reset' %}" class="text-link text-[0.9375rem]">Forgot your password?</a>
+    </div>
 
-        <button type="submit" class="btn btn-primary">Login</button>
-    </form>
+    <button type="submit" class="btn-primary w-full">Log in</button>
+</form>
+{% endblock %}
 
-    <a href="{% url 'sign_up' %}" class="btn-link">Create Account</a>
-    <a href="{% url 'password_reset' %}" class="btn-link">Forgot Password?</a>
-</div>
-
-<script>
-function togglePassword(inputId, btn) {
-    const input = document.getElementById(inputId);
-    const icon = btn.querySelector('i');
-    if (input.type === "password") {
-        input.type = "text";
-        icon.classList.remove('bi-eye');
-        icon.classList.add('bi-eye-slash');
-    } else {
-        input.type = "password";
-        icon.classList.remove('bi-eye-slash');
-        icon.classList.add('bi-eye');
-    }
-}
-</script>
-
+{% block after_panel %}
+<p class="mt-6 text-center text-ink-2">
+    New to Receipt Admin?
+    <a href="{% url 'sign_up' %}" class="text-link">Create an account</a>
+</p>
 {% endblock %}
