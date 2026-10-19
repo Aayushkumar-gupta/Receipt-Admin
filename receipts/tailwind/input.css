@@ -20,8 +20,9 @@
   --color-accent-soft: #E2F7F1;
   --color-canvas: #F8FAFC;
   --color-surface: #FFFFFF;
-  --color-line: #E2E8F0;
-  --color-line-strong: #CBD5E1;
+  --color-line: #CBD5E1;
+  --color-line-strong: #94A3B8;
+  --color-field: #8491A5;
   --color-ink: #1E293B;
   --color-ink-2: #475569;
   --color-ink-3: #64748B;
@@ -230,7 +231,7 @@
   .field {
     width: 100%;
     min-width: 0;
-    border: 1px solid var(--color-line);
+    border: 1px solid var(--color-field);
     border-radius: 0.375rem;
     background: var(--color-surface);
     min-height: 2.75rem;
@@ -258,7 +259,7 @@
   }
 
   .field:hover {
-    border-color: var(--color-line-strong);
+    border-color: var(--color-ink-3);
   }
 
   .field[aria-invalid="true"] {
@@ -407,6 +408,7 @@
     border-radius: 0.75rem;
     background: var(--color-surface);
     padding: 1.25rem;
+    box-shadow: 0 1px 3px rgb(15 23 42 / 0.06);
   }
 
   @media (width >= 40rem) {
@@ -1068,7 +1070,6 @@
     max-width: 26rem;
     margin-inline: auto;
     border: 1px solid var(--color-line);
-    border-top: 4px solid var(--color-brand);
     border-radius: 0.5rem;
     background: var(--color-surface);
     padding: 1.5rem;
@@ -1278,33 +1279,82 @@
   }
 
   .message {
+    --message-color: var(--color-brand);
+    --message-tint: var(--color-brand-soft);
     display: flex;
-    align-items: flex-start;
-    gap: 0.75rem;
-    padding: 0.75rem 1rem;
-    border: 1px solid var(--color-line);
+    align-items: center;
+    gap: 0.875rem;
+    padding: 0.875rem 1rem;
+    border: 1px solid color-mix(in oklab, var(--message-color) 45%, transparent);
     border-radius: 0.5rem;
-    background: var(--color-surface);
-    font-size: 0.9375rem;
-    font-weight: 500;
+    background: var(--message-tint);
+    box-shadow: 0 4px 14px -6px rgb(15 23 42 / 0.15);
+    animation: message-in 240ms ease-out;
   }
 
-  .message::before {
-    content: "";
-    flex-shrink: 0;
-    width: 0.5rem;
-    height: 0.5rem;
-    margin-top: 0.375rem;
-    border-radius: 9999px;
-    background: var(--color-accent);
+  .message[data-level="success"] {
+    --message-color: var(--color-accent-ink);
+    --message-tint: var(--color-accent-soft);
+  }
+
+  .message[data-level="warning"] {
+    --message-color: #B45309;
+    --message-tint: #FFFBEB;
   }
 
   .message[data-level="danger"] {
-    border-color: color-mix(in oklab, var(--color-danger) 30%, transparent);
-    color: var(--color-danger);
+    --message-color: var(--color-danger);
+    --message-tint: #FEF2F2;
   }
 
-  .message[data-level="danger"]::before {
-    background: var(--color-danger);
+  .message-icon {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 9999px;
+    background: var(--message-color);
+    color: #fff;
+  }
+
+  .message-icon .icon {
+    stroke-width: 2.25;
+  }
+
+  .message-text {
+    flex: 1;
+    color: var(--color-ink);
+    font-weight: 600;
+  }
+
+  .message-close {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 0.375rem;
+    color: var(--color-ink-2);
+  }
+
+  .message-close:hover {
+    background: color-mix(in oklab, var(--message-color) 12%, transparent);
+    color: var(--color-ink);
+  }
+
+  @keyframes message-in {
+    from {
+      opacity: 0;
+      transform: translateY(-0.5rem);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .message {
+      animation: none;
+    }
   }
 }

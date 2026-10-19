@@ -217,6 +217,16 @@ class ReceiptListTests(TestCase):
 
         self.assertEqual(list(response.context["receipts"]), [self.second])
 
+    def test_newest_receipts_come_first_within_a_day(self):
+        third = make_receipt(self.user, staged=True)
+
+        mine = self.client.get(reverse("my_receipts"))
+        dashboard = self.client.get(reverse("dashboard"))
+
+        expected = [third, self.second, self.first]
+        self.assertEqual(list(mine.context["receipts"]), expected)
+        self.assertEqual(list(dashboard.context["recent_receipts"]), expected)
+
     def test_staging_area_lists_drafts_only(self):
         draft = make_receipt(self.user)
 
@@ -375,19 +385,19 @@ class CreateReceiptTests(TestCase):
         cases = {
             "blank buyer name": (
                 {"buyer_name": " "},
-                "Buyer name: This field cannot be blank.",
+                "Check the buyer name. This field cannot be blank.",
             ),
             "buyer name too long": (
                 {"buyer_name": "B" * 302},
-                "Buyer name: Ensure this value has at most 301 characters (it has 302).",
+                "Check the buyer name. Ensure this value has at most 301 characters (it has 302).",
             ),
             "blank description": (
                 {"items": items_json((" ", "1", "1"))},
-                "Description: This field cannot be blank.",
+                "Check the description. This field cannot be blank.",
             ),
             "too many decimals": (
                 {"items": items_json(("W", "1", "1.005"))},
-                "Unit price: Ensure that there are no more than 2 decimal places.",
+                "Check the unit price. Ensure that there are no more than 2 decimal places.",
             ),
         }
         for name, (overrides, message) in cases.items():
@@ -453,7 +463,9 @@ class StagingEditTests(TestCase):
     def test_field_errors_are_reported_and_nothing_changes(self):
         response = self.post(buyer_name=" ")
 
-        self.assertIn("Buyer name: This field cannot be blank.", messages_of(response))
+        self.assertIn(
+            "Check the buyer name. This field cannot be blank.", messages_of(response)
+        )
         self.receipt.refresh_from_db()
         self.assertEqual(self.receipt.buyer_name, "Bob")
 
@@ -509,13 +521,19 @@ class StageDeleteRefundTests(TestCase):
         self.assertRedirects(response, reverse("my_receipts"))
         draft.refresh_from_db()
         self.assertTrue(draft.is_staged)
+        self.assertEqual(
+            messages_of(response), [f"Receipt {draft.invoice_number} confirmed."]
+        )
 
     def test_delete_removes_drafts_only(self):
         draft = make_receipt(self.user)
         final = make_receipt(self.user, staged=True)
 
-        self.client.post(reverse("staging_delete", args=[draft.pk]))
+        deleted = self.client.post(reverse("staging_delete", args=[draft.pk]))
         response = self.client.post(reverse("staging_delete", args=[final.pk]))
+
+        (message,) = get_messages(deleted.wsgi_request)
+        self.assertEqual((str(message), message.tags), ("Draft deleted.", "success"))
 
         self.assertFalse(Receipt.objects.filter(pk=draft.pk).exists())
         self.assertEqual(response.status_code, 404)
@@ -529,6 +547,9 @@ class StageDeleteRefundTests(TestCase):
         self.assertRedirects(response, reverse("my_receipts"))
         final.refresh_from_db()
         self.assertTrue(final.refund)
+        self.assertEqual(
+            messages_of(response), [f"Receipt {final.invoice_number} refunded."]
+        )
 
         self.assertEqual(
             self.client.post(reverse("refund", args=[final.pk])).status_code, 404
@@ -655,7 +676,7 @@ class ProfileUpdateTests(TestCase):
     def test_name_and_address_change_without_password(self):
         response = self.post(first_name="Annie", address="2 Oak Ave")
 
-        self.assertIn("Profile updated successfully!", messages_of(response))
+        self.assertIn("Your profile is saved.", messages_of(response))
         user, profile = self.reload()
         self.assertEqual(user.first_name, "Annie")
         self.assertEqual(profile.address, "2 Oak Ave")
@@ -667,7 +688,8 @@ class ProfileUpdateTests(TestCase):
                     phone_number="9999999999", current_password=password
                 )
                 self.assertIn(
-                    "Incorrect password. Cannot update email or phone number!",
+                    "Your current password is incorrect. "
+                    "Enter it to change your email or phone number.",
                     messages_of(response),
                 )
         self.post(phone_number="9999999999", current_password=PASSWORD)
@@ -690,7 +712,7 @@ class ProfileUpdateTests(TestCase):
             ),
             "invalid email": (
                 {"email": "not-an-email"},
-                "Email: Enter a valid email address.",
+                "Check the email. Enter a valid email address.",
             ),
             "email too long": (
                 {"email": "a" * 145 + "@x.com"},
@@ -706,7 +728,7 @@ class ProfileUpdateTests(TestCase):
             ),
             "address too long": (
                 {"address": "x" * 256},
-                "Address: Ensure this value has at most 255 characters (it has 256).",
+                "Check the address. Ensure this value has at most 255 characters (it has 256).",
             ),
         }
         for name, (overrides, message) in cases.items():

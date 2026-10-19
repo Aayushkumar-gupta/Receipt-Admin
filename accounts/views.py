@@ -81,7 +81,7 @@ def sign_up(request):
                 Q(email__iexact=email) | Q(username__iexact=email)
             ).exists()
         ):
-            errors.append("User already exists.")
+            errors.append("An account with this email already exists.")
 
         if errors:
             for error in errors:
@@ -100,14 +100,16 @@ def sign_up(request):
                 )
                 UserProfile.objects.create(user=user, phone_number=phone_number)
         except IntegrityError:
-            messages.error(request, "User already exists.")
+            messages.error(request, "An account with this email already exists.")
             return render(request, "sign_up.html")
 
-        # Email verification (async)
+        # Send in the background so sign-up does not wait on the email API.
         threading.Thread(target=send_email_async, args=(user, request)).start()
 
         messages.success(
-            request, "Account created! Check your email inbox for verification."
+            request,
+            "Your account is ready. "
+            "Check your inbox for a link to confirm your email address.",
         )
         return redirect("login")
 
@@ -147,7 +149,7 @@ def user_login(request):
             return redirect("dashboard")
 
         cache.set(fail_key, cache.get(fail_key, 0) + 1, 15 * 60)
-        messages.error(request, "Invalid username or password")
+        messages.error(request, "Incorrect email or password.")
         return redirect(login_url)
 
     return render(request, "login.html")
@@ -184,13 +186,13 @@ def verify_email(request, uidb64, token):
         profile, _ = UserProfile.objects.get_or_create(user=user)
         profile.email_verified = True
         profile.save()
-        messages.success(request, "Email verified successfully!")
+        messages.success(request, "Your email address is confirmed.")
         if request.user.is_authenticated and request.user.id == user.id:
             return redirect("profile")
         else:
             return redirect("login")
     else:
-        messages.error(request, "Invalid or expired verification link.")
+        messages.error(request, "This confirmation link has expired or is not valid.")
         return redirect("sign_up")
 
 
@@ -210,10 +212,11 @@ def resend_verification_email(request):
             "Please wait a minute before requesting another verification email.",
         )
     elif send_verification_email(request.user, request):
-        messages.success(request, "Verification email sent successfully!")
+        messages.success(request, "We sent a new confirmation email. Check your inbox.")
     else:
         messages.error(
-            request, "We couldn't send the verification email. Please try again later."
+            request,
+            "We could not send the confirmation email. Try again in a few minutes.",
         )
     return redirect("profile")
 
@@ -226,15 +229,12 @@ class CustomPasswordResetView(PasswordResetView):
         email = form.cleaned_data["email"]
         users = list(form.get_users(email))
         for user in users:
-            # Generate UID and token
             uid = urlsafe_base64_encode(force_bytes(user.pk))
             token = default_token_generator.make_token(user)
-            # Build full reset URL
             reset_url = self.request.build_absolute_uri(
                 reverse(
                     "password_reset_confirm", kwargs={"uidb64": uid, "token": token}
                 )
             )
-            # Send custom email with reset URL
             send_password_reset_email(user, reset_url)
         return redirect(self.success_url)

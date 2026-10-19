@@ -57,3 +57,10 @@ document.addEventListener("click", function (event) {
         }
     }
 });
+
+document.addEventListener("click", function (event) {
+    var button = event.target.closest("[data-dismiss]");
+    if (button) {
+        button.closest(".message").remove();
+    }
+});

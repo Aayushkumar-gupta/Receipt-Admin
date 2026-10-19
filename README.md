@@ -25,7 +25,7 @@ It isn't tied to any one kind of business. Whether someone sells shoes, T-shirts
 
 1. **Write up the sale:** add the buyer's details and the items sold. Line prices, tax, and totals are calculated automatically.
 2. **Review the draft:** new receipts wait in a staging area, where mistakes can be fixed or the draft deleted.
-3. **Confirm it:** the receipt becomes final, with its own invoice number (`INV-0001`, `INV-0002`, …).
+3. **Confirm it:** the receipt becomes final, with its own invoice number (`INV-0001`, `INV-0002` and so on).
 4. **Send it:** download the receipt as a PDF and share it with the buyer.
 5. **Stay on top of the business:** the dashboard shows total receipts, revenue, and pending drafts; refunds are tracked per receipt.
 
@@ -36,7 +36,7 @@ It isn't tied to any one kind of business. Whether someone sells shoes, T-shirts
 ## Features
 
 - Receipts with any number of line items and a configurable tax rate
-- Draft → review → final workflow, so mistakes are caught before a receipt is official
+- Draft, review and confirm workflow, so mistakes are caught before a receipt is official
 - PDF receipts to view in the browser or download and send
 - Refund tracking and search by invoice number
 - Dashboard with receipt count, revenue, pending drafts, and recent sales

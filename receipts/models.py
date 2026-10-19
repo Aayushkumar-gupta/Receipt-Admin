@@ -55,6 +55,5 @@ class ReceiptItem(models.Model):
 
     def save(self, *args, **kwargs):
         if self.quantity and self.unit_price:
-            # Ensure both are Decimals
             self.line_price = Decimal(self.quantity) * Decimal(self.unit_price)
         super().save(*args, **kwargs)
