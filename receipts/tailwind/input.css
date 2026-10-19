@@ -228,6 +228,27 @@
     border-color: var(--color-ink-2);
   }
 
+  .btn-danger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-height: 2.75rem;
+    padding: 0 1.125rem;
+    border-radius: 0.5rem;
+    background: var(--color-danger);
+    color: #fff;
+    font-weight: 600;
+  }
+
+  .btn-danger:hover {
+    background: #991B1B;
+  }
+
+  .danger-zone {
+    border-color: color-mix(in oklab, var(--color-danger) 35%, transparent);
+  }
+
   .field {
     width: 100%;
     min-width: 0;
