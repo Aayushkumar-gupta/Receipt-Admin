@@ -365,6 +365,7 @@ class SendEmailTests(TestCase):
         payload = send.call_args.args[0]
         self.assertEqual(payload["to"], [self.user.email])
         self.assertIn("http://testserver/reset/x/y/", payload["text"])
+        self.assertIn('href="http://testserver/reset/x/y/"', payload["html"])
 
     @mock.patch("accounts.utils.resend.Emails.send", side_effect=Exception("down"))
     def test_password_reset_email_failure_is_logged(self, send):

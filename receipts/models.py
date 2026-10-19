@@ -36,6 +36,10 @@ class Receipt(models.Model):
             self.invoice_number = f"INV-{self.pk:04d}"
             super().save(update_fields=["invoice_number"])
 
+    @property
+    def tax_amount(self):
+        return self.total_amount - self.sub_total
+
 
 class ReceiptItem(models.Model):
     receipt = models.ForeignKey(Receipt, related_name="items", on_delete=models.CASCADE)

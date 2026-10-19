@@ -6,6 +6,7 @@ from unittest import mock
 from django.contrib.auth.models import User
 from django.contrib.messages import get_messages
 from django.db import DatabaseError
+from django.template.loader import get_template
 from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
@@ -265,6 +266,19 @@ class PdfTests(TestCase):
                     self.assertContains(
                         response, "We had some errors while generating the PDF"
                     )
+
+    def test_pdf_shows_the_tax_amount_and_the_receipt_status(self):
+        draft = make_receipt(self.user)
+        refunded = make_receipt(self.user, staged=True, refunded=True)
+        cases = {self.receipt: "Paid", draft: "Draft", refunded: "Refunded"}
+
+        for receipt, status in cases.items():
+            with self.subTest(status):
+                html = get_template("receipt_pdf.html").render({"receipt": receipt})
+                self.assertIn("$0.83", html)
+                self.assertRegex(html, rf"status[^>]*>{status}</td>")
+                for other in set(cases.values()) - {status}:
+                    self.assertNotRegex(html, rf"status[^>]*>{other}</td>")
 
     def test_download_pdf_as_attachment(self):
         response = self.client.get(reverse("receipt_pdf", args=[self.receipt.pk]))
