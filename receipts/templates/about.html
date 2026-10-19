@@ -2,90 +2,155 @@
 
 {% block title %}About | Receipt Admin{% endblock %}
 {% block description %}Receipt Admin is a free receipt tool for people who sell online or in person without a shop. Learn what it does and how to contact us.{% endblock %}
+{% block legacy_css %}{% endblock %}
+{% block footer_contact %}{% endblock %}
 
-{% block content %}
-<style>
-    body {
-        background-color: #F8FAFC; /* solid light neutral background */
-        font-family: 'Segoe UI', Tahoma, sans-serif;
-        color: #1E293B; /* charcoal text */
-    }
+{% block main %}
+<section class="about-hero" aria-labelledby="about-title">
+    <div class="page about-hero-grid">
+        <div>
+            <h1 id="about-title" class="text-4xl font-bold tracking-tight text-balance sm:text-5xl">
+                About Receipt Admin
+            </h1>
+            <p class="about-lead">
+                Receipt Admin gives people who sell without a shop a simple way to write up a sale,
+                send the buyer a receipt and keep a record of every sale.
+            </p>
+            <p class="mt-4 max-w-xl text-ink-2">
+                It is free to use and works on your phone, tablet or computer.
+            </p>
+        </div>
 
-    /* Frosted glass container */
-    .glass-box {
-        background: rgba(255, 255, 255, 0.85);
-        border-radius: 20px;
-        padding: 40px;
-        margin-bottom: 40px;
-        box-shadow: 0 8px 25px rgba(0, 119, 182, 0.15);
-        backdrop-filter: blur(12px) saturate(140%);
-        -webkit-backdrop-filter: blur(12px) saturate(140%);
-        border: 1px solid rgba(226, 232, 240, 0.8);
-    }
+        <figure class="sample-receipt">
+            <figcaption class="sample-receipt-label">Sample receipt</figcaption>
+            <div class="sample-receipt-head">
+                <div>
+                    <p class="font-semibold">Admin</p>
+                    <p class="text-sm text-ink-3">14 Market Street, Austin TX</p>
+                </div>
+                <span class="badge badge-final">Final</span>
+            </div>
+            <dl class="sample-receipt-meta">
+                <div>
+                    <dt>Invoice</dt>
+                    <dd>INV-0042</dd>
+                </div>
+                <div>
+                    <dt>Buyer</dt>
+                    <dd>Robert Miller</dd>
+                </div>
+            </dl>
+            <table class="sample-receipt-items">
+                <thead>
+                    <tr>
+                        <th scope="col">Item</th>
+                        <th scope="col">Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Leather sneakers</td>
+                        <td>$85.00</td>
+                    </tr>
+                    <tr>
+                        <td>Canvas tote bag</td>
+                        <td>$24.00</td>
+                    </tr>
+                    <tr>
+                        <td>Tax at 8.25%</td>
+                        <td>$8.99</td>
+                    </tr>
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <th scope="row">Total</th>
+                        <td>$117.99</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </figure>
+    </div>
+</section>
 
-    /* About Section */
-    .about-section h1 {
-        font-size: 2.5rem;
-        font-weight: 700;
-        margin-bottom: 20px;
-        color: #0077B6; /* trust-blue accent */
-        text-align: center;
-    }
+<section aria-labelledby="why-title">
+    <div class="page about-split">
+        <h2 id="why-title" class="section-title">Why it exists</h2>
+        <div class="about-copy">
+            <p>
+                More and more people sell through Instagram messages, Facebook Marketplace listings
+                and local meetups. There is no shop and no till, so when a buyer asks for a receipt or
+                tax season comes around, there is often nothing to show apart from old chats and
+                payment notifications.
+            </p>
+            <p>
+                Receipt Admin gives these sellers what a cash register gives a shop. It works the same
+                way whether you sell shoes, clothing, home decor or a sofa you no longer need.
+            </p>
+        </div>
+    </div>
+</section>
 
-    .about-section p {
-        font-size: 1.1rem;
-        line-height: 1.8;
-        margin-bottom: 20px;
-        color: #1E293B;
-        text-align: center;
-    }
+<section class="border-y border-line bg-surface" aria-labelledby="features-title">
+    <div class="page py-16 lg:py-20">
+        <h2 id="features-title" class="section-title">What it does</h2>
+        <ul class="feature-grid">
+            <li class="feature">
+                <span class="feature-icon">{% include "partials/icons/create.html" %}</span>
+                <h3 class="feature-title">Professional receipts</h3>
+                <p>Give every buyer a clear receipt showing what they bought and what they paid.</p>
+            </li>
+            <li class="feature">
+                <span class="feature-icon">{% include "partials/icons/staging.html" %}</span>
+                <h3 class="feature-title">Fix mistakes first</h3>
+                <p>Every receipt starts as a draft, so you can correct a price or a name before it goes out.</p>
+            </li>
+            <li class="feature">
+                <span class="feature-icon">{% include "partials/icons/tag.html" %}</span>
+                <h3 class="feature-title">Easy to find later</h3>
+                <p>Each receipt has its own number, so you can look up any sale when a buyer asks.</p>
+            </li>
+            <li class="feature">
+                <span class="feature-icon">{% include "partials/icons/receipts.html" %}</span>
+                <h3 class="feature-title">Send it where you sold</h3>
+                <p>Share the receipt in the same chat, email or message where you made the sale.</p>
+            </li>
+            <li class="feature">
+                <span class="feature-icon">{% include "partials/icons/refund.html" %}</span>
+                <h3 class="feature-title">Refunds handled</h3>
+                <p>Mark a sale as refunded and your sales figures stay accurate.</p>
+            </li>
+            <li class="feature">
+                <span class="feature-icon">{% include "partials/icons/dashboard.html" %}</span>
+                <h3 class="feature-title">Track your sales</h3>
+                <p>See how much you have sold and set a goal to work towards.</p>
+            </li>
+        </ul>
+    </div>
+</section>
 
-    /* Contact Section */
-    .contact-section {
-        text-align: center; /* center everything */
-    }
+<section class="about-band" aria-labelledby="records-title">
+    <div class="page about-split">
+        <h2 id="records-title" class="section-title">Ready for tax season</h2>
+        <div class="about-copy">
+            <p>
+                Every sale you record is kept with its date, buyer and amount. When it is time to
+                do your taxes or a buyer asks for a copy, everything is in one place instead of
+                spread across old chats.
+            </p>
+        </div>
+    </div>
+</section>
 
-    .contact-section h2 {
-        font-size: 2rem;
-        font-weight: 600;
-        margin-bottom: 20px;
-        color: #0077B6;
-    }
-
-    .contact-section p {
-        font-size: 1rem;
-        margin-bottom: 10px;
-    }
-
-    .contact-section a {
-        color: #00C49A; /* teal accent */
-        text-decoration: none;
-        font-weight: 500;
-    }
-
-    .contact-section a:hover {
-        color: #009e84;
-        text-decoration: underline;
-    }
-</style>
-
-<div class="glass-box about-section">
-    <h1>About Receipt Admin</h1>
-    <p>
-        Receipt Admin is designed to help businesses create, manage and store receipts effortlessly. We help small business owners and independent operators record every sale in one secure and organized place.
-    </p>
-    <br>
-    <p>
-        Our goal is simple, to give you a clear and professional view of your business through Receipt Admin. From tracking receipts to reviewing sales trends using our <span style="color: #000000; font-weight: bold;">Dashboard</span>, Receipt Admin helps you stay organized and confident in every transaction.
-    </p>
-    <br>
-    <p>
-        At Receipt Admin, we believe financial clarity leads to smarter business decisions. Our mission is to simplify how you manage receipts, save valuable time, and help your business grow with confidence.
-    </p>
-</div>
-
-<div class="glass-box contact-section">
-    <h2>Contact Us</h2>
-    <p>Email: <a href="mailto:support@receiptadmin.com">support@receiptadmin.com</a></p>
-</div>
+<section class="page py-16 lg:py-20" aria-labelledby="contact-title">
+    <div class="contact-panel">
+        <span class="contact-icon">{% include "partials/icons/mail.html" with class="size-6" %}</span>
+        <div>
+            <h2 id="contact-title" class="panel-title">Get in touch</h2>
+            <p class="mt-1 text-ink-2">
+                Questions or feedback? Write to
+                <a href="mailto:support@receiptadmin.com" class="text-link">support@receiptadmin.com</a>.
+            </p>
+        </div>
+    </div>
+</section>
 {% endblock %}

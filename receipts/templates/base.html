@@ -142,12 +142,14 @@
     <footer class="border-t border-line bg-surface font-sans">
         <div class="page flex flex-col gap-2 py-6 text-ink-2 sm:flex-row sm:items-center sm:justify-between">
             <p>&copy; {% now "Y" %} Receipt Admin</p>
+            {% block footer_contact %}
             <p>
                 Questions?
                 <a href="mailto:support@receiptadmin.com" class="text-link">
                     support@receiptadmin.com
                 </a>
             </p>
+            {% endblock %}
         </div>
     </footer>
 </div>

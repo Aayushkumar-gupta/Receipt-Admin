@@ -14,6 +14,7 @@
 @theme {
   --color-brand: #0077B6;
   --color-brand-deep: #005F92;
+  --color-brand-soft: #E8F3FA;
   --color-accent: #00C49A;
   --color-accent-ink: #00866A;
   --color-accent-soft: #E2F7F1;
@@ -1022,6 +1023,219 @@
     border-radius: 0 0 0.75rem 0.75rem;
     background: var(--color-canvas);
     padding: 1rem 1.5rem;
+  }
+
+  .about-hero {
+    border-bottom: 1px solid var(--color-line);
+    background: var(--color-brand-soft);
+  }
+
+  .about-hero-grid {
+    display: grid;
+    align-items: center;
+    gap: 2.5rem;
+    padding-block: 3rem;
+  }
+
+  @media (width >= 64rem) {
+    .about-hero-grid {
+      grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+      gap: 4rem;
+      padding-block: 5rem;
+    }
+  }
+
+  .about-lead {
+    max-width: 40rem;
+    margin-top: 1.25rem;
+    color: var(--color-ink-2);
+    font-size: 1.25rem;
+    line-height: 1.6;
+  }
+
+  .sample-receipt {
+    width: 100%;
+    max-width: 26rem;
+    margin-inline: auto;
+    border: 1px solid var(--color-line);
+    border-top: 4px solid var(--color-brand);
+    border-radius: 0.5rem;
+    background: var(--color-surface);
+    padding: 1.5rem;
+    box-shadow: 0 12px 32px -12px rgb(15 23 42 / 0.18);
+  }
+
+  .sample-receipt-label {
+    margin-bottom: 1.25rem;
+    border-bottom: 1px solid var(--color-line);
+    padding-bottom: 1rem;
+    color: var(--color-brand-deep);
+    font-size: 1.25rem;
+    font-weight: 700;
+  }
+
+  .sample-receipt-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .sample-receipt-meta {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+    margin-block: 1.25rem;
+    border-block: 1px dashed var(--color-line-strong);
+    padding-block: 1rem;
+  }
+
+  .sample-receipt-meta dt {
+    color: var(--color-ink-3);
+    font-size: 0.875rem;
+  }
+
+  .sample-receipt-meta dd {
+    font-weight: 600;
+  }
+
+  .sample-receipt-items {
+    width: 100%;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .sample-receipt-items th,
+  .sample-receipt-items td {
+    padding-block: 0.375rem;
+    text-align: left;
+  }
+
+  .sample-receipt-items :is(th, td):last-child {
+    text-align: right;
+  }
+
+  .sample-receipt-items thead th {
+    color: var(--color-ink-3);
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+
+  .sample-receipt-items tfoot :is(th, td) {
+    border-top: 1px solid var(--color-line-strong);
+    padding-top: 0.75rem;
+    font-size: 1.125rem;
+    font-weight: 700;
+  }
+
+  .about-split {
+    display: grid;
+    gap: 1.25rem;
+    padding-block: 4rem;
+  }
+
+  @media (width >= 64rem) {
+    .about-split {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+      gap: 4rem;
+      padding-block: 5rem;
+    }
+  }
+
+  .about-copy {
+    max-width: 44rem;
+    color: var(--color-ink-2);
+    font-size: 1.125rem;
+    line-height: 1.75;
+  }
+
+  .about-band {
+    background: var(--color-brand-deep);
+    color: #fff;
+  }
+
+  .about-band .about-copy {
+    color: rgb(255 255 255 / 0.88);
+  }
+
+  .about-copy p + p {
+    margin-top: 1rem;
+  }
+
+  .feature-grid {
+    display: grid;
+    gap: 2rem;
+    margin-top: 2.5rem;
+  }
+
+  @media (width >= 40rem) {
+    .feature-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (width >= 64rem) {
+    .feature-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      column-gap: 3rem;
+    }
+  }
+
+  .feature {
+    border-top: 1px solid var(--color-line);
+    padding-top: 1.5rem;
+  }
+
+  .feature p {
+    margin-top: 0.375rem;
+    color: var(--color-ink-2);
+  }
+
+  .feature-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 0.5rem;
+    background: var(--color-brand);
+    color: #fff;
+  }
+
+  .feature-title {
+    margin-top: 1rem;
+    font-weight: 600;
+  }
+
+  .contact-panel {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    border-radius: 0.75rem;
+    background: var(--color-accent-soft);
+    padding: 1.5rem;
+  }
+
+  @media (width >= 40rem) {
+    .contact-panel {
+      align-items: center;
+      padding: 2rem;
+    }
+  }
+
+  .contact-panel .text-link {
+    color: var(--color-brand-deep);
+  }
+
+  .contact-icon {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    width: 3rem;
+    height: 3rem;
+    border-radius: 9999px;
+    background: var(--color-brand);
+    color: #fff;
   }
 
   .nav-link {
