@@ -40,7 +40,7 @@ It isn't tied to any one kind of business. Whether someone sells shoes, T-shirts
 - PDF receipts to view in the browser or download and send
 - Refund tracking and search by invoice number
 - Dashboard with receipt count, revenue, pending drafts, and recent sales
-- Accounts with email verification, password reset and self-service deletion that removes all of a seller's data
+- Accounts with email verification, password reset and change, and self-service deletion that removes all of a seller's data
 - A short profile check that asks for any missing seller details before the first receipt
 - Each seller sees only their own receipts and data
 
@@ -133,7 +133,7 @@ The app runs on [Render](https://render.com):
 
 ```
 ReceiptAdmin/   Project settings and URL configuration
-accounts/       Sign-up, login, email verification, password reset, profiles, account deletion
+accounts/       Sign-up, login, email verification, password reset and change, profiles, account deletion
 receipts/       Receipts, PDFs, dashboard, templates, and static files
 ```
 

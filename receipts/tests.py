@@ -1,5 +1,6 @@
 import json
 import logging
+import re
 from decimal import Decimal
 from unittest import mock
 
@@ -751,11 +752,20 @@ class ProfileUpdateTests(TestCase):
         self.assertRedirects(self.client.get(self.url), reverse("profile"))
 
     def test_profile_page_never_reveals_the_password(self):
-        response = self.client.get(reverse("profile"))
+        html = self.client.get(reverse("profile")).content.decode()
 
-        self.assertNotContains(response, "data-password-toggle")
-        self.assertNotContains(response, PASSWORD)
-        self.assertNotContains(response, self.user.password)
+        autofilled = re.findall(
+            r'id="([^"]+)"[^>]*autocomplete="current-password"', html
+        )
+        self.assertEqual(
+            sorted(autofilled),
+            ["current_password", "delete_password", "password_current"],
+        )
+        for field in autofilled:
+            with self.subTest(field):
+                self.assertNotIn(f'aria-controls="{field}"', html)
+        self.assertNotIn(PASSWORD, html)
+        self.assertNotIn(self.user.password, html)
 
     def test_name_and_address_change_without_password(self):
         response = self.post(first_name="Annie", address="2 Oak Ave")

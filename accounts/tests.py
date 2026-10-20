@@ -559,6 +559,81 @@ class AdminTests(TestCase):
         self.assertContains(response, "Email Verified")
 
 
+class ChangePasswordTests(TestCase):
+    url = reverse("change_password")
+    NEW = "N3w-Passw0rd!"
+
+    def setUp(self):
+        self.user = make_user()
+        self.client.force_login(self.user)
+
+    def post(self, **overrides):
+        data = {
+            "current_password": PASSWORD,
+            "new_password": self.NEW,
+            "confirm_new_password": self.NEW,
+            **overrides,
+        }
+        return self.client.post(self.url, data)
+
+    def test_requires_post(self):
+        self.assertEqual(self.client.get(self.url).status_code, 405)
+
+    def test_changes_the_password_and_stays_logged_in(self):
+        response = self.post()
+
+        self.assertRedirects(response, reverse("profile"))
+        self.assertIn("Your password is changed.", messages_of(response))
+        self.user.refresh_from_db()
+        self.assertTrue(self.user.check_password(self.NEW))
+        self.assertEqual(self.client.get(reverse("dashboard")).status_code, 200)
+
+    def test_other_sessions_are_logged_out(self):
+        other = self.client_class()
+        other.force_login(self.user)
+
+        self.post()
+
+        self.assertRedirects(
+            other.get(reverse("dashboard")),
+            f"{reverse('login')}?next={reverse('dashboard')}",
+        )
+
+    def test_invalid_changes_keep_the_old_password(self):
+        cases = {
+            "wrong current password": (
+                {"current_password": "wrong"},
+                "Your current password is incorrect.",
+            ),
+            "new passwords differ": (
+                {"confirm_new_password": "Other-Passw0rd!"},
+                "The new passwords do not match.",
+            ),
+            "same as current": (
+                {"new_password": PASSWORD, "confirm_new_password": PASSWORD},
+                "Choose a new password that is different from your current one.",
+            ),
+            "too weak": (
+                {"new_password": "weak", "confirm_new_password": "weak"},
+                "Password must be at least 8 characters long.",
+            ),
+        }
+        for name, (overrides, message) in cases.items():
+            with self.subTest(name):
+                response = self.post(**overrides)
+
+                self.assertRedirects(response, reverse("profile"))
+                self.assertIn(message, messages_of(response))
+                self.user.refresh_from_db()
+                self.assertTrue(self.user.check_password(PASSWORD))
+
+    def test_profile_page_shows_the_form(self):
+        response = self.client.get(reverse("profile"))
+
+        self.assertContains(response, f'action="{self.url}"')
+        self.assertContains(response, 'data-match="password_new"')
+
+
 class DeleteAccountTests(TestCase):
     url = reverse("delete_account")
 

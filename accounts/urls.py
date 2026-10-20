@@ -13,5 +13,6 @@ urlpatterns = [
         views.resend_verification_email,
         name="resend_verification_email",
     ),
+    path("password/change/", views.change_password, name="change_password"),
     path("delete/", views.delete_account, name="delete_account"),
 ]

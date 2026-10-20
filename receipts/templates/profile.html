@@ -195,6 +195,79 @@
 
             <form
                 method="post"
+                action="{% url 'change_password' %}"
+                class="panel"
+                aria-labelledby="password-title"
+                data-validate
+                novalidate
+            >
+                {% csrf_token %}
+                <h2 id="password-title" class="panel-title">Change password</h2>
+                <p class="settings-help">You stay logged in on this device after changing it.</p>
+                <div class="password-grid">
+                    <div class="sm:col-span-2">
+                        <label for="password_current" class="label">Current password</label>
+                        <input
+                            type="password"
+                            id="password_current"
+                            name="current_password"
+                            class="field mt-1.5"
+                            autocomplete="current-password"
+                            required
+                            data-required-message="Enter your current password."
+                            aria-describedby="password_current-error"
+                        >
+                        <p id="password_current-error" class="field-error" hidden></p>
+                    </div>
+
+                    <div>
+                        <label for="password_new" class="label">New password</label>
+                        <div class="relative mt-1.5">
+                            <input
+                                type="password"
+                                id="password_new"
+                                name="new_password"
+                                class="field pr-12"
+                                autocomplete="new-password"
+                                minlength="8"
+                                required
+                                data-required-message="Choose a new password."
+                                aria-describedby="password-rules password_new-error"
+                            >
+                            {% include "partials/password_toggle.html" with field="password_new" %}
+                        </div>
+                        <p id="password_new-error" class="field-error" hidden></p>
+                    </div>
+
+                    <div>
+                        <label for="password_confirm" class="label">Confirm new password</label>
+                        <div class="relative mt-1.5">
+                            <input
+                                type="password"
+                                id="password_confirm"
+                                name="confirm_new_password"
+                                class="field pr-12"
+                                autocomplete="new-password"
+                                required
+                                data-required-message="Enter your new password again."
+                                data-match="password_new"
+                                aria-describedby="password_confirm-error"
+                            >
+                            {% include "partials/password_toggle.html" with field="password_confirm" %}
+                        </div>
+                        <p id="password_confirm-error" class="field-error" hidden></p>
+                    </div>
+
+                    <p id="password-rules" class="hint sm:col-span-2">
+                        Use at least 8 characters, with an uppercase letter, a lowercase letter, a number
+                        and a special character such as ! or @.
+                    </p>
+                </div>
+                <button type="submit" class="btn-primary mt-5">Change password</button>
+            </form>
+
+            <form
+                method="post"
                 action="{% url 'delete_account' %}"
                 class="panel danger-zone"
                 aria-labelledby="delete-title"

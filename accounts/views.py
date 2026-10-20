@@ -3,7 +3,7 @@ import re
 import threading
 
 from django.contrib import messages
-from django.contrib.auth import authenticate
+from django.contrib.auth import authenticate, update_session_auth_hash
 from django.contrib.auth import login as auth_login
 from django.contrib.auth import logout as auth_logout
 from django.contrib.auth.decorators import login_required
@@ -255,6 +255,40 @@ class CustomPasswordResetView(PasswordResetView):
             )
             send_password_reset_email(user, reset_url)
         return redirect(self.success_url)
+
+
+@login_required
+@require_POST
+def change_password(request):
+    user = request.user
+    current = request.POST.get("current_password", "")
+    new = request.POST.get("new_password", "")
+    confirm = request.POST.get("confirm_new_password", "")
+
+    if not user.check_password(current):
+        errors = ["Your current password is incorrect."]
+    elif new != confirm:
+        errors = ["The new passwords do not match."]
+    elif new == current:
+        errors = ["Choose a new password that is different from your current one."]
+    else:
+        try:
+            validate_password(new, user=user)
+            errors = []
+        except ValidationError as e:
+            errors = e.messages
+
+    if errors:
+        for error in errors:
+            messages.error(request, error)
+        return redirect("profile")
+
+    user.set_password(new)
+    user.save()
+    # Changing the password signs out every session, so keep this one logged in.
+    update_session_auth_hash(request, user)
+    messages.success(request, "Your password is changed.")
+    return redirect("profile")
 
 
 @login_required
