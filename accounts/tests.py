@@ -1,7 +1,9 @@
+import importlib
 import logging
 import re
 from unittest import mock
 
+from django.apps import apps
 from django.contrib.auth.models import User
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.messages import get_messages
@@ -89,6 +91,12 @@ class SignUpTests(TestCase):
         self.assertEqual(user.userprofile.phone_number, "1234567890")
         self.assertFalse(user.userprofile.email_verified)
         thread.return_value.start.assert_called_once()
+
+    def test_email_is_stored_in_lowercase(self, thread):
+        self.post(email="Bo.New@Example.COM")
+
+        user = User.objects.get(email="bo.new@example.com")
+        self.assertEqual(user.username, "bo.new@example.com")
 
     def test_surrounding_spaces_are_trimmed(self, thread):
         self.post(email="  bo@example.com ", phonenumber=" 1234567890 ")
@@ -193,6 +201,18 @@ class LoginTests(TestCase):
 
         self.assertRedirects(response, reverse("dashboard"))
         self.assertEqual(int(self.client.session["_auth_user_id"]), self.user.pk)
+
+    def test_login_ignores_capital_letters_in_the_email(self):
+        response = self.login(username="Ann@Example.COM")
+
+        self.assertRedirects(response, reverse("dashboard"))
+
+    def test_logged_in_user_is_sent_to_the_dashboard(self):
+        self.client.force_login(self.user)
+
+        response = self.client.get(self.url)
+
+        self.assertRedirects(response, reverse("dashboard"))
 
     def test_login_redirects_to_safe_next_url(self):
         response = self.login(url=f"{self.url}?next=/my_receipts/")
@@ -569,3 +589,34 @@ class DeleteAccountTests(TestCase):
 
         self.assertContains(response, f'action="{self.url}"')
         self.assertContains(response, 'id="delete_password"')
+
+
+class NormalizeEmailsMigrationTests(TestCase):
+    def run_migration(self):
+        migration = importlib.import_module("accounts.migrations.0007_normalize_emails")
+        migration.normalize_emails(apps, None)
+
+    def test_emails_are_lowercased_and_copied_to_the_username(self):
+        user = User.objects.create_user("ann", "Ann@Example.COM", PASSWORD)
+
+        self.run_migration()
+
+        user.refresh_from_db()
+        self.assertEqual((user.username, user.email), ("ann@example.com",) * 2)
+
+    def test_accounts_that_would_clash_are_left_alone(self):
+        User.objects.create_user("ann@example.com", "ann@example.com", PASSWORD)
+        other = User.objects.create_user("other", "ANN@example.com", PASSWORD)
+
+        self.run_migration()
+
+        other.refresh_from_db()
+        self.assertEqual(other.username, "other")
+
+    def test_accounts_without_an_email_are_skipped(self):
+        user = User.objects.create_user("admin", "", PASSWORD)
+
+        self.run_migration()
+
+        user.refresh_from_db()
+        self.assertEqual(user.username, "admin")

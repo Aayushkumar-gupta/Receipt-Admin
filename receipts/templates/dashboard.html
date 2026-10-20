@@ -9,7 +9,7 @@
     <section class="welcome" aria-labelledby="welcome-title">
         <div class="welcome-main">
             <h1 id="welcome-title" class="welcome-title">
-                Welcome back, {{ user.first_name|default:user.username }}
+                Welcome back{% if user.first_name %}, {{ user.first_name }}{% endif %}
             </h1>
             <p class="welcome-date">{% now "l, F j" %}</p>
             <p class="welcome-status">

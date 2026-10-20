@@ -606,6 +606,17 @@ class DashboardTests(TestCase):
         self.user = make_user()
         self.client.force_login(self.user)
 
+    def test_greeting_uses_the_first_name_and_never_the_email(self):
+        self.assertContains(self.client.get(self.url), "Welcome back, Ann")
+
+        self.user.first_name = ""
+        self.user.save()
+        response = self.client.get(self.url)
+
+        self.assertContains(response, "Welcome back")
+        self.assertNotContains(response, "ann@example.com</h1>")
+        self.assertNotContains(response, "Welcome back, ")
+
     def test_revenue_counts_finalized_receipts_before_tax(self):
         make_receipt(self.user, staged=True, sub_total=Decimal("10.00"))
         make_receipt(self.user, staged=True, sub_total=Decimal("5.00"))
@@ -695,6 +706,12 @@ class ProfileUpdateTests(TestCase):
         self.post(phone_number="9999999999", current_password=PASSWORD)
 
         self.assertEqual(self.reload()[1].phone_number, "9999999999")
+
+    def test_email_is_stored_in_lowercase(self):
+        self.post(email="Ann.New@Example.COM", current_password=PASSWORD)
+
+        user, _ = self.reload()
+        self.assertEqual((user.username, user.email), ("ann.new@example.com",) * 2)
 
     def test_email_change_updates_username_and_resets_verification(self):
         self.post(email="new@example.com", current_password=PASSWORD)

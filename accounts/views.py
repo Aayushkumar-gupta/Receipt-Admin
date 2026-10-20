@@ -40,7 +40,7 @@ def sign_up(request):
     if request.method == "POST":
         first_name = request.POST.get("first_name", "").strip()
         last_name = request.POST.get("last_name", "").strip()
-        email = request.POST.get("email", "").strip()
+        email = request.POST.get("email", "").strip().lower()
         phone_number = request.POST.get("phonenumber", "").strip()
         password = request.POST.get("password", "")
         confirm_password = request.POST.get("confirm_password", "")
@@ -119,15 +119,18 @@ def sign_up(request):
 
 
 def user_login(request):
+    if request.user.is_authenticated:
+        return redirect("dashboard")
+
     next_url = request.POST.get("next") or request.GET.get("next", "")
     login_url = reverse("login") + (
         f"?{urlencode({'next': next_url})}" if next_url else ""
     )
 
     if request.method == "POST":
-        username = request.POST.get("username", "").strip()
+        username = request.POST.get("username", "").strip().lower()
         password = request.POST.get("password", "")
-        fail_key = f"login-fails:{username.lower()}"
+        fail_key = f"login-fails:{username}"
 
         if cache.get(fail_key, 0) >= 5:
             messages.error(
@@ -139,7 +142,7 @@ def user_login(request):
         user = authenticate(request, username=username, password=password)
 
         if user is not None:
-            logger.info(f"LOGIN SUCCESS for {username}")
+            logger.info(f"Login succeeded for user {user.pk}")
             cache.delete(fail_key)
             auth_login(request, user)
             if url_has_allowed_host_and_scheme(

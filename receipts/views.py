@@ -301,7 +301,7 @@ def update_profile(request):
         user = request.user
         profile, _ = UserProfile.objects.get_or_create(user=user)
 
-        new_email = request.POST.get("email", user.email).strip()
+        new_email = request.POST.get("email", user.email).strip().lower()
         new_phone = request.POST.get("phone_number", profile.phone_number).strip()
         new_address = request.POST.get("address", "").strip()
         current_password = request.POST.get("current_password", "")
