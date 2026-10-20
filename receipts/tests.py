@@ -327,15 +327,13 @@ class CreateReceiptTests(TestCase):
 
         self.assertRedirects(response, reverse("profile"))
 
-    def test_requires_an_address(self):
+    def test_incomplete_profile_is_sent_to_complete_it_first(self):
         UserProfile.objects.filter(user=self.user).update(address="")
 
         response = self.client.get(self.url)
 
-        self.assertRedirects(response, reverse("profile"))
-        self.assertIn(
-            "You must add your address in your profile before creating a receipt.",
-            messages_of(response),
+        self.assertRedirects(
+            response, f"{reverse('complete_profile')}?next=%2Fcreate%2F"
         )
 
     def test_valid_receipt_is_saved_with_server_side_totals(self):
@@ -780,3 +778,75 @@ class ProfileUpdateTests(TestCase):
         response = self.client.get(reverse("profile"))
 
         self.assertNotContains(response, 'value="None"')
+
+
+class CompleteProfileTests(TestCase):
+    url = reverse("complete_profile")
+
+    def setUp(self):
+        self.user = make_user(address="")
+        self.client.force_login(self.user)
+
+    def test_shows_only_the_missing_fields(self):
+        response = self.client.get(self.url)
+
+        self.assertContains(response, 'id="address"')
+        self.assertNotContains(response, 'id="first_name"')
+        self.assertNotContains(response, 'id="phone_number"')
+
+    def test_saving_completes_the_profile_and_continues(self):
+        response = self.client.post(
+            self.url, {"address": " 2 Oak Ave ", "next": reverse("create_receipt")}
+        )
+
+        self.assertRedirects(response, reverse("create_receipt"))
+        self.assertEqual(UserProfile.objects.get(user=self.user).address, "2 Oak Ave")
+        self.assertIn("Your profile is complete.", messages_of(response))
+
+    def test_missing_and_invalid_values_are_rejected(self):
+        UserProfile.objects.filter(user=self.user).update(phone_number="")
+        cases = {
+            "blank address": (
+                {"address": " ", "phone_number": "1234567890"},
+                "Enter your address.",
+            ),
+            "phone with letters": (
+                {"address": "2 Oak Ave", "phone_number": "12345abcde"},
+                "Phone number must be 10 to 15 digits.",
+            ),
+            "address too long": (
+                {"address": "x" * 256, "phone_number": "1234567890"},
+                "Check the address. "
+                "Ensure this value has at most 255 characters (it has 256).",
+            ),
+        }
+        for name, (data, message) in cases.items():
+            with self.subTest(name):
+                response = self.client.post(self.url, data)
+
+                self.assertEqual(response.status_code, 200)
+                self.assertIn(message, messages_of(response))
+                self.assertEqual(UserProfile.objects.get(user=self.user).address, "")
+
+    def test_complete_profile_goes_straight_on(self):
+        UserProfile.objects.filter(user=self.user).update(address="2 Oak Ave")
+
+        response = self.client.get(self.url, {"next": reverse("my_receipts")})
+
+        self.assertRedirects(response, reverse("my_receipts"))
+
+    def test_outside_next_links_are_ignored(self):
+        response = self.client.post(
+            self.url, {"address": "2 Oak Ave", "next": "https://evil.example.com/"}
+        )
+
+        self.assertRedirects(response, reverse("dashboard"))
+
+    def test_profile_page_lists_what_is_missing(self):
+        UserProfile.objects.filter(user=self.user).update(phone_number="")
+
+        response = self.client.get(reverse("profile"))
+
+        self.assertContains(
+            response, "Add your phone number and address to start creating receipts."
+        )

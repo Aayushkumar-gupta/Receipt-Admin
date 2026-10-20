@@ -15,6 +15,7 @@ urlpatterns = [
     path("staging-edit/<int:pk>/", views.staging_edit, name="staging_edit"),
     path("staging-delete/<int:pk>/", views.staging_delete, name="staging_delete"),
     path("profile/", views.profile, name="profile"),
+    path("profile/complete/", views.complete_profile, name="complete_profile"),
     path("dashboard/", views.dashboard, name="dashboard"),
     path("refund/<int:pk>/", views.refund, name="refund"),
 ]

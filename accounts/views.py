@@ -153,13 +153,17 @@ def user_login(request):
             logger.info(f"Login succeeded for user {user.pk}")
             cache.delete(fail_key)
             auth_login(request, user)
-            if url_has_allowed_host_and_scheme(
+            if not url_has_allowed_host_and_scheme(
                 next_url,
                 allowed_hosts={request.get_host()},
                 require_https=request.is_secure(),
             ):
-                return redirect(next_url)
-            return redirect("dashboard")
+                next_url = reverse("dashboard")
+            profile, _ = UserProfile.objects.get_or_create(user=user)
+            if profile.missing_fields():
+                complete_url = reverse("complete_profile")
+                return redirect(f"{complete_url}?{urlencode({'next': next_url})}")
+            return redirect(next_url)
 
         cache.set(fail_key, cache.get(fail_key, 0) + 1, 15 * 60)
         messages.error(request, "Incorrect email or password.")

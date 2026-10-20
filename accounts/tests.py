@@ -221,6 +221,15 @@ class LoginTests(TestCase):
 
         self.assertRedirects(response, reverse("dashboard"))
 
+    def test_incomplete_profile_is_asked_to_complete_after_login(self):
+        UserProfile.objects.filter(user=self.user).update(address="")
+
+        response = self.login(url=f"{self.url}?next=/my_receipts/")
+
+        self.assertRedirects(
+            response, f"{reverse('complete_profile')}?next=%2Fmy_receipts%2F"
+        )
+
     def test_logged_in_user_is_sent_to_the_dashboard(self):
         self.client.force_login(self.user)
 

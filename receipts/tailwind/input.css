@@ -941,6 +941,24 @@
     font-size: 0.9375rem;
   }
 
+  .complete-page {
+    width: 100%;
+    max-width: 36rem;
+    margin-inline: auto;
+    padding-top: 1rem;
+  }
+
+  .complete-lead {
+    margin-top: 0.75rem;
+    color: var(--color-ink-2);
+  }
+
+  .complete-form {
+    display: grid;
+    gap: 1.25rem;
+    margin-top: 1.5rem;
+  }
+
   .profile-page {
     width: 100%;
     max-width: 80rem;

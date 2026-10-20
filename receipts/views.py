@@ -12,6 +12,8 @@ from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.loader import get_template
 from django.templatetags.static import static
+from django.urls import reverse
+from django.utils.http import url_has_allowed_host_and_scheme, urlencode
 from django.views.decorators.http import require_POST
 from xhtml2pdf import pisa
 
@@ -19,10 +21,27 @@ from accounts.models import UserProfile
 
 from .models import Receipt, ReceiptItem
 
+FIELD_LABELS = {
+    "first_name": "first name",
+    "last_name": "last name",
+    "phone_number": "phone number",
+    "address": "address",
+}
+
 
 def add_field_errors(request, error):
     for field, errors in error.message_dict.items():
         messages.error(request, f"Check the {field.replace('_', ' ')}. {errors[0]}")
+
+
+def complete_profile_url(next_url):
+    return f"{reverse('complete_profile')}?{urlencode({'next': next_url})}"
+
+
+def join_words(words):
+    if len(words) < 2:
+        return "".join(words)
+    return f"{', '.join(words[:-1])} and {words[-1]}"
 
 
 def home(request):
@@ -78,8 +97,58 @@ def about(request):
 
 @login_required
 def profile(request):
-    UserProfile.objects.get_or_create(user=request.user)
-    return render(request, "profile.html")
+    profile, _ = UserProfile.objects.get_or_create(user=request.user)
+    missing = [FIELD_LABELS[field] for field in profile.missing_fields()]
+    return render(request, "profile.html", {"missing": join_words(missing)})
+
+
+@login_required
+def complete_profile(request):
+    user = request.user
+    profile, _ = UserProfile.objects.get_or_create(user=user)
+    next_url = request.POST.get("next") or request.GET.get("next", "")
+    if not url_has_allowed_host_and_scheme(
+        next_url, allowed_hosts={request.get_host()}, require_https=request.is_secure()
+    ):
+        next_url = reverse("dashboard")
+
+    missing = profile.missing_fields()
+    if not missing:
+        return redirect(next_url)
+
+    values = {field: request.POST.get(field, "").strip() for field in missing}
+    if request.method == "POST":
+        errors = [
+            f"Enter your {FIELD_LABELS[field]}."
+            for field, value in values.items()
+            if not value
+        ]
+        phone = values.get("phone_number")
+        if phone and not re.fullmatch(r"\d{10,15}", phone):
+            errors.append("Phone number must be 10 to 15 digits.")
+
+        if not errors:
+            for field, value in values.items():
+                setattr(user if field.endswith("_name") else profile, field, value)
+            try:
+                user.full_clean()
+                profile.full_clean()
+            except ValidationError as e:
+                add_field_errors(request, e)
+            else:
+                user.save()
+                profile.save()
+                messages.success(request, "Your profile is complete.")
+                return redirect(next_url)
+
+        for error in errors:
+            messages.error(request, error)
+
+    return render(
+        request,
+        "complete_profile.html",
+        {"missing": missing, "values": values, "next": next_url},
+    )
 
 
 @login_required
@@ -132,15 +201,11 @@ def receipt_pdf(request, pk):
 def create_receipt(request):
     profile, _ = UserProfile.objects.get_or_create(user=request.user)
 
+    if profile.missing_fields():
+        return redirect(complete_profile_url(request.path))
+
     if not profile.email_verified:
         messages.info(request, "You must verify your email before creating a receipt.")
-        return redirect("profile")
-
-    if not profile.address or profile.address.strip() == "":
-        messages.warning(
-            request,
-            "You must add your address in your profile before creating a receipt.",
-        )
         return redirect("profile")
 
     seller_name = f"{request.user.first_name} {request.user.last_name}"
