@@ -39,6 +39,7 @@ It isn't tied to any one kind of business. Whether someone sells shoes, T-shirts
 - Draft, review and confirm workflow, so mistakes are caught before a receipt is official
 - PDF receipts to view in the browser or download and send
 - Refund tracking and search by invoice number
+- CSV export of confirmed receipts by year or date range, ready for a spreadsheet at tax time
 - Dashboard with receipt count, revenue, pending drafts, and recent sales
 - Accounts with email verification, password reset and change, and self-service deletion that removes all of a seller's data
 - A short profile check that asks for any missing seller details before the first receipt

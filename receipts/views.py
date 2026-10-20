@@ -1,5 +1,7 @@
+import csv
 import json
 import re
+from datetime import date
 from decimal import ROUND_HALF_UP, Decimal, InvalidOperation
 
 from django.contrib import messages
@@ -13,6 +15,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.template.loader import get_template
 from django.templatetags.static import static
 from django.urls import reverse
+from django.utils import timezone
 from django.utils.http import url_has_allowed_host_and_scheme, urlencode
 from django.views.decorators.http import require_POST
 from xhtml2pdf import pisa
@@ -89,6 +92,87 @@ def my_receipts(request):
         receipts = receipts.filter(invoice_number__icontains=search_query)
     receipts = receipts.order_by("-date", "-pk")
     return render(request, "my_receipts.html", {"receipts": receipts})
+
+
+EXPORT_COLUMNS = [
+    "Invoice",
+    "Date",
+    "Buyer",
+    "Buyer email",
+    "Buyer phone",
+    "Quantity",
+    "Subtotal",
+    "Tax rate",
+    "Tax",
+    "Total",
+    "Status",
+]
+
+
+def spreadsheet_safe(value):
+    # Spreadsheets run cells starting with these characters as formulas.
+    value = "" if value == "N/A" else str(value)
+    return f"'{value}" if value[:1] in ("=", "+", "-", "@", "\t", "\r") else value
+
+
+def export_period(params):
+    today = timezone.localdate()
+    period = params.get("range", "this_year")
+    if period == "last_year":
+        year = today.year - 1
+        return date(year, 1, 1), date(year, 12, 31), str(year)
+    if period == "all":
+        return None, None, "all"
+    if period == "custom":
+        try:
+            start = date.fromisoformat(params.get("from", ""))
+            end = date.fromisoformat(params.get("to", ""))
+        except ValueError as e:
+            raise ValueError(
+                "Enter a start date and an end date for a custom range."
+            ) from e
+        if start > end:
+            raise ValueError("Choose a start date that is before the end date.")
+        return start, end, f"{start}-to-{end}"
+    return date(today.year, 1, 1), today, str(today.year)
+
+
+@login_required
+def export_receipts(request):
+    try:
+        start, end, label = export_period(request.GET)
+    except ValueError as e:
+        messages.error(request, str(e))
+        return redirect("my_receipts")
+
+    receipts = Receipt.objects.filter(user=request.user, is_staged=True)
+    if start:
+        receipts = receipts.filter(date__gte=start, date__lte=end)
+    receipts = receipts.prefetch_related("items").order_by("date", "pk")
+
+    response = HttpResponse(content_type="text/csv; charset=utf-8")
+    response["Content-Disposition"] = f'attachment; filename="receipts-{label}.csv"'
+    # The byte order mark tells Excel the file is UTF-8, so accented names show correctly.
+    response.write("\ufeff")
+    writer = csv.writer(response)
+    writer.writerow(EXPORT_COLUMNS)
+    for receipt in receipts:
+        writer.writerow(
+            [
+                receipt.invoice_number,
+                receipt.date.isoformat(),
+                spreadsheet_safe(receipt.buyer_name),
+                spreadsheet_safe(receipt.buyer_email),
+                spreadsheet_safe(receipt.buyer_phone_number),
+                sum(item.quantity for item in receipt.items.all()),
+                receipt.sub_total,
+                receipt.tax_rate,
+                receipt.tax_amount,
+                receipt.total_amount,
+                "Refunded" if receipt.refund else "Final",
+            ]
+        )
+    return response
 
 
 def about(request):

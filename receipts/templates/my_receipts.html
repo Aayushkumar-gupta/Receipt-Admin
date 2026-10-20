@@ -5,6 +5,65 @@
 
 {% block heading %}My receipts{% endblock %}
 
+{% block header_actions %}
+<button
+    type="button"
+    class="btn-secondary export-toggle"
+    data-toggle="export-panel"
+    aria-controls="export-panel"
+    aria-expanded="false"
+    aria-label="Export receipts"
+>
+    {% include "partials/icons/download.html" with class="size-4" %}
+    <span class="export-label">Export</span>
+</button>
+{% endblock %}
+
+{% block before_list %}
+<form method="get" action="{% url 'export_receipts' %}" id="export-panel" class="panel export-panel" hidden>
+    <fieldset>
+        <legend class="panel-title">Download your receipts</legend>
+        <p class="settings-help">
+            Confirmed and refunded receipts, one row each, ready for a spreadsheet or your taxes.
+        </p>
+        <div class="export-ranges">
+            <label class="export-option">
+                <input type="radio" name="range" value="this_year" checked>
+                This year
+            </label>
+            <label class="export-option">
+                <input type="radio" name="range" value="last_year">
+                Last year
+            </label>
+            <label class="export-option">
+                <input type="radio" name="range" value="all">
+                All time
+            </label>
+            <label class="export-option">
+                <input type="radio" name="range" value="custom">
+                Custom dates
+            </label>
+        </div>
+    </fieldset>
+
+    <div class="export-custom">
+        <div>
+            <label for="export_from" class="label">From</label>
+            <input type="date" id="export_from" name="from" class="field mt-1.5">
+        </div>
+        <div>
+            <label for="export_to" class="label">To</label>
+            <input type="date" id="export_to" name="to" class="field mt-1.5">
+        </div>
+    </div>
+
+    <div class="mt-5 flex flex-wrap gap-2">
+        <button type="submit" class="btn-primary">Download CSV</button>
+        <button type="button" class="btn-secondary" data-toggle="export-panel">Cancel</button>
+    </div>
+</form>
+{% endblock %}
+
 {% block actions %}
 <a
     href="{% url 'view_receipt_pdf' receipt.id %}"

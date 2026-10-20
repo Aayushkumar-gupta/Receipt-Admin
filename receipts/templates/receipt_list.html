@@ -6,19 +6,24 @@
 <div class="list-page">
     <div class="list-header">
         <h1 class="text-3xl font-bold tracking-tight sm:text-4xl">{% block heading %}{% endblock %}</h1>
-        <form method="get" class="search-form" role="search">
-            <label for="search" class="sr-only">Search by invoice number</label>
-            <input
-                type="search"
-                id="search"
-                name="search"
-                value="{{ request.GET.search }}"
-                class="field"
-                placeholder="Search by invoice number"
-            >
-            <button type="submit" class="btn-secondary">Search</button>
-        </form>
+        <div class="list-tools">
+            <form method="get" class="search-form" role="search">
+                <label for="search" class="sr-only">Search by invoice number</label>
+                <input
+                    type="search"
+                    id="search"
+                    name="search"
+                    value="{{ request.GET.search }}"
+                    class="field"
+                    placeholder="Invoice number"
+                >
+                <button type="submit" class="btn-secondary">Search</button>
+            </form>
+            {% block header_actions %}{% endblock %}
+        </div>
     </div>
+
+    {% block before_list %}{% endblock %}
 
     {% if receipts %}
     <div class="list-panel">

@@ -1,6 +1,9 @@
+import csv
+import io
 import json
 import logging
 import re
+from datetime import timedelta
 from decimal import Decimal
 from unittest import mock
 
@@ -964,3 +967,150 @@ class ErrorPageTests(TestCase):
         self.assertNotIn("{%", html)
         self.assertNotIn("/static/", html)
         self.assertIn('<meta name="robots" content="noindex">', html)
+
+
+class ExportReceiptsTests(TestCase):
+    url = reverse("export_receipts")
+
+    def setUp(self):
+        self.user = make_user()
+        self.client.force_login(self.user)
+        self.today = timezone.localdate()
+
+    def receipt(self, days_ago=0, **fields):
+        receipt = make_receipt(self.user, **{"staged": True, **fields})
+        Receipt.objects.filter(pk=receipt.pk).update(
+            date=self.today - timedelta(days=days_ago)
+        )
+        receipt.refresh_from_db()
+        return receipt
+
+    def rows(self, response):
+        return list(csv.reader(io.StringIO(response.content.decode("utf-8-sig"))))
+
+    def invoices(self, response):
+        return [row[0] for row in self.rows(response)[1:]]
+
+    def test_requires_login(self):
+        self.client.logout()
+
+        response = self.client.get(self.url)
+
+        self.assertRedirects(response, f"{reverse('login')}?next={self.url}")
+
+    def test_this_year_has_confirmed_and_refunded_receipts_only(self):
+        final = self.receipt()
+        refunded = self.receipt(refunded=True)
+        self.receipt(staged=False)
+        make_receipt(make_user("bob@example.com"), staged=True)
+        self.receipt(days_ago=400)
+
+        response = self.client.get(self.url)
+
+        self.assertEqual(
+            self.invoices(response), [final.invoice_number, refunded.invoice_number]
+        )
+        self.assertEqual(response["Content-Type"], "text/csv; charset=utf-8")
+        self.assertEqual(
+            response["Content-Disposition"],
+            f'attachment; filename="receipts-{self.today.year}.csv"',
+        )
+        self.assertTrue(response.content.startswith(b"\xef\xbb\xbf"))
+
+    def test_last_year_and_all_time(self):
+        last_year = self.receipt(days_ago=self.today.timetuple().tm_yday + 10)
+        current = self.receipt()
+
+        last = self.client.get(self.url, {"range": "last_year"})
+        everything = self.client.get(self.url, {"range": "all"})
+
+        self.assertEqual(self.invoices(last), [last_year.invoice_number])
+        self.assertEqual(
+            self.invoices(everything),
+            [last_year.invoice_number, current.invoice_number],
+        )
+        self.assertIn('filename="receipts-all.csv"', everything["Content-Disposition"])
+
+    def test_custom_range(self):
+        inside = self.receipt(days_ago=10)
+        self.receipt(days_ago=40)
+        start = (self.today - timedelta(days=20)).isoformat()
+
+        response = self.client.get(
+            self.url, {"range": "custom", "from": start, "to": self.today.isoformat()}
+        )
+
+        self.assertEqual(self.invoices(response), [inside.invoice_number])
+
+    def test_invalid_custom_ranges_go_back_with_a_message(self):
+        cases = {
+            "missing dates": (
+                {"range": "custom"},
+                "Enter a start date and an end date for a custom range.",
+            ),
+            "start after end": (
+                {"range": "custom", "from": "2026-05-02", "to": "2026-05-01"},
+                "Choose a start date that is before the end date.",
+            ),
+        }
+        for name, (params, message) in cases.items():
+            with self.subTest(name):
+                response = self.client.get(self.url, params)
+
+                self.assertRedirects(response, reverse("my_receipts"))
+                self.assertIn(message, messages_of(response))
+
+    def test_columns_and_values(self):
+        receipt = self.receipt(
+            refunded=True, buyer_name="Robert Miller", buyer_email="N/A"
+        )
+
+        header, row = self.rows(self.client.get(self.url))
+
+        self.assertEqual(
+            header,
+            [
+                "Invoice",
+                "Date",
+                "Buyer",
+                "Buyer email",
+                "Buyer phone",
+                "Quantity",
+                "Subtotal",
+                "Tax rate",
+                "Tax",
+                "Total",
+                "Status",
+            ],
+        )
+        self.assertEqual(
+            row,
+            [
+                receipt.invoice_number,
+                self.today.isoformat(),
+                "Robert Miller",
+                "",
+                "5551234567",
+                "2",
+                "10.00",
+                "8.25",
+                "0.83",
+                "10.83",
+                "Refunded",
+            ],
+        )
+
+    def test_values_that_look_like_formulas_are_neutralized(self):
+        self.receipt(buyer_name="=HYPERLINK(1)", buyer_email="@evil")
+
+        row = self.rows(self.client.get(self.url))[1]
+
+        self.assertEqual(row[2:4], ["'=HYPERLINK(1)", "'@evil"])
+
+    def test_export_button_is_only_on_my_receipts(self):
+        mine = self.client.get(reverse("my_receipts"))
+        staging = self.client.get(reverse("staging_area"))
+
+        self.assertContains(mine, f'action="{self.url}"')
+        self.assertContains(mine, 'aria-label="Export receipts"')
+        self.assertNotContains(staging, 'id="export-panel"')
