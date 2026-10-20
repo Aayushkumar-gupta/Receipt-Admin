@@ -2,6 +2,7 @@ import os
 from pathlib import Path
 
 import dj_database_url
+import sentry_sdk
 from django.contrib.messages import constants as message_constants
 from django.core.exceptions import ImproperlyConfigured
 from dotenv import load_dotenv
@@ -179,6 +180,14 @@ else:
     SECURE_HSTS_PRELOAD = True
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
     SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+    SENTRY_DSN = os.environ.get("SENTRY_DSN")
+    if SENTRY_DSN:
+        sentry_sdk.init(
+            dsn=SENTRY_DSN,
+            environment="production",
+            send_default_pii=False,
+            traces_sample_rate=0,
+        )
 
 
 LOGGING = {

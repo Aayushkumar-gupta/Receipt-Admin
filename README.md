@@ -62,11 +62,12 @@ Receipts are financial records, so the app is built to keep them correct and pri
 | Area | Technology |
 | --- | --- |
 | Backend | Python 3.13, Django 6.1 |
-| Database | PostgreSQL in production (psycopg 3), SQLite for local development |
+| Database | PostgreSQL on Neon in production (psycopg 3), SQLite for local development |
 | PDF generation | xhtml2pdf |
 | Email | Resend API |
 | Frontend | Django templates, Tailwind CSS 4, vanilla JavaScript |
 | Hosting | Render (Gunicorn, WhiteNoise for static files) |
+| Monitoring | Sentry for errors, UptimeRobot for uptime |
 | Quality | Django test suite, coverage, Ruff, pre-commit, GitHub Actions, Dependabot |
 
 ## Run it locally
@@ -113,6 +114,7 @@ Settings are read from environment variables, or from a `.env` file in the proje
 | `DJANGO_SECRET_KEY` | optional | **required** | Django secret key |
 | `DATABASE_URL` | optional (SQLite) | **required** | Database connection string |
 | `RESEND_API_KEY` | optional | **required** | Sends verification and password reset emails |
+| `SENTRY_DSN` | not used | optional | Reports production errors to Sentry |
 
 ## Tests and code quality
 
@@ -124,7 +126,7 @@ ruff check . && ruff format --check .              # lint and formatting
 
 ## Deployment
 
-The app runs on [Render](https://render.com):
+The app runs on [Render](https://render.com), with the database on [Neon](https://neon.tech):
 
 - **Build command:** `pip install -r requirements.txt && python manage.py collectstatic --noinput && python manage.py migrate`
 - **Start command:** `gunicorn ReceiptAdmin.wsgi` (from the `Procfile`)

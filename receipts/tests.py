@@ -174,6 +174,14 @@ class SeoTests(TestCase):
         self.assertContains(response, "We may respond if a buyer contacts us")
         self.assertNotContains(response, "We never contact your buyers")
 
+    def test_privacy_policy_names_every_service_provider(self):
+        response = self.client.get(reverse("privacy"))
+
+        for provider in ("Render", "Neon", "Resend", "Cloudflare", "Sentry"):
+            with self.subTest(provider):
+                self.assertContains(response, provider)
+        self.assertNotContains(response, "hosts the website and its database")
+
     def test_terms_name_the_governing_law(self):
         response = self.client.get(reverse("terms"))
 
