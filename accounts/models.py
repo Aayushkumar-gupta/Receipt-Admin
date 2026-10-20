@@ -11,3 +11,12 @@ class UserProfile(models.Model):
 
     def __str__(self):
         return self.user.username
+
+    def missing_fields(self):
+        values = {
+            "first_name": self.user.first_name,
+            "last_name": self.user.last_name,
+            "phone_number": self.phone_number,
+            "address": self.address,
+        }
+        return [field for field, value in values.items() if not value.strip()]

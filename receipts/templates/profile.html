@@ -9,6 +9,13 @@
 <div class="profile-page">
     <h1 class="text-3xl font-bold tracking-tight sm:text-4xl">Profile</h1>
 
+    {% if missing %}
+    <div class="message mt-6" data-level="warning" role="status">
+        <span class="message-icon">{% include "partials/icons/alert.html" %}</span>
+        <p class="message-text">Add your {{ missing }} to start creating receipts.</p>
+    </div>
+    {% endif %}
+
     <div class="profile-layout">
         <aside class="panel profile-summary" aria-labelledby="summary-name">
             <div class="avatar" aria-hidden="true">
@@ -154,7 +161,9 @@
                                 value="{{ user.userprofile.address }}"
                                 class="field mt-1.5"
                                 autocomplete="street-address"
-                                maxlength="100"
+                                maxlength="255"
+                                required
+                                data-required-message="Enter your address."
                                 aria-describedby="address-error"
                             >
                             <p id="address-error" class="field-error" hidden></p>
