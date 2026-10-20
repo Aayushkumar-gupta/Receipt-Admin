@@ -146,7 +146,7 @@ def create_receipt(request):
     seller_name = f"{request.user.first_name} {request.user.last_name}"
     seller_email = request.user.email
     seller_phone = profile.phone_number
-    seller_address = profile.address or "Default Address"
+    seller_address = profile.address
 
     if request.method == "POST":
         receipt = Receipt(
@@ -306,8 +306,10 @@ def update_profile(request):
         new_address = request.POST.get("address", "").strip()
         current_password = request.POST.get("current_password", "")
 
-        if new_address:
-            profile.address = new_address
+        if not new_address:
+            messages.error(request, "Enter your address.")
+            return redirect("profile")
+        profile.address = new_address
 
         # Email and phone appear on receipts, so changing them needs the password.
         sensitive_change = new_email != user.email or new_phone != profile.phone_number

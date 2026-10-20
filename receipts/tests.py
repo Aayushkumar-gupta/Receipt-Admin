@@ -592,6 +592,16 @@ class InvoiceNumberTests(TestCase):
         receipt.refresh_from_db()
         self.assertEqual(len(receipt.seller_name), 301)
 
+    def test_addresses_up_to_255_characters_are_stored(self):
+        receipt = make_receipt(self.user)
+        receipt.seller_address = "S" * 255
+        receipt.buyer_address = "B" * 255
+        receipt.full_clean()
+        receipt.save()
+
+        receipt.refresh_from_db()
+        self.assertEqual(len(receipt.seller_address), 255)
+
     def test_string_representations(self):
         receipt = make_receipt(self.user)
 
@@ -743,6 +753,7 @@ class ProfileUpdateTests(TestCase):
                 {"first_name": " "},
                 "First name and last name are required.",
             ),
+            "blank address": ({"address": " "}, "Enter your address."),
             "address too long": (
                 {"address": "x" * 256},
                 "Check the address. Ensure this value has at most 255 characters (it has 256).",

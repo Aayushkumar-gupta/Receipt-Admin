@@ -42,6 +42,7 @@ def sign_up(request):
         last_name = request.POST.get("last_name", "").strip()
         email = request.POST.get("email", "").strip().lower()
         phone_number = request.POST.get("phonenumber", "").strip()
+        address = request.POST.get("address", "").strip()
         password = request.POST.get("password", "")
         confirm_password = request.POST.get("confirm_password", "")
 
@@ -60,6 +61,11 @@ def sign_up(request):
 
         if not re.fullmatch(r"\d{10,15}", phone_number):
             errors.append("Phone number must be 10 to 15 digits.")
+
+        if not address:
+            errors.append("Enter your address.")
+        elif len(address) > 255:
+            errors.append("Address must be 255 characters or fewer.")
 
         if password != confirm_password:
             errors.append("Passwords do not match.")
@@ -100,7 +106,9 @@ def sign_up(request):
                     password=password,
                     is_active=True,
                 )
-                UserProfile.objects.create(user=user, phone_number=phone_number)
+                UserProfile.objects.create(
+                    user=user, phone_number=phone_number, address=address
+                )
         except IntegrityError:
             messages.error(request, "An account with this email already exists.")
             return render(request, "sign_up.html")

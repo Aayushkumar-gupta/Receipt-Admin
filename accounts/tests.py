@@ -69,6 +69,7 @@ SIGNUP_DATA = {
     "last_name": "Li",
     "email": "bo@example.com",
     "phonenumber": "1234567890",
+    "address": "1 Main St",
     "password": PASSWORD,
     "confirm_password": PASSWORD,
 }
@@ -89,6 +90,7 @@ class SignUpTests(TestCase):
         self.assertEqual(user.username, "bo@example.com")
         self.assertTrue(user.check_password(PASSWORD))
         self.assertEqual(user.userprofile.phone_number, "1234567890")
+        self.assertEqual(user.userprofile.address, "1 Main St")
         self.assertFalse(user.userprofile.email_verified)
         thread.return_value.start.assert_called_once()
 
@@ -113,6 +115,18 @@ class SignUpTests(TestCase):
             "An account with this email already exists.", messages_of(response)
         )
         self.assertEqual(User.objects.count(), 1)
+
+    def test_address_is_required_and_limited_to_255_characters(self, thread):
+        cases = {
+            "missing": ("  ", "Enter your address."),
+            "too long": ("x" * 256, "Address must be 255 characters or fewer."),
+        }
+        for name, (address, message) in cases.items():
+            with self.subTest(name):
+                response = self.post(address=address)
+
+                self.assertIn(message, messages_of(response))
+                self.assertFalse(User.objects.exists())
 
     def test_weak_password_is_rejected_on_the_server(self, thread):
         response = self.post(password="weak", confirm_password="weak")

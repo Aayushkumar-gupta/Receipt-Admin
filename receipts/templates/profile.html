@@ -154,7 +154,9 @@
                                 value="{{ user.userprofile.address }}"
                                 class="field mt-1.5"
                                 autocomplete="street-address"
-                                maxlength="100"
+                                maxlength="255"
+                                required
+                                data-required-message="Enter your address."
                                 aria-describedby="address-error"
                             >
                             <p id="address-error" class="field-error" hidden></p>
