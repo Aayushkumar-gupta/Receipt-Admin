@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+
+{% block title %}Terms of service | Receipt Admin{% endblock %}
+{% block description %}The terms for using Receipt Admin, including your account, your receipts and acceptable use.{% endblock %}
+
+{% block content %}
+<article class="legal-page">
+    <h1 class="text-3xl font-bold tracking-tight sm:text-4xl">Terms of service</h1>
+    <p class="legal-updated">Last updated October 20, 2026</p>
+
+    <p class="legal-lead">
+        These terms apply when you use Receipt Admin at receiptadmin.com. By creating an account or using the
+        service, you agree to them. Please read them together with our
+        <a href="{% url 'privacy' %}" class="text-link">privacy policy</a>.
+    </p>
+
+    <section class="legal-section" aria-labelledby="service-title">
+        <h2 id="service-title">The service</h2>
+        <p>
+            Receipt Admin lets you record sales, create receipts as PDFs and keep a record of your sales. The service
+            is free. We may add, change or remove features over time. If we ever introduce paid features, we will tell
+            you before they apply to you.
+        </p>
+    </section>
+
+    <section class="legal-section" aria-labelledby="account-title">
+        <h2 id="account-title">Your account</h2>
+        <ul>
+            <li>You must be at least 18 years old and have reached the age of majority where you live.</li>
+            <li>The details you give us must be accurate and kept up to date.</li>
+            <li>You are responsible for keeping your password safe and for everything done with your account.</li>
+            <li>Tell us right away if you think someone else has used your account.</li>
+        </ul>
+    </section>
+
+    <section class="legal-section" aria-labelledby="receipts-title">
+        <h2 id="receipts-title">Your receipts and information</h2>
+        <p>
+            You keep any rights you have in the receipts and information you submit. You allow us to store and
+            process this information only as needed to provide the service.
+        </p>
+        <p>
+            You are responsible for the accuracy of your receipts, including prices, tax rates and buyer details, and
+            for following the tax and business laws that apply to you. Receipt Admin is a record keeping tool. It does
+            not give tax, accounting or legal advice.
+        </p>
+        <p>
+            When you add a buyer's details, you confirm that you have the right to share them with us.
+        </p>
+    </section>
+
+    <section class="legal-section" aria-labelledby="use-title">
+        <h2 id="use-title">Acceptable use</h2>
+        <p>You agree not to</p>
+        <ul>
+            <li>create false or misleading receipts, or use the service for fraud</li>
+            <li>record sales of illegal goods or services</li>
+            <li>use the service to send spam or to harass anyone</li>
+            <li>try to access another person's account or data</li>
+            <li>disrupt, overload or attack the service, or collect data from it automatically</li>
+        </ul>
+    </section>
+
+    <section class="legal-section" aria-labelledby="availability-title">
+        <h2 id="availability-title">Availability</h2>
+        <p>
+            We work to keep Receipt Admin running and your data safe, but the service is provided as it is, without
+            guarantees that it will always be available or free of errors. Keep your own copies of important receipts
+            by downloading their PDFs.
+        </p>
+    </section>
+
+    <section class="legal-section" aria-labelledby="liability-title">
+        <h2 id="liability-title">Limitation of liability</h2>
+        <p>
+            To the extent the law allows, Receipt Admin is not liable for indirect or consequential losses, such as lost
+            profits, lost data or tax penalties, that result from using the service. Our total liability for any
+            claim is limited to the greater of the amount you paid us in the 12 months before the claim or 50 US
+            dollars.
+        </p>
+    </section>
+
+    <section class="legal-section" aria-labelledby="ending-title">
+        <h2 id="ending-title">Ending your use</h2>
+        <p>
+            You can stop using Receipt Admin and delete your account from your profile at any time. We may suspend or
+            close an account that breaks these terms, and we will tell you when we reasonably can.
+        </p>
+    </section>
+
+    <section class="legal-section" aria-labelledby="law-title">
+        <h2 id="law-title">Governing law</h2>
+        <p>
+            These terms are governed by the laws of the State of Texas and applicable United States federal law. Any
+            dispute about them will be handled in the state or federal courts located in Texas. Nothing in these terms
+            takes away rights you have under the consumer protection laws of the state where you live.
+        </p>
+    </section>
+
+    <section class="legal-section" aria-labelledby="changes-title">
+        <h2 id="changes-title">Changes to these terms</h2>
+        <p>
+            When we update these terms, we change the date at the top. If a change is significant, we will tell you on
+            the website or by email before it takes effect. Using the service after a change means you accept the new
+            terms.
+        </p>
+    </section>
+
+    <section class="legal-section" aria-labelledby="contact-title">
+        <h2 id="contact-title">Contact us</h2>
+        <p>
+            For questions about these terms, write to
+            <a href="mailto:support@receiptadmin.com" class="text-link">support@receiptadmin.com</a>.
+        </p>
+    </section>
+</article>
+{% endblock %}

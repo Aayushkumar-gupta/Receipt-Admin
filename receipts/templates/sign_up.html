@@ -144,6 +144,12 @@
     </div>
 
     <button type="submit" class="btn-primary w-full">Create account</button>
+    <p class="text-center text-sm text-ink-2">
+        By creating an account, you agree to the
+        <a href="{% url 'terms' %}" class="text-link">Terms of service</a>
+        and
+        <a href="{% url 'privacy' %}" class="text-link">Privacy policy</a>.
+    </p>
 </form>
 {% endblock %}
 

@@ -79,6 +79,28 @@
                     </form>
                 </li>
             </ul>
+            <ul class="sidebar-legal">
+                <li>
+                    <a
+                        href="{% url 'privacy' %}"
+                        class="nav-link nav-link-small"
+                        {% if current == "privacy" %}aria-current="page"{% endif %}
+                    >
+                        {% include "partials/icons/shield.html" with class="size-4" %}
+                        Privacy policy
+                    </a>
+                </li>
+                <li>
+                    <a
+                        href="{% url 'terms' %}"
+                        class="nav-link nav-link-small"
+                        {% if current == "terms" %}aria-current="page"{% endif %}
+                    >
+                        {% include "partials/icons/document.html" with class="size-4" %}
+                        Terms of service
+                    </a>
+                </li>
+            </ul>
         </nav>
     </header>
 
@@ -133,17 +155,23 @@
     </div>
 </div>
 {% else %}
-    <footer class="border-t border-line bg-surface font-sans">
-        <div class="page flex flex-col gap-2 py-6 text-ink-2 sm:flex-row sm:items-center sm:justify-between">
-            <p>&copy; {% now "Y" %} Receipt Admin</p>
-            {% block footer_contact %}
-            <p>
+    <footer class="site-footer-band">
+        <div class="page site-footer">
+            <div class="footer-brand">
+                {% include "partials/brand.html" %}
+                <p class="footer-tagline">Simple receipts and sales records for every seller.</p>
+            </div>
+            <p class="footer-contact">
                 Questions?
                 <a href="mailto:support@receiptadmin.com" class="text-link">
                     support@receiptadmin.com
                 </a>
             </p>
-            {% endblock %}
+            <nav class="footer-links" aria-label="Legal">
+                <a href="{% url 'privacy' %}" class="footer-link">Privacy policy</a>
+                <a href="{% url 'terms' %}" class="footer-link">Terms of service</a>
+            </nav>
+            <p class="footer-copyright">&copy; {% now "Y" %} Receipt Admin</p>
         </div>
     </footer>
 </div>

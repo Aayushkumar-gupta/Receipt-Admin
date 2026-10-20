@@ -1,0 +1,151 @@
+{% extends 'base.html' %}
+
+{% block title %}Privacy policy | Receipt Admin{% endblock %}
+{% block description %}How Receipt Admin collects, uses and protects your information and the information about your buyers.{% endblock %}
+
+{% block content %}
+<article class="legal-page">
+    <h1 class="text-3xl font-bold tracking-tight sm:text-4xl">Privacy policy</h1>
+    <p class="legal-updated">Last updated October 20, 2026</p>
+
+    <p class="legal-lead">
+        This policy explains what information Receipt Admin collects when you use receiptadmin.com, how we use it
+        and the choices you have. We collect only what we need to run the service, and we never sell your
+        information.
+    </p>
+
+    <section class="legal-section" aria-labelledby="collect-title">
+        <h2 id="collect-title">Information you give us</h2>
+        <p>When you create an account and use Receipt Admin, we store</p>
+        <ul>
+            <li>your first and last name, email address, phone number and address</li>
+            <li>your password, stored only as a secure hash that we cannot read</li>
+            <li>the goal you set on your dashboard, if you add one</li>
+            <li>
+                the receipts you create, including your buyers' names, phone numbers, email addresses and addresses,
+                the items you sold, prices, tax and dates
+            </li>
+        </ul>
+    </section>
+
+    <section class="legal-section" aria-labelledby="buyers-title">
+        <h2 id="buyers-title">Information about your buyers</h2>
+        <p>
+            When you add a buyer's details to a receipt, you are responsible for having the right to share them with
+            us. We use buyer details only to create, store and show your receipts. We do not contact your buyers for
+            marketing or sales. We may respond if a buyer contacts us about their personal information.
+        </p>
+        <p>
+            If your details appear on a receipt and you want to see, correct or remove them, please contact the seller
+            who gave you the receipt first, since they created it. You can also write to us. To protect everyone's
+            information, we will ask for details that match the receipt, such as the invoice number and the seller's
+            name, and we may contact the seller to help resolve your request.
+        </p>
+    </section>
+
+    <section class="legal-section" aria-labelledby="automatic-title">
+        <h2 id="automatic-title">Information collected automatically</h2>
+        <p>
+            Receipt Admin uses two essential cookies. One keeps you logged in and is set to end when you close your
+            browser, although some browsers that restore your last session may keep it longer. The other lasts up to
+            a year and protects your forms from being submitted by other websites. Cloudflare, which delivers the
+            website, may also set a temporary security cookie to block automated traffic. We do not use analytics,
+            advertising or tracking cookies.
+        </p>
+        <p>
+            Like most websites, our hosting providers keep standard server logs, such as IP addresses and the pages
+            requested, to keep the service secure and fix problems.
+        </p>
+    </section>
+
+    <section class="legal-section" aria-labelledby="use-title">
+        <h2 id="use-title">How we use your information</h2>
+        <ul>
+            <li>to run your account and create, store and show your receipts</li>
+            <li>to send account emails, such as email confirmation and password reset links</li>
+            <li>to keep the service secure and prevent abuse</li>
+            <li>to answer your questions when you contact us</li>
+        </ul>
+        <p>We do not send marketing emails.</p>
+    </section>
+
+    <section class="legal-section" aria-labelledby="share-title">
+        <h2 id="share-title">How we share information</h2>
+        <p>
+            We do not sell, rent or share your information for advertising. We share it only with the service
+            providers that run Receipt Admin for us, and only as much as they need.
+        </p>
+        <ul>
+            <li>Render, which hosts the website and its database</li>
+            <li>Resend, which sends our account emails</li>
+            <li>Cloudflare, which delivers and protects the website</li>
+        </ul>
+        <p>We may also share information if the law requires it.</p>
+    </section>
+
+    <section class="legal-section" aria-labelledby="retention-title">
+        <h2 id="retention-title">How long we keep information</h2>
+        <p>
+            We keep your information for as long as your account exists. When you delete your account from your
+            profile, your account, profile and all your receipts are deleted from our live database right away.
+        </p>
+        <p>
+            Copies may remain in backups until those backups are replaced, and the server logs kept by our providers
+            are removed on their normal schedule. We may keep limited information longer only when the law requires
+            it or to investigate abuse of the service.
+        </p>
+    </section>
+
+    <section class="legal-section" aria-labelledby="rights-title">
+        <h2 id="rights-title">Your choices and rights</h2>
+        <ul>
+            <li>You can see and update your details on your profile at any time.</li>
+            <li>You can delete your account and all your receipts from your profile.</li>
+            <li>You can ask us for a copy of your information, or ask us to correct or delete it.</li>
+        </ul>
+        <p>
+            These choices are open to everyone, wherever you live. Some state privacy laws, such as those in
+            California and Texas, give residents specific rights over their information. Where a law like that applies
+            to Receipt Admin, we will honor those rights, and we will never treat you differently for using them. We
+            do not sell personal information or share it for advertising.
+        </p>
+    </section>
+
+    <section class="legal-section" aria-labelledby="security-title">
+        <h2 id="security-title">Security</h2>
+        <p>
+            Every connection to Receipt Admin is encrypted, passwords are stored as secure hashes, and each account can
+            see only its own receipts. No online service can be completely secure, but we work to protect your
+            information and fix problems quickly.
+        </p>
+    </section>
+
+    <section class="legal-section" aria-labelledby="children-title">
+        <h2 id="children-title">Age requirement</h2>
+        <p>
+            Receipt Admin is for adults. To create an account, you must be at least 18 years old and have reached
+            the age of majority where you live, as our
+            <a href="{% url 'terms' %}" class="text-link">terms of service</a> explain. We do not knowingly allow
+            anyone under 18 to create an account. Receipts created by our users may still contain information about
+            buyers who are under 18. If you believe someone under 18 has created an account, contact us and we will
+            delete it.
+        </p>
+    </section>
+
+    <section class="legal-section" aria-labelledby="changes-title">
+        <h2 id="changes-title">Changes to this policy</h2>
+        <p>
+            When we update this policy, we change the date at the top. If a change is significant, we will tell you
+            on the website or by email before it takes effect.
+        </p>
+    </section>
+
+    <section class="legal-section" aria-labelledby="contact-title">
+        <h2 id="contact-title">Contact us</h2>
+        <p>
+            For questions or requests about your information, write to
+            <a href="mailto:support@receiptadmin.com" class="text-link">support@receiptadmin.com</a>.
+        </p>
+    </section>
+</article>
+{% endblock %}

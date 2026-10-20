@@ -95,6 +95,14 @@ def about(request):
     return render(request, "about.html")
 
 
+def privacy(request):
+    return render(request, "privacy.html")
+
+
+def terms(request):
+    return render(request, "terms.html")
+
+
 @login_required
 def profile(request):
     profile, _ = UserProfile.objects.get_or_create(user=request.user)

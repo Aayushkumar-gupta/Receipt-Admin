@@ -107,10 +107,75 @@ class SeoTests(TestCase):
     def test_sitemap_lists_only_public_pages(self):
         response = self.client.get(reverse("sitemap"))
 
-        for name in ("home", "about", "sign_up", "login"):
+        for name in ("home", "about", "sign_up", "login", "privacy", "terms"):
             with self.subTest(name):
                 self.assertContains(response, f"<loc>http://testserver{reverse(name)}")
         self.assertNotContains(response, reverse("dashboard"))
+
+    def test_privacy_and_terms_pages_are_public_and_indexed(self):
+        pages = {
+            "privacy": "<title>Privacy policy | Receipt Admin</title>",
+            "terms": "<title>Terms of service | Receipt Admin</title>",
+        }
+        for name, title in pages.items():
+            with self.subTest(name):
+                response = self.client.get(reverse(name))
+
+                self.assertContains(response, title)
+                self.assertContains(
+                    response, '<meta name="robots" content="index, follow">'
+                )
+                self.assertContains(response, 'href="mailto:support@receiptadmin.com"')
+
+    def test_footer_and_sign_up_link_to_privacy_and_terms(self):
+        for name in ("home", "sign_up"):
+            with self.subTest(name):
+                response = self.client.get(reverse(name))
+
+                self.assertContains(response, f'href="{reverse("privacy")}"')
+                self.assertContains(response, f'href="{reverse("terms")}"')
+        self.assertContains(
+            self.client.get(reverse("sign_up")), "By creating an account, you agree"
+        )
+
+    def test_footer_is_the_same_on_every_public_page(self):
+        for name in ("home", "about", "privacy", "terms", "login"):
+            with self.subTest(name):
+                response = self.client.get(reverse(name))
+
+                self.assertContains(response, "Questions?")
+                self.assertContains(response, 'aria-label="Legal"')
+
+    def test_logged_in_sidebar_links_to_privacy_and_terms(self):
+        self.client.force_login(make_user())
+
+        response = self.client.get(reverse("dashboard"))
+
+        self.assertContains(response, "nav-link nav-link-small", count=2)
+        self.assertContains(response, f'href="{reverse("privacy")}"')
+        self.assertContains(response, f'href="{reverse("terms")}"')
+
+    def test_privacy_and_terms_agree_on_the_minimum_age(self):
+        for name in ("privacy", "terms"):
+            with self.subTest(name):
+                self.assertContains(
+                    self.client.get(reverse(name)),
+                    "at least 18 years old and have reached",
+                )
+
+    def test_privacy_policy_explains_requests_from_buyers(self):
+        response = self.client.get(reverse("privacy"))
+
+        self.assertContains(response, "If your details appear on a receipt")
+        self.assertContains(response, "We may respond if a buyer contacts us")
+        self.assertNotContains(response, "We never contact your buyers")
+
+    def test_terms_name_the_governing_law(self):
+        response = self.client.get(reverse("terms"))
+
+        self.assertContains(response, "governed by the laws of the State of Texas")
+        self.assertContains(response, "You keep any rights you have in the receipts")
+        self.assertNotContains(response, "belong to you")
 
     def test_favicon_redirects_to_the_static_icon(self):
         response = self.client.get("/favicon.ico")
