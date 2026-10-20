@@ -850,3 +850,42 @@ class CompleteProfileTests(TestCase):
         self.assertContains(
             response, "Add your phone number and address to start creating receipts."
         )
+
+
+class ErrorPageTests(TestCase):
+    def test_missing_page_shows_the_404_page(self):
+        response = self.client.get("/no-such-page/")
+
+        self.assertEqual(response.status_code, 404)
+        self.assertContains(response, "Page not found", status_code=404)
+        self.assertContains(
+            response, '<meta name="robots" content="noindex">', status_code=404
+        )
+        self.assertContains(response, "Go to the home page", status_code=404)
+
+    def test_404_page_offers_the_dashboard_when_logged_in(self):
+        self.client.force_login(make_user())
+
+        response = self.client.get("/no-such-page/")
+
+        self.assertContains(response, "Go to your dashboard", status_code=404)
+
+    def test_server_error_shows_the_500_page(self):
+        self.client.raise_request_exception = False
+        with (
+            mock.patch("receipts.views.render", side_effect=RuntimeError("boom")),
+            self.assertLogs("django.request", level="ERROR"),
+        ):
+            response = self.client.get(reverse("home"))
+
+        self.assertEqual(response.status_code, 500)
+        self.assertContains(
+            response, "Something went wrong on our side", status_code=500
+        )
+
+    def test_500_page_does_not_depend_on_the_rest_of_the_site(self):
+        html = get_template("500.html").render()
+
+        self.assertNotIn("{%", html)
+        self.assertNotIn("/static/", html)
+        self.assertIn('<meta name="robots" content="noindex">', html)
