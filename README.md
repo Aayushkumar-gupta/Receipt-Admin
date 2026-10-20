@@ -13,11 +13,11 @@
 
 ## Why I built it
 
-A growing number of small businesses sell through Instagram DMs, Facebook Marketplace listings, and local meetups. They have no storefront and no point-of-sale system, so when a buyer asks for a receipt, or tax season arrives, there is nothing to show: just a scattered trail of chats and payment notifications.
+People sell in many ways: through Instagram DMs, Facebook Marketplace listings, local meetups, weekend markets, and small shops. Many of them have no simple way to give a receipt, so when a buyer asks for one, or tax season arrives, there is nothing to show: just a scattered trail of chats and payment notifications.
 
-Receipt Admin gives these sellers what a cash register gives a shop. They can write up a sale in under a minute, hand the buyer a clean PDF receipt, and keep every sale on record in one place, with their revenue at a glance.
+Receipt Admin gives every seller, with or without a shop, a simple way to handle this. They can write up a sale in under a minute, hand the buyer a clean PDF receipt, and keep every sale on record in one place, with their revenue at a glance.
 
-Unlike traditional accounting and point-of-sale software, Receipt Admin focuses on a simple workflow for independent social sellers: record a sale, generate a professional receipt, and track revenue without setting up a full business management system.
+Unlike traditional accounting and point-of-sale software, Receipt Admin focuses on a simple workflow for independent sellers: record a sale, generate a professional receipt, and track revenue without setting up a full business management system.
 
 It isn't tied to any one kind of business. Whether someone sells shoes, T-shirts, home decor, or a sofa or table on Marketplace, every sale is recorded the same way: describe the items, set the prices, and the receipt is ready.
 

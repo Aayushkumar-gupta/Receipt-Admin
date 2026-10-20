@@ -508,11 +508,6 @@ class PasswordResetTests(TestCase):
         self.assertRedirects(response, reverse("password_reset_done"))
         send.assert_not_called()
 
-    def test_forgot_password_redirects_to_reset_page(self):
-        response = self.client.get(reverse("forgot_password"))
-
-        self.assertRedirects(response, reverse("password_reset"))
-
     def test_invalid_link_shows_message_instead_of_form(self):
         uid = urlsafe_base64_encode(str(self.user.pk).encode())
 

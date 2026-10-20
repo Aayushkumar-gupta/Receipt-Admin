@@ -179,10 +179,6 @@ def user_logout(request):
     return redirect("home")
 
 
-def forgot_password(request):
-    return redirect("password_reset")
-
-
 def verify_email(request, uidb64, token):
     try:
         uid = force_str(urlsafe_base64_decode(uidb64))

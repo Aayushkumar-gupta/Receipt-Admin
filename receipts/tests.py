@@ -182,6 +182,22 @@ class SeoTests(TestCase):
                 self.assertContains(response, provider)
         self.assertNotContains(response, "hosts the website and its database")
 
+    def test_pages_welcome_sellers_with_or_without_a_shop(self):
+        pages = {
+            "home": "Whether you run a shop or sell from home",
+            "about": "whether you run a shop or sell from home",
+            "login": "with or without a shop",
+        }
+        for name, phrase in pages.items():
+            with self.subTest(name):
+                response = self.client.get(reverse(name))
+
+                self.assertContains(response, phrase)
+                self.assertNotContains(response, "people who sell without a shop")
+
+    def test_old_forgot_password_address_is_gone(self):
+        self.assertEqual(self.client.get("/accounts/forgot_password").status_code, 404)
+
     def test_terms_name_the_governing_law(self):
         response = self.client.get(reverse("terms"))
 
@@ -198,7 +214,9 @@ class SeoTests(TestCase):
     def test_home_has_search_and_social_metadata(self):
         response = self.client.get(reverse("home"))
 
-        self.assertContains(response, "<title>Receipt Admin | Receipts for sellers")
+        self.assertContains(
+            response, "<title>Receipt Admin | Simple receipts for every sale</title>"
+        )
         self.assertContains(response, '<meta name="robots" content="index, follow">')
         self.assertContains(
             response, '<link rel="canonical" href="http://testserver/">'
@@ -666,6 +684,11 @@ class InvoiceNumberTests(TestCase):
 
         receipt.refresh_from_db()
         self.assertEqual(len(receipt.seller_name), 301)
+
+    def test_emails_default_to_empty(self):
+        receipt = Receipt()
+
+        self.assertEqual((receipt.seller_email, receipt.buyer_email), ("", ""))
 
     def test_addresses_up_to_255_characters_are_stored(self):
         receipt = make_receipt(self.user)
