@@ -148,7 +148,7 @@ class SeoTests(TestCase):
                 response = self.client.get(reverse(name))
 
                 self.assertContains(response, "Questions?")
-                self.assertContains(response, 'aria-label="Legal"')
+                self.assertContains(response, 'aria-label="Footer"')
 
     def test_logged_in_sidebar_links_to_privacy_and_terms(self):
         self.client.force_login(make_user())
