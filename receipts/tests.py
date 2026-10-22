@@ -1145,3 +1145,42 @@ class ExportReceiptsTests(TestCase):
         self.assertContains(mine, f'action="{self.url}"')
         self.assertContains(mine, 'aria-label="Export receipts"')
         self.assertNotContains(staging, 'id="export-panel"')
+
+
+class LoadingButtonTests(TestCase):
+    def test_submit_buttons_show_a_loading_label(self):
+        public = {"login": "Logging in", "sign_up": "Creating account"}
+        for name, label in public.items():
+            with self.subTest(name):
+                self.assertContains(
+                    self.client.get(reverse(name)), f'data-loading="{label}"'
+                )
+
+        self.client.force_login(make_user())
+        private = {
+            "dashboard": ["Saving goal", "Logging out"],
+            "profile": ["Saving changes", "Changing password", "Deleting account"],
+            "create_receipt": ["Saving draft"],
+        }
+        for name, labels in private.items():
+            response = self.client.get(reverse(name))
+            for label in labels:
+                with self.subTest(name=name, label=label):
+                    self.assertContains(response, f'data-loading="{label}"')
+
+    def test_search_downloads_and_verification_show_loading(self):
+        user = make_user(verified=False)
+        make_receipt(user, staged=True)
+        self.client.force_login(user)
+
+        for name in ("my_receipts", "staging_area"):
+            with self.subTest(name):
+                self.assertContains(
+                    self.client.get(reverse(name)), 'data-loading="Searching"'
+                )
+        mine = self.client.get(reverse("my_receipts"))
+        self.assertContains(mine, 'data-loading="Preparing file" data-download')
+        self.assertContains(mine, 'data-loading="Preparing PDF"')
+        self.assertContains(
+            self.client.get(reverse("profile")), 'data-loading="Sending email"'
+        )

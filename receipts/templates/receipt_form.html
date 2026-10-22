@@ -9,5 +9,5 @@
 {% block tax_rate %}{{ request.POST.tax_rate|default:'8.25' }}{% endblock %}
 
 {% block actions %}
-<button type="submit" class="btn-primary w-full">Save draft</button>
+<button type="submit" class="btn-primary w-full" data-loading="Saving draft">Save draft</button>
 {% endblock %}

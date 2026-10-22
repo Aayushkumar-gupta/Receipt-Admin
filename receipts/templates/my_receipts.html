@@ -58,7 +58,7 @@
     </div>
 
     <div class="mt-5 flex flex-wrap gap-2">
-        <button type="submit" class="btn-primary">Download CSV</button>
+        <button type="submit" class="btn-primary" data-loading="Preparing file" data-download>Download CSV</button>
         <button type="button" class="btn-secondary" data-toggle="export-panel">Cancel</button>
     </div>
 </form>
@@ -76,7 +76,12 @@
         {% include "partials/icons/more.html" %}
     </summary>
     <div class="menu-panel">
-        <a href="{% url 'receipt_pdf' receipt.id %}" class="menu-item">Download PDF</a>
+        <a
+            href="{% url 'receipt_pdf' receipt.id %}"
+            class="menu-item"
+            data-loading="Preparing PDF"
+            data-download
+        >Download PDF</a>
         {% if not receipt.refund %}
         <form
             method="post"
@@ -84,7 +89,7 @@
             data-confirm="Refund {{ receipt.invoice_number }}? It will be marked as refunded."
         >
             {% csrf_token %}
-            <button type="submit" class="menu-item menu-item-danger">Refund</button>
+            <button type="submit" class="menu-item menu-item-danger" data-loading="Refunding">Refund</button>
         </form>
         {% endif %}
     </div>

@@ -13,7 +13,7 @@
 {% block tax_rate %}{{ receipt.tax_rate }}{% endblock %}
 
 {% block actions %}
-<button type="submit" class="btn-primary w-full">Save changes</button>
+<button type="submit" class="btn-primary w-full" data-loading="Saving changes">Save changes</button>
 <a href="{% url 'staging_area' %}" class="btn-secondary w-full">Cancel</a>
 {% endblock %}
 
