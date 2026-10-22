@@ -72,7 +72,7 @@
                 <li>
                     <form method="post" action="{% url 'logout' %}" data-confirm="Log out of Receipt Admin?">
                         {% csrf_token %}
-                        <button type="submit" class="nav-link">
+                        <button type="submit" class="nav-link" data-loading="Logging out">
                             {% include "partials/icons/logout.html" %}
                             Log out
                         </button>

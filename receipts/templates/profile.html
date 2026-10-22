@@ -52,7 +52,11 @@
                 <p class="text-ink-2">Verify your email before you create receipts.</p>
                 <form method="post" action="{% url 'resend_verification_email' %}" class="mt-3">
                     {% csrf_token %}
-                    <button type="submit" class="btn-secondary w-full">Send verification email</button>
+                    <button
+                        type="submit"
+                        class="btn-secondary w-full"
+                        data-loading="Sending email"
+                    >Send verification email</button>
                 </form>
             </div>
             {% endif %}
@@ -189,7 +193,7 @@
                 </section>
 
                 <div class="settings-footer">
-                    <button type="submit" class="btn-primary">Save changes</button>
+                    <button type="submit" class="btn-primary" data-loading="Saving changes">Save changes</button>
                 </div>
             </form>
 
@@ -263,7 +267,7 @@
                         and a special character such as ! or @.
                     </p>
                 </div>
-                <button type="submit" class="btn-primary mt-5">Change password</button>
+                <button type="submit" class="btn-primary mt-5" data-loading="Changing password">Change password</button>
             </form>
 
             <form
@@ -287,7 +291,7 @@
                     autocomplete="current-password"
                     required
                 >
-                <button type="submit" class="btn-danger mt-4">Delete account</button>
+                <button type="submit" class="btn-danger mt-4" data-loading="Deleting account">Delete account</button>
             </form>
         </div>
     </div>
