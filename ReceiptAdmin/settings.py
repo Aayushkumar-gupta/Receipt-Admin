@@ -72,6 +72,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "accounts.context_processors.turnstile",
             ],
         },
     },
@@ -152,6 +153,10 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 DEFAULT_FROM_EMAIL = "support@receiptadmin.com"
 RESEND_API_KEY = os.environ.get("RESEND_API_KEY")
+
+TURNSTILE_SITE_KEY = os.environ.get("TURNSTILE_SITE_KEY", "")
+TURNSTILE_SECRET_KEY = os.environ.get("TURNSTILE_SECRET_KEY", "")
+TURNSTILE_REQUIRED = ENVIRONMENT != "local"
 
 CSRF_TRUSTED_ORIGINS = [
     "https://receiptadmin.com",

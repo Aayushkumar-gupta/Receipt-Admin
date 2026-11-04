@@ -1,0 +1,9 @@
+{% if TURNSTILE_SITE_KEY %}
+<div class="cf-turnstile" data-sitekey="{{ TURNSTILE_SITE_KEY }}" data-size="flexible"></div>
+<script>
+    if (window.innerWidth < 340) {
+        document.querySelector(".cf-turnstile").dataset.size = "compact";
+    }
+</script>
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+{% endif %}

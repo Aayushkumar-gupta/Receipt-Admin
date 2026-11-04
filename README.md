@@ -54,6 +54,7 @@ Receipts are financial records, so the app is built to keep them correct and pri
 - **Atomic writes:** creating or editing a receipt runs in a database transaction, so a failure can't leave a receipt half-saved or lose its items.
 - **Collision-safe invoice numbers:** numbers are derived from the database row id, so two receipts saved at the same moment can't get the same number.
 - **Account security:** login rate limiting (5 attempts, then a 15-minute lockout), signed email-verification links that expire, POST-only and CSRF-protected state changes, and safe post-login redirects.
+- **Abuse protection:** Cloudflare Turnstile on sign-up and password reset, database-backed limits per IP address and per recipient, and a daily email budget with an early alert, so bots can't use the app to send spam or exhaust the email quota.
 - **Production hardening:** secrets from environment variables, HTTPS with HSTS and secure cookies, and the app refuses to start without a secret key.
 - **Tested and automated:** a test suite covering 100% of the views, models, and utilities, run by GitHub Actions on every push together with linting and a missing-migrations check. Dependabot proposes dependency updates weekly.
 
@@ -115,6 +116,8 @@ Settings are read from environment variables, or from a `.env` file in the proje
 | `DATABASE_URL` | optional (SQLite) | **required** | Database connection string |
 | `RESEND_API_KEY` | optional | **required** | Sends verification and password reset emails |
 | `SENTRY_DSN` | not used | optional | Reports production errors to Sentry |
+| `TURNSTILE_SITE_KEY` | optional | **required** | Shows the Cloudflare Turnstile check on sign-up and password reset |
+| `TURNSTILE_SECRET_KEY` | optional | **required** | Verifies Turnstile on the server; without it, production blocks those forms |
 
 ## Tests and code quality
 
