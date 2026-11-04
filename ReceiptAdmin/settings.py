@@ -25,7 +25,7 @@ DEBUG = ENVIRONMENT == "local"
 if ENVIRONMENT == "local":
     ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
 else:
-    ALLOWED_HOSTS = ["receiptadmin.com", "www.receiptadmin.com", ".onrender.com"]
+    ALLOWED_HOSTS = ["receiptadmin.com", "www.receiptadmin.com"]
 
 
 # Application definition
@@ -161,7 +161,6 @@ TURNSTILE_REQUIRED = ENVIRONMENT != "local"
 CSRF_TRUSTED_ORIGINS = [
     "https://receiptadmin.com",
     "https://www.receiptadmin.com",
-    "https://*.onrender.com",
 ]
 
 if ENVIRONMENT == "local":
