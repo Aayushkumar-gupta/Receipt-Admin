@@ -30,14 +30,33 @@ from django.views.decorators.http import require_POST
 
 from receipts.models import Receipt
 
+from .limits import (
+    ALL_EMAILS_PER_DAY,
+    VERIFICATION_EMAILS_PER_DAY,
+    allow_email,
+    allow_password_reset,
+    allow_resend,
+    allow_signup,
+)
 from .models import UserProfile
-from .utils import send_password_reset_email, send_verification_email
+from .utils import (
+    send_password_reset_email,
+    send_verification_email,
+    turnstile_passed,
+)
 
 logger = logging.getLogger(__name__)
+
+NOT_A_NAME = re.compile(r"[\d@/\\:<>=?&%#_+]|www\.|\.[^\W\d_]{2,}", re.IGNORECASE)
+SECURITY_CHECK_ERROR = "Complete the security check and try again."
 
 
 def sign_up(request):
     if request.method == "POST":
+        if not turnstile_passed(request):
+            messages.error(request, SECURITY_CHECK_ERROR)
+            return render(request, "sign_up.html")
+
         first_name = request.POST.get("first_name", "").strip()
         last_name = request.POST.get("last_name", "").strip()
         email = request.POST.get("email", "").strip().lower()
@@ -49,8 +68,10 @@ def sign_up(request):
         errors = []
         if not first_name or not last_name:
             errors.append("First name and last name are required.")
-        elif len(first_name) > 150 or len(last_name) > 150:
-            errors.append("First and last name must be 150 characters or fewer.")
+        elif len(first_name) > 50 or len(last_name) > 50:
+            errors.append("First and last name must be 50 characters or fewer.")
+        elif NOT_A_NAME.search(first_name) or NOT_A_NAME.search(last_name):
+            errors.append("Enter your real first and last name.")
 
         try:
             validate_email(email)
@@ -96,6 +117,12 @@ def sign_up(request):
                 messages.error(request, error)
             return render(request, "sign_up.html")
 
+        if not allow_signup(request):
+            messages.error(
+                request, "Too many accounts were created here. Try again in an hour."
+            )
+            return render(request, "sign_up.html")
+
         try:
             with transaction.atomic():
                 user = User.objects.create_user(
@@ -113,14 +140,20 @@ def sign_up(request):
             messages.error(request, "An account with this email already exists.")
             return render(request, "sign_up.html")
 
-        # Send in the background so sign-up does not wait on the email API.
-        threading.Thread(target=send_email_async, args=(user, request)).start()
-
-        messages.success(
-            request,
-            "Your account is ready. "
-            "Check your inbox for a link to confirm your email address.",
-        )
+        if allow_email(email, VERIFICATION_EMAILS_PER_DAY):
+            # Send in the background so sign-up does not wait on the email API.
+            threading.Thread(target=send_email_async, args=(user, request)).start()
+            messages.success(
+                request,
+                "Your account is ready. "
+                "Check your inbox for a link to confirm your email address.",
+            )
+        else:
+            messages.success(
+                request,
+                "Your account is ready. We could not send the confirmation email "
+                "right now, so log in later and request it from your profile.",
+            )
         return redirect("login")
 
     return render(request, "sign_up.html")
@@ -219,10 +252,15 @@ def send_email_async(user, request):
 @login_required
 @require_POST
 def resend_verification_email(request):
-    if not cache.add(f"verify-email-sent:{request.user.pk}", True, 60):
+    if not allow_resend(request.user):
         messages.error(
             request,
             "Please wait a minute before requesting another verification email.",
+        )
+    elif not allow_email(request.user.email, VERIFICATION_EMAILS_PER_DAY):
+        messages.error(
+            request,
+            "We cannot send another confirmation email right now. Try again tomorrow.",
         )
     elif send_verification_email(request.user, request):
         messages.success(request, "We sent a new confirmation email. Check your inbox.")
@@ -238,10 +276,22 @@ class CustomPasswordResetView(PasswordResetView):
     template_name = "password_reset.html"
     success_url = reverse_lazy("password_reset_done")
 
+    def post(self, request, *args, **kwargs):
+        if not turnstile_passed(request):
+            messages.error(request, SECURITY_CHECK_ERROR)
+            return self.render_to_response(self.get_context_data(form=self.get_form()))
+        return super().post(request, *args, **kwargs)
+
     def form_valid(self, form):
+        # Always show the same page, so this never reveals whether an account exists.
+        if not allow_password_reset(self.request):
+            return redirect(self.success_url)
+
         email = form.cleaned_data["email"]
         users = list(form.get_users(email))
         for user in users:
+            if not allow_email(user.email, ALL_EMAILS_PER_DAY):
+                continue
             uid = urlsafe_base64_encode(force_bytes(user.pk))
             token = default_token_generator.make_token(user)
             reset_url = self.request.build_absolute_uri(

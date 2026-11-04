@@ -1,8 +1,10 @@
 import importlib
 import logging
 import re
+from datetime import timedelta
 from unittest import mock
 
+import requests
 from django.apps import apps
 from django.contrib.auth.models import User
 from django.contrib.auth.tokens import default_token_generator
@@ -12,12 +14,21 @@ from django.core.cache import cache
 from django.db import IntegrityError
 from django.test import RequestFactory, TestCase, override_settings
 from django.urls import reverse
+from django.utils import timezone
 from django.utils.http import urlsafe_base64_encode
 
 from receipts.models import Receipt, ReceiptItem
 from receipts.tests import make_receipt
 
-from .models import UserProfile
+from .limits import (
+    ALL_EMAILS_PER_DAY,
+    EMAIL_ALERT_AT,
+    VERIFICATION_EMAILS_PER_DAY,
+    allow_email,
+    consume,
+    hashed_key,
+)
+from .models import RateCounter, UserProfile
 from .utils import send_password_reset_email, send_verification_email
 from .views import send_email_async
 
@@ -168,7 +179,7 @@ class SignUpTests(TestCase):
 
         response = self.post(first_name="A" * 151)
         self.assertIn(
-            "First and last name must be 150 characters or fewer.",
+            "First and last name must be 50 characters or fewer.",
             messages_of(response),
         )
         self.assertFalse(User.objects.exists())
@@ -713,3 +724,229 @@ class NormalizeEmailsMigrationTests(TestCase):
 
         user.refresh_from_db()
         self.assertEqual(user.username, "admin")
+
+
+def fill_daily_budget(count):
+    RateCounter.objects.create(
+        key=f"emails-sent:{timezone.now().date()}",
+        count=count,
+        expires_at=timezone.now() + timedelta(days=2),
+    )
+
+
+@mock.patch("accounts.views.threading.Thread")
+class SignUpAbuseTests(TestCase):
+    url = reverse("sign_up")
+
+    def post(self, ip="203.0.113.1", **overrides):
+        return self.client.post(
+            self.url, {**SIGNUP_DATA, **overrides}, HTTP_CF_CONNECTING_IP=ip
+        )
+
+    def test_names_with_links_are_rejected(self, thread):
+        spam = ("https://bit.ly/win", "www.win.com", "win.com", "Win @ casino", "W1n")
+        for name in spam:
+            with self.subTest(name):
+                response = self.post(first_name=name)
+
+                self.assertIn(
+                    "Enter your real first and last name.", messages_of(response)
+                )
+                self.assertFalse(User.objects.exists())
+
+    def test_real_names_are_accepted(self, thread):
+        names = ("José", "Mary-Jane", "O'Neil", "J.R.", "St. John", "आयुष", "李")
+        for number, name in enumerate(names):
+            with self.subTest(name):
+                self.post(
+                    ip=f"203.0.113.{number}",
+                    first_name=name,
+                    email=f"user{number}@example.com",
+                )
+
+                self.assertTrue(User.objects.filter(first_name=name).exists())
+
+    def test_sixth_sign_up_from_one_ip_is_blocked(self, thread):
+        for number in range(5):
+            self.post(email=f"bot{number}@example.com")
+
+        response = self.post(email="bot5@example.com")
+
+        self.assertIn(
+            "Too many accounts were created here. Try again in an hour.",
+            messages_of(response),
+        )
+        self.assertEqual(User.objects.count(), 5)
+        self.assertEqual(thread.call_count, 5)
+
+    def test_other_ips_can_still_sign_up(self, thread):
+        for number in range(6):
+            self.post(email=f"bot{number}@example.com")
+
+        self.post(ip="203.0.113.2", email="real@example.com")
+
+        self.assertTrue(User.objects.filter(email="real@example.com").exists())
+
+    @override_settings(RESEND_API_KEY="test-key")
+    def test_email_stops_at_the_verification_budget(self, thread):
+        fill_daily_budget(VERIFICATION_EMAILS_PER_DAY)
+
+        with self.assertLogs("accounts.limits", level="ERROR"):
+            response = self.post()
+
+        thread.assert_not_called()
+        self.assertTrue(User.objects.filter(email="bo@example.com").exists())
+        self.assertIn("We could not send", messages_of(response)[0])
+
+    @override_settings(TURNSTILE_REQUIRED=True, TURNSTILE_SECRET_KEY="")
+    def test_production_without_a_secret_blocks_sign_up(self, thread):
+        with self.assertLogs("accounts.utils", level="ERROR"):
+            response = self.post()
+
+        self.assertIn("Complete the security check", messages_of(response)[0])
+        self.assertFalse(User.objects.exists())
+
+    @override_settings(TURNSTILE_SECRET_KEY="secret")
+    @mock.patch("accounts.utils.requests.post")
+    def test_server_verifies_turnstile(self, verify, thread):
+        verify.return_value.json.return_value = {"success": False}
+        self.post(**{"cf-turnstile-response": "bad"})
+        self.assertFalse(User.objects.exists())
+        self.assertEqual(verify.call_args.kwargs["data"]["response"], "bad")
+
+        verify.return_value.json.return_value = {"success": True}
+        self.post(**{"cf-turnstile-response": "good"})
+        self.assertTrue(User.objects.exists())
+
+    @override_settings(TURNSTILE_SECRET_KEY="secret")
+    @mock.patch(
+        "accounts.utils.requests.post", side_effect=requests.ConnectionError("down")
+    )
+    def test_turnstile_outage_blocks_sign_up(self, verify, thread):
+        with self.assertLogs("accounts.utils", level="ERROR"):
+            self.post()
+
+        self.assertFalse(User.objects.exists())
+
+    @override_settings(TURNSTILE_SITE_KEY="site-key")
+    def test_forms_show_the_turnstile_widget(self, thread):
+        for name in ("sign_up", "password_reset"):
+            with self.subTest(name):
+                self.assertContains(
+                    self.client.get(reverse(name)), 'data-sitekey="site-key"'
+                )
+
+
+class EmailLimitTests(TestCase):
+    def setUp(self):
+        patcher = override_settings(RESEND_API_KEY="test-key")
+        patcher.enable()
+        self.addCleanup(patcher.disable)
+
+    def test_recipient_gets_at_most_three_emails_a_day(self):
+        results = [allow_email("Ann@Example.com", 90) for _ in range(3)]
+
+        self.assertEqual(results, [True, True, True])
+        self.assertFalse(allow_email("ann@example.com", 90))
+
+    def test_alert_is_logged_once_at_the_threshold(self):
+        fill_daily_budget(EMAIL_ALERT_AT - 1)
+
+        with self.assertLogs("accounts.limits", level="ERROR") as logs:
+            allow_email("first@example.com", ALL_EMAILS_PER_DAY)
+        self.assertIn("check for sign-up abuse", logs.output[0])
+
+        with self.assertNoLogs("accounts.limits", level="ERROR"):
+            allow_email("second@example.com", ALL_EMAILS_PER_DAY)
+
+    def test_resets_still_send_after_verification_stops(self):
+        fill_daily_budget(VERIFICATION_EMAILS_PER_DAY)
+
+        self.assertTrue(allow_email("ann@example.com", ALL_EMAILS_PER_DAY))
+
+    def test_expired_counters_start_again(self):
+        self.assertEqual(consume("test", 1, timedelta(hours=1)), 1)
+        self.assertIsNone(consume("test", 1, timedelta(hours=1)))
+
+        RateCounter.objects.update(expires_at=timezone.now() - timedelta(seconds=1))
+
+        self.assertEqual(consume("test", 1, timedelta(hours=1)), 1)
+
+    @override_settings(DEBUG=True, RESEND_API_KEY=None)
+    def test_local_development_is_not_counted(self):
+        self.assertTrue(allow_email("ann@example.com", 0))
+        self.assertFalse(RateCounter.objects.exists())
+
+    def test_counter_is_labeled_by_its_key(self):
+        consume("test", 1, timedelta(hours=1))
+
+        self.assertEqual(str(RateCounter.objects.get()), "test")
+
+    def test_counters_do_not_store_addresses(self):
+        key = hashed_key("email-to", "ann@example.com")
+
+        self.assertNotIn("ann", key)
+        self.assertLessEqual(len(key), 100)
+
+
+@override_settings(RESEND_API_KEY="test-key")
+@mock.patch("accounts.utils.resend.Emails.send", return_value={"id": "abc"})
+class EmailContentAndResetAbuseTests(TestCase):
+    url = reverse("password_reset")
+
+    def test_emails_never_contain_the_name(self, send):
+        spam = "WIN CASH bit.ly/win"
+        user = make_user(first_name=spam)
+        request = RequestFactory().get("/")
+
+        send_verification_email(user, request)
+        send_password_reset_email(user, "http://testserver/reset/x/y/")
+
+        for call in send.call_args_list:
+            payload = call.args[0]
+            self.assertNotIn(spam, payload["html"])
+            self.assertNotIn(spam, payload["text"])
+            self.assertTrue(payload["text"].startswith("Hi,"))
+
+    def test_sixth_reset_from_one_ip_sends_nothing_but_looks_the_same(self, send):
+        for number in range(6):
+            make_user(f"user{number}@example.com")
+            response = self.client.post(
+                self.url,
+                {"email": f"user{number}@example.com"},
+                HTTP_CF_CONNECTING_IP="203.0.113.1",
+            )
+            self.assertRedirects(response, reverse("password_reset_done"))
+
+        self.assertEqual(send.call_count, 5)
+
+    def test_one_person_cannot_be_flooded_with_resets(self, send):
+        make_user()
+        for number in range(5):
+            self.client.post(
+                self.url,
+                {"email": "ann@example.com"},
+                HTTP_CF_CONNECTING_IP=f"203.0.113.{number}",
+            )
+
+        self.assertEqual(send.call_count, 3)
+
+    @override_settings(TURNSTILE_REQUIRED=True, TURNSTILE_SECRET_KEY="")
+    def test_failed_security_check_keeps_the_form(self, send):
+        make_user()
+
+        with self.assertLogs("accounts.utils", level="ERROR"):
+            response = self.client.post(self.url, {"email": "ann@example.com"})
+
+        self.assertContains(response, "Complete the security check")
+        send.assert_not_called()
+
+    def test_resend_is_refused_when_the_budget_is_gone(self, send):
+        self.client.force_login(make_user())
+        fill_daily_budget(VERIFICATION_EMAILS_PER_DAY)
+
+        with self.assertLogs("accounts.limits", level="ERROR"):
+            response = self.client.post(reverse("resend_verification_email"))
+
+        self.assertIn("Try again tomorrow", messages_of(response)[0])
+        send.assert_not_called()

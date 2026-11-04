@@ -19,7 +19,7 @@
                 value="{{ request.POST.first_name }}"
                 class="field mt-1.5"
                 autocomplete="given-name"
-                maxlength="150"
+                maxlength="50"
                 required
                 data-required-message="Enter your first name."
                 aria-describedby="first_name-error"
@@ -36,7 +36,7 @@
                 value="{{ request.POST.last_name }}"
                 class="field mt-1.5"
                 autocomplete="family-name"
-                maxlength="150"
+                maxlength="50"
                 required
                 data-required-message="Enter your last name."
                 aria-describedby="last_name-error"
@@ -142,6 +142,8 @@
             and a special character such as ! or @.
         </p>
     </div>
+
+    {% include "partials/turnstile.html" %}
 
     <button type="submit" class="btn-primary w-full" data-loading="Creating account">Create account</button>
     <p class="text-center text-sm text-ink-2">

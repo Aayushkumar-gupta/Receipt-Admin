@@ -1,5 +1,6 @@
 import logging
 
+import requests
 import resend
 from django.conf import settings
 from django.core import signing
@@ -11,8 +12,29 @@ from django.utils.http import urlsafe_base64_encode
 logger = logging.getLogger(__name__)
 
 
-def greeting(user):
-    return f"Hi {user.first_name}," if user.first_name else "Hi,"
+TURNSTILE_VERIFY_URL = "https://challenges.cloudflare.com/turnstile/v0/siteverify"
+
+
+def turnstile_passed(request):
+    if not settings.TURNSTILE_SECRET_KEY:
+        if settings.TURNSTILE_REQUIRED:
+            logger.error("TURNSTILE_SECRET_KEY is not set; blocking the request")
+            return False
+        return True
+
+    try:
+        response = requests.post(
+            TURNSTILE_VERIFY_URL,
+            data={
+                "secret": settings.TURNSTILE_SECRET_KEY,
+                "response": request.POST.get("cf-turnstile-response", ""),
+            },
+            timeout=5,
+        )
+        return response.json().get("success") is True
+    except (requests.RequestException, ValueError):
+        logger.exception("Could not verify the Turnstile response")
+        return False
 
 
 def send_verification_email(user, request):
@@ -31,12 +53,10 @@ def send_verification_email(user, request):
 
     subject = "Confirm your email address for Receipt Admin"
 
-    html_content = render_to_string(
-        "verify_email.html", {"user": user, "action_url": verify_url}
-    )
+    html_content = render_to_string("verify_email.html", {"action_url": verify_url})
 
     text_content = (
-        f"{greeting(user)}\n\n"
+        "Hi,\n\n"
         "Thanks for creating a Receipt Admin account. Open the link below to confirm "
         "your email address and start making receipts.\n\n"
         f"{verify_url}\n\n"
@@ -71,11 +91,11 @@ def send_password_reset_email(user, reset_url):
     subject = "Reset your Receipt Admin password"
 
     html_content = render_to_string(
-        "password_reset_email.html", {"user": user, "action_url": reset_url}
+        "password_reset_email.html", {"action_url": reset_url}
     )
 
     text_content = (
-        f"{greeting(user)}\n\n"
+        "Hi,\n\n"
         "We received a request to reset the password for your Receipt Admin account. "
         "Open the link below to choose a new one.\n\n"
         f"{reset_url}\n\n"
