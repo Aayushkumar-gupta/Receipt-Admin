@@ -1,5 +1,4 @@
 User-agent: *
-Disallow: /admin/
 Disallow: /accounts/verify-email/
 Disallow: /create/
 Disallow: /dashboard/

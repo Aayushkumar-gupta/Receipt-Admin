@@ -158,6 +158,8 @@ TURNSTILE_SITE_KEY = os.environ.get("TURNSTILE_SITE_KEY", "")
 TURNSTILE_SECRET_KEY = os.environ.get("TURNSTILE_SECRET_KEY", "")
 TURNSTILE_REQUIRED = ENVIRONMENT != "local"
 
+ADMIN_URL = os.environ.get("ADMIN_URL", "admin/").strip("/") + "/"
+
 CSRF_TRUSTED_ORIGINS = [
     "https://receiptadmin.com",
     "https://www.receiptadmin.com",

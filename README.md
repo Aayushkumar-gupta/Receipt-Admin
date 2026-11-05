@@ -118,6 +118,7 @@ Settings are read from environment variables, or from a `.env` file in the proje
 | `SENTRY_DSN` | not used | optional | Reports production errors to Sentry |
 | `TURNSTILE_SITE_KEY` | optional | **required** | Shows the Cloudflare Turnstile check on sign-up and password reset |
 | `TURNSTILE_SECRET_KEY` | optional | **required** | Verifies Turnstile on the server; without it, production blocks those forms |
+| `ADMIN_URL` | optional | recommended | Path of the admin site; defaults to `admin/` |
 
 ## Tests and code quality
 
