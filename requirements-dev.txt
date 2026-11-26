@@ -1,4 +1,4 @@
 -r requirements.txt
-coverage==7.17.3
+coverage==7.17.5
 pre-commit==4.7.0
-ruff==0.17.5
+ruff==0.17.6
